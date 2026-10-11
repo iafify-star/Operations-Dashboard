@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffe900">
+    <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
+    <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
+    <title>نون مينتس | لوحة العمليات</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="التنقل الرئيسي" data-i18n-aria="navLabel">
+        <a class="brand" href="#overview" aria-label="العودة للرئيسية" data-i18n-aria="homeLabel">
+          <img class="brand-logo" src="assets/noon-minutes-logo.png" alt="نون مينتس" data-i18n-alt="brandLogo">
+          <span class="brand-copy"><strong>noon<span> minutes</span></strong><small data-i18n="brandCaption">مركز العمليات</small></span>
+        </a>
+        <div class="nav-label" data-i18n="navSection">لوحة المتابعة</div>
+        <nav class="main-nav">
+          <a class="nav-link active" href="#overview"><span class="nav-icon">◫</span><span data-i18n="navOverview">نظرة عامة</span></a>
+          <a class="nav-link" href="#warehouses"><span class="nav-icon">▦</span><span data-i18n="navWarehouses">أداء المستودعات</span></a>
+          <a class="nav-link" href="#productivity"><span class="nav-icon">⌁</span><span data-i18n="navProductivity">الإنتاجية الساعية</span></a>
+          <a class="nav-link" href="#workflows"><span class="nav-icon">⇄</span><span data-i18n="navWorkflows">سير العمل والشحن</span></a>
+          <a class="nav-link" href="#issues"><span class="nav-icon">⚑</span><span data-i18n="navIssues">النواقص والمشاكل</span></a>
+        </nav>
+        <div class="sidebar-spacer"></div>
+        <div class="source-card">
+          <span class="source-icon">▤</span>
+          <div><strong data-i18n="dataSource">مصدر البيانات</strong><small>Google Sheets</small></div>
+          <span class="source-dot" aria-label="متصل" data-i18n-aria="connected"></span>
+        </div>
+        <div class="sidebar-foot"><span data-i18n="sidebarFoot">لوحة تشغيلية مباشرة</span> <span>●</span></div>
+      </aside>
+
+      <main class="main-content" id="overview">
+        <header class="topbar">
+          <div class="breadcrumb"><span data-i18n="brandCaption">مركز العمليات</span><b>/</b><strong data-i18n="dashboard">لوحة القيادة</strong></div>
+          <div class="topbar-actions">
+            <span class="live-pill"><i></i><span data-i18n="live">بث مباشر</span></span>
+            <button class="language-button" id="languageButton" type="button" aria-label="Switch to English">EN</button>
+            <button class="icon-button" id="refreshButton" type="button" title="تحديث البيانات الآن" aria-label="تحديث البيانات الآن" data-i18n-title="refreshNow" data-i18n-aria="refreshNow"><span class="refresh-icon">↻</span></button>
+            <span class="avatar" aria-label="لوحة تشغيل المستودعات" data-i18n-aria="dashboard">ن</span>
+          </div>
+        </header>
+
+        <div class="page-wrap">
+          <section class="page-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="pageEyebrow">ملخص الأداء التشغيلي</span></div>
+              <h1><span class="heading-main" data-i18n="headingMain">لوحة القيادة</span> <span data-i18n="headingAccent">التشغيلية</span></h1>
+              <p data-i18n="pageIntro">نظرة موحدة على التجهيز، الإنتاجية، تدفق الحاويات ومؤشرات الجودة.</p>
+            </div>
+            <div class="heading-meta">
+              <div class="date-box"><span class="calendar-icon">▦</span><span><small data-i18n="sheetDateLabel">تاريخ بيانات الشيت</small><strong id="sheetDate">—</strong></span></div>
+              <label class="auto-refresh"><input id="autoRefresh" type="checkbox" checked><span class="switch"></span><span data-i18n="autoRefresh">تحديث تلقائي</span></label>
+            </div>
+          </section>
+
+          <div class="connection-banner" id="connectionBanner" role="status" hidden></div>
+
+          <section class="section-block" aria-labelledby="overviewTitle">
+            <div class="section-heading">
+              <div><span class="section-kicker"><span class="section-number">01</span><span data-i18n="dailyPerformance">الأداء اليومي</span></span><h2 id="overviewTitle" data-i18n="mainKpis">مؤشرات التجهيز الرئيسية</h2></div>
+              <span class="updated-at"><span data-i18n="lastSync">آخر مزامنة</span> <b id="lastSynced">جارٍ الاتصال…</b></span>
+            </div>
+            <div class="kpi-grid" id="kpiGrid" aria-live="polite"></div>
+          </section>
+
+          <section class="dashboard-grid main-grid">
+            <article class="panel chart-panel" id="productivity">
+              <div class="panel-heading">
+                <div><span class="panel-icon violet">⌁</span><div><h3 data-i18n="hourlyTitle">الإنتاجية على مدار الساعة</h3><p data-i18n="hourlySubtitle">المنجز الفعلي مقارنة بالمستهدف الساعي</p></div></div>
+                <span class="chart-legend"><i class="legend-actual"></i><span data-i18n="completed">المنجز</span><i class="legend-target"></i><span data-i18n="target">المستهدف</span></span>
+              </div>
+              <div class="chart-wrap" id="hourlyChart" aria-label="رسم بياني للإنتاجية الساعية" data-i18n-aria="hourlyChartLabel"></div>
+              <div class="chart-foot"><span data-i18n="dailyShift">الوردية اليومية</span><strong id="shiftHours">04:00 – 19:00</strong><span class="chart-note" id="hourlyNote"></span></div>
+              <div class="table-in-panel" id="pickingHourlyTable"></div>
+            </article>
+
+            <article class="panel progress-panel">
+              <div class="panel-heading">
+                <div><span class="panel-icon teal">◉</span><div><h3 data-i18n="planProgress">التقدم نحو الخطة</h3><p data-i18n="planProgressSubtitle">نسبة الإنجاز من إجمالي المطلوب</p></div></div>
+              </div>
+              <div class="progress-content" id="progressContent"></div>
+              <div class="progress-divider"></div>
+              <div class="mini-stat-row" id="progressStats"></div>
+            </article>
+          </section>
+
+          <section class="section-block" id="warehouses">
+            <div class="section-heading">
+              <div><span class="section-kicker"><span class="section-number">02</span><span data-i18n="performanceComparison">مقارنة الأداء</span></span><h2 data-i18n="warehousePerformance">أداء المستودعات</h2></div>
+              <div class="heading-tools"><span class="warehouse-count" id="warehouseCount"></span><label class="search-box"><span>⌕</span><input id="warehouseSearch" type="search" placeholder="ابحث عن مستودع…" aria-label="ابحث عن مستودع" data-i18n-placeholder="searchWarehouse" data-i18n-aria="searchWarehouse"></label></div>
+            </div>
+            <div class="panel table-panel">
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th data-i18n="warehouse">المستودع</th><th data-i18n="totalRequired">إجمالي المطلوب</th><th data-i18n="actualCompleted">المنجز الفعلي</th><th data-i18n="remaining">المتبقي</th><th data-i18n="shortages">النواقص</th><th data-i18n="hourlyTarget">المستهدف / س</th><th data-i18n="completionRate">نسبة الإنجاز</th></tr></thead>
+                  <tbody id="warehouseRows"></tbody>
+                </table>
+              </div>
+              <div class="table-foot"><span data-i18n="sheetDataNote">يتم عرض البيانات كما وردت في الشيت</span><span id="warehouseTotal"></span></div>
+            </div>
+          </section>
+
+          <section class="section-block" id="workflows">
+            <div class="section-heading">
+              <div><span class="section-kicker"><span class="section-number">03</span><span data-i18n="operationsFlow">تدفق العمليات</span></span><h2 data-i18n="workflowShipping">سير العمل والشحن</h2></div>
+              <span class="section-description" data-i18n="workflowSubtitle">متابعة الكميات والمهام عبر مراحل التشغيل</span>
+            </div>
+            <div class="workflow-grid" id="workflowCards"></div>
+            <div class="details-grid" id="sortingTables"></div>
+            <div class="logistics-kpis" id="stagingKpis"></div>
+            <div class="dashboard-grid lower-grid">
+              <article class="panel pipeline-panel">
+                <div class="panel-heading">
+                  <div><span class="panel-icon blue">⇄</span><div><h3 data-i18n="containerPipeline">خط سير الحاويات</h3><p data-i18n="containerPipelineSubtitle">توزيع الحاويات حسب المرحلة التشغيلية</p></div></div>
+                </div>
+                <div id="pipelineContent"></div>
+              </article>
+              <article class="panel workflow-hourly-panel">
+                <div class="panel-heading">
+                  <div><span class="panel-icon amber">◷</span><div><h3 data-i18n="hourlyDispatch">حركة الشحن الساعية</h3><p data-i18n="hourlyDispatchSubtitle">إجمالي حركة الحاويات حسب الساعة</p></div></div>
+                </div>
+                <div class="compact-chart" id="dispatchChart" aria-label="رسم بياني لحركة الحاويات الساعية" data-i18n-aria="dispatchChartLabel"></div>
+              </article>
+            </div>
+            <div class="details-grid logistics-tables">
+              <div id="dispatchHourlyTable"></div>
+              <div id="palletTable"></div>
+            </div>
+          </section>
+
+          <section class="section-block" id="issues">
+            <div class="section-heading">
+              <div><span class="section-kicker"><span class="section-number">04</span><span data-i18n="qualityAvailability">الجودة والتوفر</span></span><h2 data-i18n="operationalIssues">النواقص والمشاكل التشغيلية</h2></div>
+              <span class="risk-tag"><i></i><span data-i18n="qualityMonitoring">متابعة الجودة</span></span>
+            </div>
+            <div class="issue-kpis" id="issueKpis"></div>
+            <div class="dashboard-grid lower-grid issue-grid">
+              <article class="panel">
+                <div class="panel-heading">
+                  <div><span class="panel-icon red">⚑</span><div><h3 data-i18n="issuesByWarehouse">المشاكل حسب المستودع</h3><p data-i18n="issuesByWarehouseSubtitle">توزيع البلاغات والقطع المتأثرة</p></div></div>
+                </div>
+                <div class="table-scroll small-table">
+                  <table><thead><tr><th data-i18n="warehouse">المستودع</th><th data-i18n="reports">البلاغات</th><th data-i18n="missing">غير موجود</th><th data-i18n="damagedExpired">تالف / منتهي</th><th data-i18n="skippedUnits">القطع المتخطاة</th><th data-i18n="share">النسبة</th></tr></thead><tbody id="issueWarehouseRows"></tbody></table>
+                </div>
+              </article>
+              <article class="panel hotspots-panel">
+                <div class="panel-heading">
+                  <div><span class="panel-icon orange">⌖</span><div><h3 data-i18n="topLocations">أبرز مواقع المشاكل</h3><p data-i18n="topLocationsSubtitle">المواقع الأكثر تأثراً بالنواقص</p></div></div>
+                </div>
+                <div id="hotspotRows" class="hotspot-list"></div>
+              </article>
+            </div>
+            <div class="details-grid issue-hourly-grid">
+              <div id="issueHourlyTable"></div>
+              <div id="hotspotFullTable"></div>
+            </div>
+          </section>
+
+          <footer class="page-footer">
+            <span class="footer-brand"><span>noon minutes</span> <i>·</i> <span data-i18n="footerLabel">لوحة متابعة تشغيلية</span></span>
+            <span data-i18n="connectedTo">متصلة مباشرة ببيانات Google Sheets</span>
+          </footer>
+        </div>
+      </main>
+    </div>
+    <noscript><div class="noscript">يلزم تفعيل JavaScript لعرض بيانات لوحة القيادة.</div></noscript>
+  </body>
+</html>
