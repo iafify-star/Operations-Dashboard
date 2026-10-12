@@ -364,20 +364,24 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 .heatmap-tab:hover { border-color: #63a8ff52; color: var(--text); }
 .heatmap-tab.active { border-color: #ffe90056; background: #ffe90018; color: var(--brand-yellow); }
 .heatmap-tab:focus-visible { outline: 2px solid var(--brand-yellow); outline-offset: 2px; }
-.heatmap-wrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #3d4f6b transparent; }
-.heatmap-grid { display: grid; grid-template-columns: auto repeat(var(--heat-cols), minmax(26px, 1fr)) auto; gap: 3px; min-width: 660px; margin-top: 15px; }
-.heat-corner { height: 18px; }
-.heat-hour { padding-bottom: 5px; color: var(--muted); font: 600 8px "Inter", "Segoe UI", sans-serif; text-align: center; }
-.heat-label { display: flex; align-items: center; padding-inline-end: 9px; color: #b7c4d8; direction: ltr; font: 700 9px "Segoe UI", sans-serif; text-align: right; }
-.is-en .heat-label { text-align: left; }
-.heat-cell { display: grid; place-items: center; min-height: 27px; border-radius: 6px; background: var(--heat, #141f33); color: #cfd9e8; font: 600 8px "Segoe UI", sans-serif; font-variant-numeric: tabular-nums; transition: transform .15s ease, box-shadow .15s ease; }
-.heat-cell:hover { z-index: 1; transform: scale(1.09); box-shadow: 0 8px 18px #00000061; }
-.heat-cell.on-bright { color: #0b1424; font-weight: 800; }
-.heat-label.heat-total { color: #ffe996; }
-.heat-total-cell { border: 1px solid #ffe90033; background: #1b2b45; color: #ffe996; }
-.heat-legend { display: flex; align-items: center; gap: 9px; margin-top: 14px; color: var(--muted); font-size: 9px; }
-.heat-gradient { flex: 0 0 115px; height: 6px; border-radius: 4px; background: linear-gradient(90deg, rgb(19, 31, 52), rgb(46, 92, 130), rgb(214, 217, 28), rgb(255, 233, 0)); }
+.heatmap-wrap { max-height: 400px; overflow: auto; background: #101b2e; border-radius: 10px; scrollbar-width: thin; scrollbar-color: #3d4f6b transparent; }
+.heat-table { min-width: 680px; margin-top: 15px; border-collapse: separate; border-spacing: 3px; background: #101b2e; }
+.heat-table th { position: sticky; top: 0; z-index: 2; padding: 5px 6px 9px; background: #101b2e; color: var(--muted); font: 700 9px "Inter", "Segoe UI", sans-serif; text-align: center; white-space: nowrap; }
+.heat-table th.heat-corner-cell { inset-inline-start: 0; z-index: 4; }
+.heat-table td { height: 30px; min-width: 54px; padding: 0 7px; border-radius: 7px; background: var(--heat, #15223a); color: #cfd9e8; font: 700 9px "Segoe UI", sans-serif; font-variant-numeric: tabular-nums; text-align: center; cursor: default; transition: transform .15s ease, box-shadow .15s ease; }
+.heat-table td:hover { z-index: 3; transform: scale(1.07); box-shadow: 0 8px 18px #00000070; }
+.heat-table td.on-bright { color: #0b1424; }
+.heat-table td.is-empty { background: #15223a; color: #4a5c80; }
+.heat-table .heat-label { position: sticky; inset-inline-start: 0; z-index: 1; padding: 0 11px; background: #111d30; color: #c7d3e4; direction: ltr; font: 700 9.5px "Segoe UI", sans-serif; text-align: right; white-space: nowrap; }
+.is-en .heat-table .heat-label { text-align: left; }
+.heat-table .heat-total-label { top: 0; z-index: 3; background: #162640; color: #ffe996; font-weight: 800; }
+.heat-table td.heat-total-cell { background: #1b2b45; border: 1px solid #ffe90038; color: #ffe996; }
+.heat-table tfoot th.heat-label, .heat-table tfoot td { border: 1px solid #ffe90038; background: #162640; color: #ffe996; font-weight: 800; }
+.heat-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 13px; color: var(--muted); font-size: 9px; }
+.heat-scale { display: flex; align-items: center; gap: 6px; direction: ltr; }
+.heat-gradient { display: block; flex: 0 0 120px; height: 7px; border-radius: 4px; background: linear-gradient(90deg, rgb(19, 31, 52), rgb(46, 92, 130), rgb(214, 217, 28), rgb(255, 233, 0)); }
 .heat-max { color: #ffe996; font-weight: 700; }
+.heat-hint { color: #7d8ca4; }
 
 .report-host { position: fixed; top: 0; inset-inline-start: -20000px; z-index: -1; pointer-events: none; }
 .report-doc { width: 780px; background: #ffffff; color: #14203a; font: 400 12px/1.7 "Cairo", "Inter", "Segoe UI", sans-serif; }
@@ -489,7 +493,7 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bar-actual, .area-dot, .kpi-card, .heat-cell { animation: none; transition: none; }
+  .bar-actual, .area-dot, .kpi-card, .heat-table td { animation: none; transition: none; }
   .area-line { animation: none; stroke-dasharray: none; }
   html { scroll-behavior: auto; }
 }

@@ -142,6 +142,7 @@ const messages = {
     periodAllHours: "كل الساعات", filteredTotal: "إجمالي الفترة",
     heatmapTitle: "كثافة الفرز الساعية", heatmapSubtitle: "مخرجات كل مستودع عبر ساعات الوردية",
     heatmapLegend: "كثافة الإنتاج", heatmapEmpty: "لا تتوفر بيانات للخريطة الحرارية.",
+    heatmapHint: "كل صف = مستودع · كل عمود = ساعة",
     peakHour: "الذروة", avgShort: "المتوسط", sortHint: "اضغط للترتيب",
     reportButton: "تقرير PDF", reportTitle: "تنزيل تقرير الأداء بصيغة PDF", reportPreparing: "جارٍ تجهيز التقرير…",
     reportKpiSection: "أبرز المؤشرات", reportHourlySection: "ملخص الإنتاجية الساعية",
@@ -278,6 +279,7 @@ const messages = {
     periodAllHours: "All hours", filteredTotal: "Period total",
     heatmapTitle: "Sorting intensity heatmap", heatmapSubtitle: "Output per warehouse across shift hours",
     heatmapLegend: "Output intensity", heatmapEmpty: "No heatmap data available.",
+    heatmapHint: "Each row = warehouse · each column = hour",
     peakHour: "Peak", avgShort: "Avg", sortHint: "Click to sort",
     reportButton: "PDF report", reportTitle: "Download the performance report as PDF", reportPreparing: "Preparing report…",
     reportKpiSection: "Key metrics", reportHourlySection: "Hourly productivity summary",
@@ -466,18 +468,27 @@ function renderHeatmap(data) {
     return;
   }
   const maxValue = Math.max(1, ...records.flatMap((row) => warehouses.map(({ index }) => parseNumber(textAt(row, index)))));
-  const hourRow = `<div class="heat-corner"></div>${records.map((row) => `<div class="heat-hour">${escapeHtml(textAt(row, 1))}</div>`).join("")}`;
-  const body = warehouses.map(({ header, index }) => `<div class="heat-label">${escapeHtml(header)}</div>${records.map((row) => {
-    const value = parseNumber(textAt(row, index));
-    const ratio = value / maxValue;
-    const intensity = value > 0 ? .14 + ratio * .86 : 0;
-    const tip = chartTip(`${header} · ${textAt(row, 1)}`, [[t("totalCompleted"), formatNumber(value)]]);
-    return `<div class="heat-cell${ratio > .58 ? " on-bright" : ""}" style="--heat:${heatColor(intensity)}" data-tip="${escapeHtml(tip)}">${value > 0 ? formatNumber(value) : ""}</div>`;
-  }).join("")}`).join("");
-  const totals = totalIndex >= 0
-    ? `<div class="heat-label heat-total">${t("overallTotal")}</div>${records.map((row) => `<div class="heat-cell heat-total-cell" data-tip="${escapeHtml(chartTip(textAt(row, 1), [[t("totalCompleted"), formatNumber(textAt(row, totalIndex))]]))}">${formatNumber(textAt(row, totalIndex))}</div>`).join("")}`
-    : "";
-  container.innerHTML = `<div class="heatmap-grid" style="--heat-cols:${records.length}">${hourRow}${body}${totals}</div><div class="heat-legend"><span>${t("heatmapLegend")}</span><i class="heat-gradient"></i><span>0</span><span class="heat-max">${formatNumber(maxValue)}</span></div>`;
+  const hourCells = records.map((row) => `<th scope="col">${escapeHtml(textAt(row, 1))}</th>`).join("");
+  const body = warehouses.map(({ header, index }) => {
+    const cells = records.map((row) => {
+      const value = parseNumber(textAt(row, index));
+      const ratio = value / maxValue;
+      const classes = ["heat-cell"];
+      if (value === 0) classes.push("is-empty");
+      else if (ratio > .58) classes.push("on-bright");
+      const tip = chartTip(`${header} · ${textAt(row, 1)}`, [[t("totalCompleted"), formatNumber(value)]]);
+      return `<td class="${classes.join(" ")}" style="--heat:${heatColor(value > 0 ? .14 + ratio * .86 : 0)}" data-tip="${escapeHtml(tip)}">${formatNumber(value)}</td>`;
+    }).join("");
+    const rowTotal = records.reduce((sum, row) => sum + parseNumber(textAt(row, index)), 0);
+    const totalTip = chartTip(header, [[t("totalCompleted"), formatNumber(rowTotal)]]);
+    return `<tr><th scope="row" class="heat-label">${escapeHtml(header)}</th>${cells}<td class="heat-total-cell" data-tip="${escapeHtml(totalTip)}">${formatNumber(rowTotal)}</td></tr>`;
+  }).join("");
+  const hourTotals = records.map((row) => {
+    const value = totalIndex >= 0 ? parseNumber(textAt(row, totalIndex)) : 0;
+    return `<td class="heat-total-cell" data-tip="${escapeHtml(chartTip(textAt(row, 1), [[t("totalCompleted"), formatNumber(value)]]))}">${formatNumber(value)}</td>`;
+  }).join("");
+  const grandTotal = totalIndex >= 0 ? records.reduce((sum, row) => sum + parseNumber(textAt(row, totalIndex)), 0) : 0;
+  container.innerHTML = `<div class="heatmap-wrap"><table class="heat-table"><thead><tr><th class="heat-corner-cell"></th>${hourCells}</tr></thead><tbody>${body}</tbody><tfoot><tr><th class="heat-label heat-total-label">${t("overallTotal")}</th>${hourTotals}<td class="heat-total-cell">${formatNumber(grandTotal)}</td></tr></tfoot></table></div><div class="heat-legend"><span>${t("heatmapLegend")}</span><span class="heat-scale"><i>0</i><i class="heat-gradient"></i><i class="heat-max">${formatNumber(maxValue)}</i></span><span class="heat-hint">${t("heatmapHint")}</span></div>`;
 }
 
 function reportPeriodText() {
