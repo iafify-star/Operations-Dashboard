@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="utf-8">
@@ -40,6 +40,7 @@
           <div class="topbar-actions">
             <span class="live-pill"><i></i><span data-i18n="live">بث مباشر</span></span>
             <button class="language-button" id="languageButton" type="button" aria-label="Switch to English">EN</button>
+            <button class="report-button" id="reportButton" type="button" title="تنزيل تقرير الأداء بصيغة PDF" aria-label="تنزيل تقرير الأداء بصيغة PDF" data-i18n-title="reportTitle" data-i18n-aria="reportTitle"><span class="report-icon">⤓</span><span class="report-button-label" data-i18n="reportButton">تقرير PDF</span></button>
             <button class="icon-button" id="refreshButton" type="button" title="تحديث البيانات الآن" aria-label="تحديث البيانات الآن" data-i18n-title="refreshNow" data-i18n-aria="refreshNow"><span class="refresh-icon">↻</span></button>
             <span class="avatar" aria-label="لوحة تشغيل المستودعات" data-i18n-aria="dashboard">ن</span>
           </div>
@@ -56,6 +57,20 @@
               <div class="date-box"><span class="calendar-icon">▦</span><span><small data-i18n="sheetDateLabel">تاريخ بيانات الشيت</small><strong id="sheetDate">—</strong></span></div>
               <label class="auto-refresh"><input id="autoRefresh" type="checkbox" checked><span class="switch"></span><span data-i18n="autoRefresh">تحديث تلقائي</span></label>
             </div>
+          </section>
+
+          <section class="global-time-filter" aria-label="فلتر الفترة الزمنية" data-i18n-aria="hourFilterTitle">
+            <div class="filter-description">
+              <span class="filter-icon">◷</span>
+              <div><strong data-i18n="hourFilterTitle">تحديد الفترة بالساعة</strong><small data-i18n="hourFilterDescription">يُطبق الاختيار على جميع الرسوم والجداول الساعية في لوحة المتابعة.</small></div>
+            </div>
+            <div class="filter-controls">
+              <label><span data-i18n="fromHour">من الساعة</span><select id="timeFrom" aria-label="من الساعة" data-i18n-aria="fromHour"></select></label>
+              <span class="filter-separator">—</span>
+              <label><span data-i18n="toHour">إلى الساعة</span><select id="timeTo" aria-label="إلى الساعة" data-i18n-aria="toHour"></select></label>
+              <button class="reset-filter" id="resetTimeFilter" type="button" data-i18n="resetHours">كل الساعات</button>
+            </div>
+            <span class="filter-period" id="timeFilterPeriod" aria-live="polite"></span>
           </section>
 
           <div class="connection-banner" id="connectionBanner" role="status" hidden></div>
@@ -96,7 +111,7 @@
             </div>
             <div class="panel table-panel">
               <div class="table-scroll">
-                <table>
+                <table id="warehouseTable" class="warehouse-table">
                   <thead><tr><th data-i18n="warehouse">المستودع</th><th data-i18n="totalRequired">إجمالي المطلوب</th><th data-i18n="actualCompleted">المنجز الفعلي</th><th data-i18n="remaining">المتبقي</th><th data-i18n="shortages">النواقص</th><th data-i18n="hourlyTarget">المستهدف / س</th><th data-i18n="completionRate">نسبة الإنجاز</th></tr></thead>
                   <tbody id="warehouseRows"></tbody>
                 </table>
@@ -112,6 +127,13 @@
             </div>
             <div class="workflow-grid" id="workflowCards"></div>
             <div class="details-grid" id="sortingTables"></div>
+            <div class="panel heatmap-panel">
+              <div class="panel-heading">
+                <div><span class="panel-icon teal">▦</span><div><h3 data-i18n="heatmapTitle">كثافة الفرز الساعية</h3><p data-i18n="heatmapSubtitle">مخرجات كل مستودع عبر ساعات الوردية</p></div></div>
+                <div class="heatmap-tabs" role="tablist"><button type="button" class="heatmap-tab active" data-heatmap="batch" data-i18n="batches">فرز الباتشات</button><button type="button" class="heatmap-tab" data-heatmap="crossdock" data-i18n="crossDock">فرز الكروس دوك</button></div>
+              </div>
+              <div id="heatmapContent" class="heatmap-wrap" aria-live="polite"></div>
+            </div>
             <div class="logistics-kpis" id="stagingKpis"></div>
             <div class="dashboard-grid lower-grid">
               <article class="panel pipeline-panel">
@@ -163,7 +185,7 @@
 
           <footer class="page-footer">
             <span class="footer-brand"><span>noon minutes</span> <i>·</i> <span data-i18n="footerLabel">لوحة متابعة تشغيلية</span></span>
-            <span data-i18n="connectedTo">متصلة مباشرة ببيانات Google Sheets</span>
+            <span data-i18n="designCredit">تصميم إبراهيم عفيفي</span>
           </footer>
         </div>
       </main>
