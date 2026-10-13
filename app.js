@@ -940,7 +940,7 @@ function buildProductivityReportDocument(data) {
       share += shares.get(hour) || 0;
     });
     const fullName = nameIndex >= 0 ? textAt(row, nameIndex) : "";
-    return { user: textAt(row, 1).split("@")[0], name: fullName.split(/\s+/).slice(0, 2).join(" "), warehouse, units, worked, share, met: share > 0 && units >= share };
+    return { user: textAt(row, 1).split("@")[0], name: fullName.split(/\s+/).slice(0, 3).join(" "), warehouse, units, worked, share, met: share > 0 && units >= share };
   }).filter((picker) => picker.worked > 0)
     .sort((left, right) => left.warehouse.localeCompare(right.warehouse) || right.units - left.units);
   const onTarget = pickers.filter((picker) => picker.met).length;
@@ -951,8 +951,6 @@ function buildProductivityReportDocument(data) {
     formatNumber(picker.units / picker.worked), picker.share > 0 ? formatNumber(picker.share / picker.worked) : "—",
     picker.share > 0 ? status(picker.met) : "—",
   ];
-  const half = Math.ceil(pickers.length / 2);
-  const pickerTable = (from, to) => reportDataTable({ headers: pickerHeaders, rows: pickers.slice(from, to).map(pickerLine), groups: pickerGroups });
   const sum = (index) => closedRows.reduce((total, row) => total + parseNumber(textAt(row, index)), 0);
 
   return `<div class="report-doc report-hourly report-productivity" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
@@ -978,7 +976,7 @@ function buildProductivityReportDocument(data) {
     <div class="report-section-title">${escapeHtml(t("warehouseBreakdown"))}</div>
     ${warehouseBlocks}
     <section class="report-block report-pickers"><h2>${escapeHtml(t("pickersSection"))}</h2>${pickers.length
-      ? `<div class="report-split report-branches">${pickerTable(0, half)}${pickers.length > 1 ? pickerTable(half, pickers.length) : ""}</div>`
+      ? `<div class="report-branches">${reportDataTable({ headers: pickerHeaders, rows: pickers.map(pickerLine), groups: pickerGroups })}</div>`
       : reportDataTable({ headers: pickerHeaders, rows: [] })}</section>
     <p class="report-footnote">${escapeHtml(t("productivityNote"))}</p>
     <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>

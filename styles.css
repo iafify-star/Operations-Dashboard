@@ -499,7 +499,8 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 .report-productivity .report-branches th:first-child { width: auto; }
 .report-productivity .report-branches td:first-child { overflow: visible; text-align: center; }
 .report-productivity .report-branches td:nth-child(2) { direction: ltr; text-align: start; color: #46536c; }
-.report-productivity .report-branches td:nth-child(3) { max-width: 96px; overflow: hidden; direction: ltr; text-align: start; text-overflow: ellipsis; color: #1d2b3d; font-weight: 700; }
+.report-productivity .report-branches td:nth-child(3) { direction: ltr; text-align: start; color: #1d2b3d; font-weight: 700; }
+.report-productivity .report-branches th, .report-productivity .report-branches td { font-size: 9px; padding-inline: 8px; }
 .report-productivity .report-branches .report-pill { padding: 0 5px; font-size: 8px; }
 .report-delta { display: inline-block; direction: ltr; font-weight: 800; }
 .report-delta.is-up { color: #1c7a3e; }
