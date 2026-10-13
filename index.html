@@ -7,8 +7,8 @@
     <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20">
+    <script src="app.js?v=20" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -41,6 +41,7 @@
             <span class="live-pill"><i></i><span data-i18n="live">بث مباشر</span></span>
             <button class="language-button" id="languageButton" type="button" aria-label="Switch to English">EN</button>
             <button class="report-button" id="reportButton" type="button" title="تنزيل تقرير الأداء بصيغة PDF" aria-label="تنزيل تقرير الأداء بصيغة PDF" data-i18n-title="reportTitle" data-i18n-aria="reportTitle"><span class="report-icon">⤓</span><span class="report-button-label" data-i18n="reportButton">تقرير PDF</span></button>
+            <button class="report-button report-button-hourly" id="hourlyReportButton" type="button" title="تنزيل التقرير الساعي لكل الأقسام بصيغة PDF" aria-label="تنزيل التقرير الساعي لكل الأقسام بصيغة PDF" data-i18n-title="hourlyReportTitle" data-i18n-aria="hourlyReportTitle"><span class="report-icon">◷</span><span class="report-button-label" data-i18n="hourlyReportButton">تقرير الساعة</span></button>
             <button class="icon-button" id="refreshButton" type="button" title="تحديث البيانات الآن" aria-label="تحديث البيانات الآن" data-i18n-title="refreshNow" data-i18n-aria="refreshNow"><span class="refresh-icon">↻</span></button>
             <span class="avatar" aria-label="لوحة تشغيل المستودعات" data-i18n-aria="dashboard">ن</span>
           </div>
@@ -51,7 +52,7 @@
             <div>
               <div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="pageEyebrow">ملخص الأداء التشغيلي</span></div>
               <h1><span class="heading-main" data-i18n="headingMain">لوحة القيادة</span> <span data-i18n="headingAccent">التشغيلية</span></h1>
-              <p data-i18n="pageIntro">نظرة موحدة على التجهيز، الإنتاجية، تدفق الحاويات ومؤشرات الجودة.</p>
+              <p data-i18n="pageIntro">نظرة موحدة على التجهيز، الإنتاجية، تدفق التوتات ومؤشرات الجودة.</p>
             </div>
             <div class="heading-meta">
               <div class="date-box"><span class="calendar-icon">▦</span><span><small data-i18n="sheetDateLabel">تاريخ بيانات الشيت</small><strong id="sheetDate">—</strong></span></div>
@@ -138,15 +139,15 @@
             <div class="dashboard-grid lower-grid">
               <article class="panel pipeline-panel">
                 <div class="panel-heading">
-                  <div><span class="panel-icon blue">⇄</span><div><h3 data-i18n="containerPipeline">خط سير الحاويات</h3><p data-i18n="containerPipelineSubtitle">توزيع الحاويات حسب المرحلة التشغيلية</p></div></div>
+                  <div><span class="panel-icon blue">⇄</span><div><h3 data-i18n="containerPipeline">خط سير التوتات</h3><p data-i18n="containerPipelineSubtitle">توزيع التوتات حسب المرحلة التشغيلية</p></div></div>
                 </div>
                 <div id="pipelineContent"></div>
               </article>
               <article class="panel workflow-hourly-panel">
                 <div class="panel-heading">
-                  <div><span class="panel-icon amber">◷</span><div><h3 data-i18n="hourlyDispatch">حركة الشحن الساعية</h3><p data-i18n="hourlyDispatchSubtitle">إجمالي حركة الحاويات حسب الساعة</p></div></div>
+                  <div><span class="panel-icon amber">◷</span><div><h3 data-i18n="hourlyDispatch">حركة الشحن الساعية</h3><p data-i18n="hourlyDispatchSubtitle">إجمالي حركة التوتات حسب الساعة</p></div></div>
                 </div>
-                <div class="compact-chart" id="dispatchChart" aria-label="رسم بياني لحركة الحاويات الساعية" data-i18n-aria="dispatchChartLabel"></div>
+                <div class="compact-chart" id="dispatchChart" aria-label="رسم بياني لحركة التوتات الساعية" data-i18n-aria="dispatchChartLabel"></div>
               </article>
             </div>
             <div class="details-grid logistics-tables">

@@ -23,7 +23,7 @@ const messages = {
     sidebarFoot: "لوحة تشغيلية مباشرة", dashboard: "لوحة القيادة", live: "بث مباشر",
     refreshNow: "تحديث البيانات الآن", pageEyebrow: "ملخص الأداء التشغيلي",
     headingMain: "لوحة القيادة", headingAccent: "التشغيلية",
-    pageIntro: "نظرة موحدة على التجهيز، الإنتاجية، تدفق الحاويات ومؤشرات الجودة.",
+    pageIntro: "نظرة موحدة على التجهيز، الإنتاجية، تدفق التوتات ومؤشرات الجودة.",
     sheetDateLabel: "تاريخ بيانات الشيت", autoRefresh: "تحديث تلقائي",
     dailyPerformance: "الأداء اليومي", mainKpis: "مؤشرات التجهيز الرئيسية",
     lastSync: "آخر مزامنة", hourlyTitle: "الإنتاجية على مدار الساعة",
@@ -38,11 +38,11 @@ const messages = {
     completionRate: "نسبة الإنجاز", sheetDataNote: "يتم عرض البيانات كما وردت في الشيت",
     operationsFlow: "تدفق العمليات", workflowShipping: "سير العمل والشحن",
     workflowSubtitle: "متابعة الكميات والمهام عبر مراحل التشغيل",
-    containerPipeline: "خط سير الحاويات",
-    containerPipelineSubtitle: "توزيع الحاويات حسب المرحلة التشغيلية",
+    containerPipeline: "خط سير التوتات",
+    containerPipelineSubtitle: "توزيع التوتات حسب المرحلة التشغيلية",
     hourlyDispatch: "حركة الشحن الساعية",
-    hourlyDispatchSubtitle: "إجمالي حركة الحاويات حسب الساعة",
-    dispatchChartLabel: "رسم بياني لحركة الحاويات الساعية",
+    hourlyDispatchSubtitle: "إجمالي حركة التوتات حسب الساعة",
+    dispatchChartLabel: "رسم بياني لحركة التوتات الساعية",
     qualityAvailability: "الجودة والتوفر", operationalIssues: "النواقص والمشاكل التشغيلية",
     qualityMonitoring: "متابعة الجودة", issuesByWarehouse: "المشاكل حسب المستودع",
     issuesByWarehouseSubtitle: "توزيع البلاغات والقطع المتأثرة",
@@ -67,9 +67,9 @@ const messages = {
     batches: "فرز الباتشات", batchSubtitle: "المنجز، الجاري، والمعلق",
     crossDock: "فرز الكروس دوك", crossDockSubtitle: "متابعة فرز عمليات العبور",
     sheetConnected: "متصل بالشيت", inProgress: "قيد الفرز", pending: "معلق",
-    progressRate: "نسبة الإنجاز", containers: "حاوية", units: "قطعة",
+    progressRate: "نسبة الإنجاز", containers: "توتة", units: "قطعة",
     totalUnitsRecorded: "إجمالي القطع المسجلة",
-    noPipelineData: "لا تتوفر تفاصيل مراحل الحاويات.",
+    noPipelineData: "لا تتوفر تفاصيل مراحل التوتات.",
     skippedPieces: "القطع المتخطاة", issueReports: "بلاغات المشاكل",
     missingPieces: "قطع غير موجودة", damagedPieces: "قطع تالفة",
     expiredPieces: "منتهية الصلاحية", affectedLocations: "مواقع متأثرة",
@@ -82,7 +82,7 @@ const messages = {
     parseFailed: "تعذر العثور على مؤشرات التجهيز الرئيسية في الشيت.",
     layoutChanged: "وصلت بيانات الشيت، لكن تنسيق الجداول غير متوقع. راجع تبويب Executive Dashboard.",
     chartHourlyLabel: "المنجز مقارنة بالمستهدف",
-    chartContainerLabel: "حركة الحاويات",
+    chartContainerLabel: "حركة التوتات",
     hourlyDetails: "التفاصيل الساعية",
     pickingHourlyDetails: "تفاصيل الإنجاز الساعي للتجهيز",
     batchWarehouseSummary: "ملخص فرز الباتشات حسب المستودع",
@@ -90,8 +90,8 @@ const messages = {
     crossdockWarehouseSummary: "ملخص فرز الكروس دوك حسب المستودع",
     crossdockHourlyDetails: "المنجز الساعي حسب مستودع الكروس دوك",
     stagingKpisTitle: "مؤشرات التجهيز والشحن",
-    dispatchHourlyDetails: "حركة الحاويات والشحن لكل ساعة",
-    palletDispatchDetails: "تفاصيل البالتات والحاويات حسب الوجهة",
+    dispatchHourlyDetails: "حركة التوتات والشحن لكل ساعة",
+    palletDispatchDetails: "تفاصيل البالتات والتوتات حسب الوجهة",
     issuesHourlyDetails: "النواقص والقطع المتخطاة لكل ساعة ومستودع",
     hotspotDetails: "تفاصيل مواقع المشاكل والمنتجات المتأثرة",
     time: "الساعة",
@@ -109,14 +109,14 @@ const messages = {
     readyDispatch: "جاهزة للشحن",
     closedPallets: "بالتات مقفلة",
     totalPieces: "إجمالي القطع",
-    totalContainerFlow: "إجمالي حركة الحاويات",
+    totalContainerFlow: "إجمالي حركة التوتات",
     destinationCode: "كود الوجهة",
     darkStore: "اسم الدارك ستور",
     palletBarcode: "باركود البالتة",
     stagingLocation: "موقع الاستيج",
     destinationPallets: "بالتات الوجهة",
-    containersPerPallet: "حاويات بالبالتة",
-    percentOfContainers: "من إجمالي الحاويات",
+    containersPerPallet: "توتات بالبالتة",
+    percentOfContainers: "من إجمالي التوتات",
     issueReportsHeader: "إجمالي البلاغات",
     missingHeader: "غير موجود",
     damagedHeader: "تالف",
@@ -149,7 +149,32 @@ const messages = {
     reportWarehouseSection: "أداء المستودعات", reportStagingSection: "التجهيز والشحن",
     reportSortingSection: "عمليات الفرز", reportIssuesSection: "الجودة والنواقص",
     reportHotspotsSection: "أبرز مواقع المشاكل", reportMetTarget: "ساعات حققت المستهدف",
-    reportGenerated: "تاريخ التقرير", reportValue: "القيمة",
+    reportGenerated: "تاريخ التقرير", reportValue: "القيمة", reportPeak: "ساعة الذروة",
+    sortingExplanation: "إجمالي كل قسم، وتحته ما يخص كل مخزن بالقطع",
+    hourlyReportButton: "تقرير الساعة", hourlyReportTitle: "تنزيل التقرير الساعي لكل الأقسام بصيغة PDF",
+    hourlyReportHeading: "التقرير الساعي للعمليات", reportDateLabel: "تاريخ البيانات",
+    reportHourLabel: "ساعة التقرير", reportIssuedLabel: "وقت الإصدار", reportPeriodLabel: "الفترة",
+    execSummary: "الملخص التنفيذي", pickingSection: "تجهيز الطلبات", lastHourSection: "أداء آخر ساعة",
+    lastHourDone: "منجز الساعة", lastHourTarget: "مستهدف الساعة", lastHourRate: "إنجاز الساعة",
+    allSectionsHour: "حركة كل الأقسام في آخر ساعة", sectionCol: "القسم", lastHourCol: "آخر ساعة",
+    prevHourCol: "الساعة السابقة", changeCol: "التغير", cumulativeCol: "تراكمي حتى الساعة",
+    targetToDate: "المستهدف حتى الساعة", gapToDate: "الفرق عن المستهدف", totalWorkforce: "إجمالي العمالة",
+    closedQty: "كمية الفرز المنجز", closedTasks: "مهام منجزة", inProgressQty: "كمية قيد الفرز",
+    inProgressTasks: "مهام قيد التنفيذ", pendingQty: "كمية معلقة", pendingTasks: "مهام معلقة",
+    pendingContainers: "توتات تنتظر الاستيج", pendingPieces: "قطع تنتظر الاستيج",
+    stagedContainers: "توتات تم استيجها", stagingRecords: "سجلات الاستيج", readyContainers: "توتات جاهزة للشحن",
+    stageCol: "المرحلة", uniqueContainers: "التوتات", recordsUnits: "السجلات / القطع", distribution: "نسبة التوزيع",
+    palletCount: "عدد البالتات", totalContainers: "إجمالي التوتات", avgPerPallet: "متوسط التوتات للبالتة",
+    statusCol: "الحالة", statusPreparing: "قيد التجهيز",
+    metStatus: "محقق", missStatus: "عجز", reportNoData: "لا توجد بيانات",
+    hoursOnTarget: "ساعات محققة", issuesHourlySection: "النواقص الساعية", sectionsProgress: "تقدم الأقسام",
+    branchStatus: "حالة التوتات والبالتات حسب الفرع", branchCol: "الفرع", onPallet: "على بالتة",
+    adjustedTarget: "المستهدف المعدّل", nextHourTarget: "مستهدف الساعة القادمة",
+    closedPalletsByBranch: "البالتات المقفولة لكل فرع", recordsWord: "سجل",
+    warehouseOutput: "ما أنجزه كل مخزن", pickingDone: "منجز التجهيز",
+    batchLastHour: "باتشات آخر ساعة", batchToDate: "باتشات تراكمي",
+    toDateCol: "تراكمي", statusClosed: "اتقفل", statusInProgress: "شغالين فيه", statusPending: "متفتحش",
+    skippedLastHour: "متخطاة آخر ساعة", skippedToDate: "متخطاة تراكمي",
   },
   en: {
     brandLogo: "noon minutes logo", navLabel: "Main navigation", homeLabel: "Back to home",
@@ -160,7 +185,7 @@ const messages = {
     sidebarFoot: "Live operations dashboard", dashboard: "Dashboard", live: "LIVE",
     refreshNow: "Refresh data now", pageEyebrow: "OPERATIONS PERFORMANCE",
     headingMain: "Operations", headingAccent: "Dashboard",
-    pageIntro: "A unified view of picking, productivity, container flow, and quality.",
+    pageIntro: "A unified view of picking, productivity, tote flow, and quality.",
     sheetDateLabel: "Sheet data date", autoRefresh: "Auto-refresh",
     dailyPerformance: "DAILY PERFORMANCE", mainKpis: "Picking overview",
     lastSync: "Last synced", hourlyTitle: "Hourly productivity",
@@ -171,15 +196,15 @@ const messages = {
     performanceComparison: "PERFORMANCE", warehousePerformance: "Warehouse performance",
     searchWarehouse: "Search warehouses…", warehouse: "Warehouse",
     totalRequired: "Total required", actualCompleted: "Completed",
-    remaining: "Remaining", shortages: "Shortages", hourlyTarget: "Target / hr",
+    remaining: "Remaining", shortages: "OOS", hourlyTarget: "Target / hr",
     completionRate: "Completion", sheetDataNote: "Data shown as provided in the source sheet",
     operationsFlow: "OPERATIONS FLOW", workflowShipping: "Workflow & dispatch",
     workflowSubtitle: "Track units and tasks across operational stages",
-    containerPipeline: "Container pipeline",
-    containerPipelineSubtitle: "Container distribution by operational stage",
+    containerPipeline: "Tote pipeline",
+    containerPipelineSubtitle: "Tote distribution by operational stage",
     hourlyDispatch: "Hourly dispatch flow",
-    hourlyDispatchSubtitle: "Container movement by hour",
-    dispatchChartLabel: "Hourly container movement chart",
+    hourlyDispatchSubtitle: "Tote movement by hour",
+    dispatchChartLabel: "Hourly tote movement chart",
     qualityAvailability: "QUALITY & AVAILABILITY", operationalIssues: "Shortages & operational issues",
     qualityMonitoring: "QUALITY MONITORING", issuesByWarehouse: "Issues by warehouse",
     issuesByWarehouseSubtitle: "Affected items and reported issues by warehouse",
@@ -204,9 +229,9 @@ const messages = {
     batches: "Batch sorting", batchSubtitle: "Completed, in progress, and pending",
     crossDock: "Cross-dock sorting", crossDockSubtitle: "Cross-dock sorting progress",
     sheetConnected: "Sheet connected", inProgress: "In progress", pending: "Pending",
-    progressRate: "Completion rate", containers: "containers", units: "units",
+    progressRate: "Completion rate", containers: "totes", units: "units",
     totalUnitsRecorded: "Total units recorded",
-    noPipelineData: "Container pipeline details are unavailable.",
+    noPipelineData: "Tote pipeline details are unavailable.",
     skippedPieces: "Skipped units", issueReports: "Issue reports",
     missingPieces: "Missing units", damagedPieces: "Damaged units",
     expiredPieces: "Expired units", affectedLocations: "Affected locations",
@@ -219,7 +244,7 @@ const messages = {
     parseFailed: "Could not find the main picking metrics in the sheet.",
     layoutChanged: "Sheet data was received, but its table layout was unexpected. Check the Executive Dashboard tab.",
     chartHourlyLabel: "Completed vs. target",
-    chartContainerLabel: "Container movement",
+    chartContainerLabel: "Tote movement",
     hourlyDetails: "Hourly details",
     pickingHourlyDetails: "Hourly picking performance",
     batchWarehouseSummary: "Batch sorting by warehouse",
@@ -227,8 +252,8 @@ const messages = {
     crossdockWarehouseSummary: "Cross-dock sorting by warehouse",
     crossdockHourlyDetails: "Hourly cross-dock output by warehouse",
     stagingKpisTitle: "Staging & dispatch metrics",
-    dispatchHourlyDetails: "Hourly container and dispatch flow",
-    palletDispatchDetails: "Pallet and container details by destination",
+    dispatchHourlyDetails: "Hourly tote and dispatch flow",
+    palletDispatchDetails: "Pallet and tote details by destination",
     issuesHourlyDetails: "Hourly skipped units by warehouse",
     hotspotDetails: "Issue locations and affected products",
     time: "Hour",
@@ -246,14 +271,14 @@ const messages = {
     readyDispatch: "Ready to dispatch",
     closedPallets: "Closed pallets",
     totalPieces: "Total units",
-    totalContainerFlow: "Total container flow",
+    totalContainerFlow: "Total tote flow",
     destinationCode: "Destination code",
     darkStore: "Dark store",
     palletBarcode: "Pallet barcode",
     stagingLocation: "Staging location",
     destinationPallets: "Destination pallets",
-    containersPerPallet: "Containers / pallet",
-    percentOfContainers: "Share of containers",
+    containersPerPallet: "Totes / pallet",
+    percentOfContainers: "Share of totes",
     issueReportsHeader: "Total reports",
     missingHeader: "Missing",
     damagedHeader: "Damaged",
@@ -286,7 +311,32 @@ const messages = {
     reportWarehouseSection: "Warehouse performance", reportStagingSection: "Staging & dispatch",
     reportSortingSection: "Sorting operations", reportIssuesSection: "Quality & shortages",
     reportHotspotsSection: "Top issue hotspots", reportMetTarget: "hours met target",
-    reportGenerated: "Report date", reportValue: "Value",
+    reportGenerated: "Report date", reportValue: "Value", reportPeak: "Peak hour",
+    sortingExplanation: "Section totals, with each warehouse listed underneath (units).",
+    hourlyReportButton: "Hourly report", hourlyReportTitle: "Download the hourly all-sections report as PDF",
+    hourlyReportHeading: "Hourly Operations Report", reportDateLabel: "Data date",
+    reportHourLabel: "Report hour", reportIssuedLabel: "Issued at", reportPeriodLabel: "Period",
+    execSummary: "Executive summary", pickingSection: "Picking", lastHourSection: "Latest hour performance",
+    lastHourDone: "Hour output", lastHourTarget: "Hour target", lastHourRate: "Hour completion",
+    allSectionsHour: "All sections in the latest hour", sectionCol: "Section", lastHourCol: "Latest hour",
+    prevHourCol: "Previous hour", changeCol: "Change", cumulativeCol: "Total to report hour",
+    targetToDate: "Target to report hour", gapToDate: "Gap to target", totalWorkforce: "Total workforce",
+    closedQty: "Sorted qty (closed)", closedTasks: "Closed tasks", inProgressQty: "In-progress qty",
+    inProgressTasks: "Tasks in progress", pendingQty: "Pending qty", pendingTasks: "Pending tasks",
+    pendingContainers: "Awaiting staging", pendingPieces: "Units to stage",
+    stagedContainers: "Staged totes", stagingRecords: "Staging records", readyContainers: "Totes ready",
+    stageCol: "Stage", uniqueContainers: "Totes", recordsUnits: "Records / units", distribution: "Distribution",
+    palletCount: "Pallets", totalContainers: "Totes", avgPerPallet: "Avg totes / pallet",
+    statusCol: "Status", statusPreparing: "In preparation",
+    metStatus: "Met", missStatus: "Below", reportNoData: "No data",
+    hoursOnTarget: "Hours on target", issuesHourlySection: "Hourly shortages", sectionsProgress: "Section progress",
+    branchStatus: "Totes & pallets by branch", branchCol: "Branch", onPallet: "On pallet",
+    adjustedTarget: "Adjusted target", nextHourTarget: "Next hour target",
+    closedPalletsByBranch: "Closed pallets by branch", recordsWord: "records",
+    warehouseOutput: "Output by warehouse", pickingDone: "Picked",
+    batchLastHour: "Batch latest hr", batchToDate: "Batch to date",
+    toDateCol: "To date", statusClosed: "Closed", statusInProgress: "In progress", statusPending: "Not opened",
+    skippedLastHour: "Skipped latest hr", skippedToDate: "Skipped to date",
   },
 };
 
@@ -515,14 +565,14 @@ function reportBar(value, color) {
   return `<div class="report-bar"><span><i style="width:${percent}%;background:${color}"></i></span><b>${escapeHtml(value || "0%")}</b></div>`;
 }
 
-function reportTable(headers, rows) {
+function reportTable(headers, rows, className = "") {
   const cell = (value) => (value && typeof value === "object" && "html" in value ? value.html : escapeHtml(value ?? "—"));
-  return `<table class="report-table"><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((value, index) => `<td${index === 0 ? ' class="report-strong"' : ""}>${cell(value)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  return `<table class="report-table${className ? ` ${className}` : ""}"><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((value, index) => `<td${index === 0 ? ' class="report-strong"' : ""}>${cell(value)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
 }
 
 function buildReportDocument(data) {
   const picking = hourlyView(data.pickingHourly)?.records || [];
-  const met = picking.filter((row) => parseNumber(textAt(row, 3)) >= parseNumber(textAt(row, 2)) && parseNumber(textAt(row, 2)) > 0).length;
+  const met = picking.filter((row) => parseNumber(textAt(row, 3)) >= parseNumber(textAt(row, hourTargetIndex(data.pickingHourly))) && parseNumber(textAt(row, hourTargetIndex(data.pickingHourly))) > 0).length;
   const peak = picking.reduce((best, row) => (best === null || parseNumber(textAt(row, 3)) > parseNumber(textAt(best, 3)) ? row : best), null);
   const periodTarget = picking.reduce((sum, row) => sum + parseNumber(textAt(row, 2)), 0);
   const periodDone = picking.reduce((sum, row) => sum + parseNumber(textAt(row, 3)), 0);
@@ -538,12 +588,14 @@ function buildReportDocument(data) {
     [t("readyDispatch"), stagingValue(data, "حاويات جاهزة للشحن")],
     [t("closedPallets"), stagingValue(data, "بالتات مقفلة للشحن")],
   ];
-  const sortingRows = [data.batch, data.crossdock].map((section, index) => [
-    index === 0 ? t("batches") : t("crossDock"),
-    getLabelMetric(section, "كمية الفرز المنجز") || "—",
-    getLabelMetric(section, "كمية قيد الفرز") || "—",
-    getLabelMetric(section, "كمية المعلق") || "—",
-  ]);
+  const sortingRows = [[t("batches"), data.batch], [t("crossDock"), data.crossdock]].flatMap(([label, section]) => {
+    const total = section?.table?.total || [];
+    const figures = (row) => [3, 4, 5].map((index) => reportCell(textAt(row, index)));
+    const warehouses = (section?.table?.records || [])
+      .filter((row) => [3, 4, 5].some((index) => parseNumber(textAt(row, index)) > 0))
+      .map((row) => [{ html: `<span class="report-sub">${escapeHtml(textAt(row, 1))}</span>` }, ...figures(row)]);
+    return [[label, ...figures(total).map((value) => ({ html: `<b>${typeof value === "object" ? value.html : escapeHtml(value)}</b>` }))], ...warehouses];
+  });
   const issueStats = [
     reportStat(t("skippedPieces"), textAt(data.issueKpis, 1), colors.red),
     reportStat(t("issueReports"), textAt(data.issueKpis, 3), colors.amber),
@@ -552,7 +604,7 @@ function buildReportDocument(data) {
     reportStat(t("expiredPieces"), textAt(data.issueKpis, 9), colors.violet),
     reportStat(t("affectedLocations"), textAt(data.issueKpis, 11), colors.blue),
   ].join("");
-  return `<div class="report-doc">
+  return `<div class="report-doc" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
     <header class="report-head">
       <img src="assets/noon-minutes-logo.png" alt="noon minutes">
       <div class="report-head-copy"><strong>noon minutes</strong><h1>${locale === "ar" ? "تقرير الأداء التشغيلي" : "Operations Performance Report"}</h1><p>${t("reportGenerated")}: ${escapeHtml(data.date || t("unknownDate"))} · ${t("dailyShift")} 04:00 — 19:00</p></div>
@@ -563,7 +615,7 @@ function buildReportDocument(data) {
       ${reportStat(t("kpiCompleted"), data.main.completed, colors.green)}
       ${reportStat(t("kpiRemaining"), data.main.remaining, colors.amber)}
       ${reportStat(t("kpiCompletion"), data.main.completion, colors.teal)}
-      ${reportStat(t("averageProductivity"), data.main.iph ? `${data.main.iph} ${t("piecePerHour")}` : "—", colors.violet)}
+      ${reportStat(t("productivityPerHour"), data.main.iph, colors.violet)}
       ${reportStat(t("totalShortages"), data.main.shortages, colors.red)}
     </div></section>
     <section class="report-block"><h2>${t("reportHourlySection")} <em>${escapeHtml(reportPeriodText())}</em></h2><div class="report-stats report-stats-5">
@@ -571,7 +623,7 @@ function buildReportDocument(data) {
       ${reportStat(t("target"), formatNumber(periodTarget), colors.blue)}
       ${reportStat(t("kpiCompletion"), periodTarget > 0 ? `${((periodDone / periodTarget) * 100).toFixed(1)}%` : "—", colors.teal)}
       ${reportStat(t("reportMetTarget"), `${met}`, colors.amber)}
-      ${reportStat(t("reportPeak"), peak ? `${textAt(peak, 1)} · ${formatNumber(textAt(peak, 3))}` : "—", "#c9a227")}
+      ${reportStat(peak ? `${t("reportPeak")} · ${translateCell(textAt(peak, 1), "الساعة")}` : t("reportPeak"), peak ? formatNumber(textAt(peak, 3)) : "—", "#c9a227")}
     </div></section>
     <section class="report-block"><h2>${t("reportWarehouseSection")}</h2>
       ${reportTable([t("warehouse"), t("totalRequired"), t("actualCompleted"), t("remaining"), t("shortages"), t("completionRate")], warehouseRows)}
@@ -579,13 +631,210 @@ function buildReportDocument(data) {
     </section>
     <div class="report-split">
       <section class="report-block"><h2>${t("reportStagingSection")}</h2>${reportTable([t("stagingKpisTitle"), t("reportValue")], stagingRows)}</section>
-      <section class="report-block"><h2>${t("reportSortingSection")}</h2>${reportTable([t("batches"), t("done"), t("inProgress"), t("pending")], sortingRows)}</section>
+      <section class="report-block report-sorting-block"><h2>${t("reportSortingSection")}</h2><p class="report-explainer">${t("sortingExplanation")}</p>${reportTable([t("sectionCol"), t("done"), t("inProgress"), t("pending")], sortingRows, "report-sorting-table")}</section>
     </div>
     <section class="report-block"><h2>${t("reportIssuesSection")}</h2><div class="report-stats">${issueStats}</div></section>
     <section class="report-block"><h2>${t("reportHotspotsSection")}</h2>
       ${reportTable([t("location"), t("warehouse"), t("totalQuantity"), t("share")], hotspotRows)}
     </section>
     <footer class="report-foot"><span>noon minutes · ${t("dashboard")}</span><span>${escapeHtml(t("designCredit"))} · ${escapeHtml(generatedAt)}</span></footer>
+  </div>`;
+}
+
+function reportCell(value) {
+  const text = String(value ?? "").trim();
+  if (!text || text === "-" || text === "#N/A") return "—";
+  if (/^0(?:\.0+)?%?$/.test(text)) return { html: `<span class="report-zero">${escapeHtml(text)}</span>` };
+  return text;
+}
+
+function reportDataTable({ headers, rows, foot = null, current = -1, className = "", groups = null }) {
+  const cell = (value) => (value && typeof value === "object" && "html" in value ? value.html : escapeHtml(value ?? "—"));
+  const line = (row) => row.map((value, index) => `<td${index === 0 ? ' class="report-strong"' : ""}>${cell(value)}</td>`).join("");
+  const body = rows.length
+    ? rows.map((row, index) => `<tr${index === current ? ' class="is-current"' : ""}>${line(row)}</tr>`).join("")
+    : `<tr><td colspan="${headers.length}" class="report-empty">${escapeHtml(t("reportNoData"))}</td></tr>`;
+  const groupRow = groups ? `<tr class="report-group-row">${groups.map((group) => `<th colspan="${group.span}">${escapeHtml(group.label)}</th>`).join("")}</tr>` : "";
+  return `<table class="report-table report-data${className ? ` ${className}` : ""}"><thead>${groupRow}<tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr></thead><tbody>${body}</tbody>${foot && rows.length ? `<tfoot><tr>${line(foot)}</tr></tfoot>` : ""}</table>`;
+}
+
+function lastHeaderIndex(table) {
+  const headers = table?.headers || [];
+  for (let index = headers.length - 1; index >= 0; index -= 1) {
+    if (String(headers[index] ?? "").trim()) return index;
+  }
+  return -1;
+}
+
+function latestReportHour(data) {
+  const records = hourlyView(data.pickingHourly)?.records || [];
+  const active = records.filter((row) => parseNumber(textAt(row, 3)) > 0);
+  const row = active[active.length - 1] || records[0];
+  return row ? hourValue(textAt(row, 1)) : null;
+}
+
+function hourSnapshot(table, valueIndex, reportHour) {
+  const records = hourlyView(table)?.records || [];
+  if (!records.length || valueIndex < 0 || reportHour === null) return { current: null, previous: null, cumulative: null };
+  const at = (hour) => {
+    const row = records.find((record) => hourValue(textAt(record, 1)) === hour);
+    return row ? parseNumber(textAt(row, valueIndex)) : null;
+  };
+  const cumulative = records.reduce((sum, row) => {
+    const hour = hourValue(textAt(row, 1));
+    return hour !== null && hour <= reportHour ? sum + parseNumber(textAt(row, valueIndex)) : sum;
+  }, 0);
+  return { current: at(reportHour), previous: at(reportHour - 1), cumulative };
+}
+
+// Picking lists warehouses as ID01 while sorting and issues use CAIID01; both name the same site.
+function warehouseKey(code) {
+  return String(code ?? "").trim().replace(/^CAI/i, "");
+}
+
+function warehouseHourFigures(table, reportHour) {
+  const figures = new Map();
+  const totalIndex = lastHeaderIndex(table);
+  (table?.headers || []).forEach((header, index) => {
+    const key = warehouseKey(header);
+    if (!key || index < 2 || index >= totalIndex) return;
+    figures.set(key, hourSnapshot(table, index, reportHour));
+  });
+  return figures;
+}
+
+function reportDelta(snapshot, inverse = false) {
+  if (snapshot.current === null || snapshot.previous === null) return "—";
+  const delta = snapshot.current - snapshot.previous;
+  if (delta === 0) return reportCell("0");
+  const good = inverse ? delta < 0 : delta > 0;
+  return { html: `<span class="report-delta is-${good ? "up" : "down"}">${delta > 0 ? "+" : "−"}${formatNumber(Math.abs(delta))}</span>` };
+}
+
+function buildHourlyReportDocument(data) {
+  const reportHour = latestReportHour(data);
+  const hourText = reportHour === null ? "—" : formatHour(reportHour);
+  const now = new Date();
+  const issuedAt = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const dateText = data.date || t("unknownDate");
+  const heading = t("hourlyReportHeading");
+  const chip = (label, value, key = false) => `<div class="report-chip${key ? " is-key" : ""}"><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`;
+  const block = (title, content) => `<section class="report-block"><h2>${escapeHtml(title)}</h2>${content}</section>`;
+  const stats = (items, className = "") => `<div class="report-stats${className ? ` ${className}` : ""}">${items.map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div>`;
+  const number = (value) => (value === null || value === undefined ? "—" : reportCell(formatNumber(value)));
+
+  const pickingRecords = hourlyView(data.pickingHourly)?.records || [];
+  const hourTarget = hourTargetIndex(data.pickingHourly);
+  const toDate = pickingRecords.filter((row) => {
+    const hour = hourValue(textAt(row, 1));
+    return hour !== null && reportHour !== null && hour <= reportHour;
+  });
+  const targetToDate = toDate.reduce((sum, row) => sum + parseNumber(textAt(row, 2)), 0);
+  const doneToDate = toDate.reduce((sum, row) => sum + parseNumber(textAt(row, 3)), 0);
+  const gap = doneToDate - targetToDate;
+  const met = toDate.filter((row) => parseNumber(textAt(row, hourTarget)) > 0 && parseNumber(textAt(row, 3)) >= parseNumber(textAt(row, hourTarget))).length;
+  const currentRow = pickingRecords.find((row) => hourValue(textAt(row, 1)) === reportHour) || [];
+  const nextRow = pickingRecords.find((row) => hourValue(textAt(row, 1)) === reportHour + 1) || [];
+
+  const sectionRows = [
+    [t("pickingSection"), data.pickingHourly, 3, false],
+    [t("batches"), data.batchHourly, lastHeaderIndex(data.batchHourly), false],
+    [t("crossDock"), data.crossdockHourly, lastHeaderIndex(data.crossdockHourly), false],
+    [t("skippedPieces"), data.issueHourly, lastHeaderIndex(data.issueHourly), true],
+  ].map(([label, table, index, inverse]) => {
+    const snapshot = hourSnapshot(table, index, reportHour);
+    return [label, number(snapshot.current), number(snapshot.previous), reportDelta(snapshot, inverse), number(snapshot.cumulative)];
+  });
+
+  const sortingProgress = (label, section) => {
+    const total = section?.table?.total || [];
+    return [label, ...[2, 3, 4, 5, 7].map((index) => reportCell(textAt(total, index)))];
+  };
+  const progressRows = [
+    [t("pickingSection"), reportCell(data.main.target), reportCell(data.main.completed), "—", reportCell(data.main.remaining), reportCell(data.main.completion)],
+    sortingProgress(t("batches"), data.batch),
+    sortingProgress(t("crossDock"), data.crossdock),
+  ];
+
+  const pickingByWarehouse = new Map(data.warehouses.map((row) => [warehouseKey(textAt(row, 1)), row]));
+  const batchFigures = warehouseHourFigures(data.batchHourly, reportHour);
+  const issueFigures = warehouseHourFigures(data.issueHourly, reportHour);
+  const crossdockByWarehouse = new Map((data.crossdock?.table?.records || []).map((row) => [warehouseKey(textAt(row, 1)), row]));
+  const warehouseKeys = [...new Set([...pickingByWarehouse.keys(), ...batchFigures.keys(), ...crossdockByWarehouse.keys(), ...issueFigures.keys()])].sort();
+  const warehouseRows = warehouseKeys.map((key) => {
+    const row = pickingByWarehouse.get(key);
+    const crossdock = crossdockByWarehouse.get(key);
+    return [
+      key,
+      row ? reportCell(textAt(row, 3)) : "—",
+      row ? { html: reportBar(textAt(row, 7), colors.teal) } : "—",
+      number(batchFigures.get(key)?.current), number(batchFigures.get(key)?.cumulative),
+      ...[3, 4, 5].map((index) => (crossdock ? reportCell(textAt(crossdock, index)) : "—")),
+      number(issueFigures.get(key)?.current), number(issueFigures.get(key)?.cumulative),
+    ];
+  });
+  const warehouseGroups = [
+    { label: "", span: 1 }, { label: t("pickingSection"), span: 2 }, { label: t("batches"), span: 2 },
+    { label: t("crossDock"), span: 3 }, { label: t("skippedPieces"), span: 2 },
+  ];
+  const warehouseHeaders = [
+    t("warehouse"), t("completed"), t("completionRate"), t("lastHourCol"), t("toDateCol"),
+    t("statusClosed"), t("statusInProgress"), t("statusPending"), t("lastHourCol"), t("toDateCol"),
+  ];
+
+  const issueStats = stats([
+    [t("skippedPieces"), textAt(data.issueKpis, 1), colors.red],
+    [t("issueReports"), textAt(data.issueKpis, 3), colors.amber],
+    [t("missingPieces"), textAt(data.issueKpis, 5), "#ff9c67"],
+    [t("damagedPieces"), textAt(data.issueKpis, 7), colors.red],
+    [t("expiredPieces"), textAt(data.issueKpis, 9), colors.violet],
+    [t("affectedLocations"), textAt(data.issueKpis, 11), colors.blue],
+  ], "report-stats-3");
+
+  const branchLine = (row, first) => [first, ...[3, 4, 5, 6].map((index) => reportCell(textAt(row, index)))];
+  const branchRows = data.branchStaging.records.map((row) => branchLine(row, textAt(row, 2) || textAt(row, 1)));
+  const branchTotal = data.branchStaging.total;
+  const branchHeaders = [t("branchCol"), t("pendingStaging"), t("stagedRelease"), t("onPallet"), t("palletCount")];
+  const branchHalf = Math.ceil(branchRows.length / 2);
+  const branchTables = `<div class="report-split report-branches">${reportDataTable({ headers: branchHeaders, rows: branchRows.slice(0, branchHalf) })}${branchRows.length > 1 ? reportDataTable({ headers: branchHeaders, rows: branchRows.slice(branchHalf), foot: branchTotal.length ? branchLine(branchTotal, t("overallTotal")) : null }) : ""}</div>`;
+
+  return `<div class="report-doc report-hourly" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
+    <header class="report-head">
+      <img src="assets/noon-minutes-logo.png" alt="noon minutes">
+      <div class="report-head-copy"><strong>noon minutes</strong><h1>${escapeHtml(heading)}</h1></div>
+      <div class="report-chips">${chip(t("reportDateLabel"), dateText)}${chip(t("reportHourLabel"), hourText, true)}${chip(t("reportIssuedLabel"), issuedAt)}${isHourFilterActive() ? chip(t("reportPeriodLabel"), `${formatHour(hourRange.from)} — ${formatHour(hourRange.to)}`) : ""}</div>
+    </header>
+    ${block(t("mainKpis"), `${stats([
+      [t("kpiRequired"), data.main.target, colors.blue],
+      [t("kpiCompleted"), data.main.completed, colors.green],
+      [t("kpiRemaining"), data.main.remaining, colors.amber],
+      [t("kpiCompletion"), data.main.completion, colors.teal],
+      [t("productivityPerHour"), data.main.iph, colors.violet],
+      [t("totalShortages"), data.main.shortages, colors.red],
+    ])}${stats([
+      [t("hourlyTargetShort"), data.main.targetHourly, colors.blue],
+      [t("totalWorkforce"), data.main.workers, colors.violet],
+      [t("shortageRate"), data.main.shortageRate, colors.red],
+      [t("targetToDate"), formatNumber(targetToDate), colors.blue],
+      [t("gapToDate"), `${gap > 0 ? "+" : gap < 0 ? "−" : ""}${formatNumber(Math.abs(gap))}`, gap < 0 ? colors.red : colors.green],
+      [t("hoursOnTarget"), `${met} / ${toDate.length}`, colors.amber],
+    ])}`)}
+    ${block(t("lastHourSection"), stats([
+      [t("lastHourDone"), textAt(currentRow, 3), colors.green],
+      [t("lastHourTarget"), textAt(currentRow, hourTarget), colors.blue],
+      [t("lastHourRate"), textAt(currentRow, 6), colors.teal],
+      [t("activeStaff"), textAt(currentRow, 4), colors.violet],
+      [t("productivityPerHour"), textAt(currentRow, 5), colors.amber],
+      [t("nextHourTarget"), textAt(nextRow, hourTarget), colors.red],
+    ]))}
+    ${block(t("allSectionsHour"), reportDataTable({ headers: [t("sectionCol"), t("lastHourCol"), t("prevHourCol"), t("changeCol"), t("cumulativeCol")], rows: sectionRows }))}
+    <div class="report-split">
+      ${block(t("sectionsProgress"), reportDataTable({ headers: [t("sectionCol"), t("totalRequired"), t("done"), t("inProgress"), t("remaining"), t("completionRate")], rows: progressRows, className: "report-compact" }))}
+      ${block(t("reportIssuesSection"), issueStats)}
+    </div>
+    ${block(t("warehouseOutput"), reportDataTable({ headers: warehouseHeaders, rows: warehouseRows, groups: warehouseGroups, className: "report-compact" }))}
+    ${block(t("branchStatus"), branchTables)}
+    <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>
   </div>`;
 }
 
@@ -624,38 +873,96 @@ function getReportContainer() {
   return container;
 }
 
-async function generatePdfReport() {
-  const button = $("#reportButton");
-  if (!dashboardData || button?.disabled) return;
+// html2canvas drops the space before the last word of right-to-left text; non-breaking spaces keep each run in one piece.
+function keepReportSpaces(root) {
+  if (!root || typeof document.createTreeWalker !== "function") return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    // Branch column headers are narrow and must stay free to wrap onto two lines.
+    if (node.parentElement?.closest(".report-branches thead")) continue;
+    node.nodeValue = node.nodeValue.replace(/(\S) (?=\S)/g, "$1 ");
+  }
+}
+
+function printReport() {
+  document.body.classList.add("printing-report");
+  window.addEventListener("afterprint", () => document.body.classList.remove("printing-report"), { once: true });
+  window.print();
+}
+
+function numberReportPages(pdf) {
+  const pages = pdf.internal.getNumberOfPages();
+  if (pages < 2) return;
+  const width = pdf.internal.pageSize.getWidth();
+  const height = pdf.internal.pageSize.getHeight();
+  pdf.setFontSize(7.5);
+  pdf.setTextColor(125, 140, 165);
+  for (let page = 1; page <= pages; page += 1) {
+    pdf.setPage(page);
+    pdf.text(`${page} / ${pages}`, width / 2, height - 3.5, { align: "center" });
+  }
+}
+
+let reportBusy = false;
+
+async function exportReport({ buttonSelector, labelKey, buildDocument, filename, pagebreak }) {
+  const button = $(buttonSelector);
+  if (!dashboardData || reportBusy || !button) return;
   const container = getReportContainer();
   if (!container) return;
-  const label = $("#reportButton .report-button-label");
+  const label = button.querySelector(".report-button-label");
   const previousLabel = label?.textContent || "";
+  reportBusy = true;
   button.disabled = true;
   button.classList.add("is-loading");
   if (label) label.textContent = t("reportPreparing");
-  container.innerHTML = buildReportDocument(dashboardData);
-  const stamp = (dashboardData.date || "").replace(/[^\w-]/g, "") || "latest";
+  container.innerHTML = buildDocument(dashboardData);
+  if (locale === "ar") keepReportSpaces(container);
   try {
     const html2pdf = await ensurePdfLibrary();
     await html2pdf().set({
-      margin: [6, 6],
-      filename: `noon-operations-report-${stamp}.pdf`,
+      margin: [6, 6, 9, 6],
+      filename,
       image: { type: "jpeg", quality: .96 },
-      html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false },
+      html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-    }).from(container).save();
+      pagebreak,
+    }).from(container.firstElementChild).toPdf().get("pdf").then(numberReportPages).save();
   } catch (error) {
     console.error("PDF report failed:", error);
-    document.body.classList.add("printing-report");
-    window.print();
+    printReport();
   } finally {
-    document.body.classList.remove("printing-report");
-    if (label) label.textContent = previousLabel || t("reportButton");
+    if (label) label.textContent = previousLabel || t(labelKey);
+    reportBusy = false;
     button.disabled = false;
     button.classList.remove("is-loading");
   }
+}
+
+function reportStamp() {
+  return (dashboardData?.date || "").replace(/[^\w-]/g, "") || "latest";
+}
+
+function generatePdfReport() {
+  return exportReport({
+    buttonSelector: "#reportButton",
+    labelKey: "reportButton",
+    buildDocument: buildReportDocument,
+    filename: `noon-operations-report-${reportStamp()}.pdf`,
+    pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+  });
+}
+
+function generateHourlyReport() {
+  const hour = dashboardData ? latestReportHour(dashboardData) : null;
+  return exportReport({
+    buttonSelector: "#hourlyReportButton",
+    labelKey: "hourlyReportButton",
+    buildDocument: buildHourlyReportDocument,
+    filename: `noon-hourly-report-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+  });
 }
 
 function hourColumnValues(table) {
@@ -706,6 +1013,11 @@ function buildPeriodTotal(table, records) {
   headers.forEach((header, index) => {
     if (index <= 1) return;
     const values = records.map((row) => textAt(row, index));
+    if (header.includes("المستهدف المعد")) {
+      // Carried shortfalls repeat across hours, so the period's target stays the base plan.
+      total[index] = formatNumber(sumColumn(targetIndex));
+      return;
+    }
     if (header.includes("نسبة الإنجاز")) {
       const target = sumColumn(targetIndex);
       const completed = sumColumn(completedIndex);
@@ -728,6 +1040,12 @@ function buildPeriodTotal(table, records) {
   });
   total[1] = t("filteredTotal");
   return total;
+}
+
+// The sheet rolls each hour's shortfall into the next hour's target in its own column; older layouts only have the base target.
+function hourTargetIndex(table) {
+  const index = (table?.headers || []).findIndex((header) => String(header ?? "").includes("المستهدف المعد"));
+  return index >= 0 ? index : 2;
 }
 
 function hourlyView(table) {
@@ -886,9 +1204,14 @@ function escapeHtml(value) {
   })[character]);
 }
 
+// The sheet says "حاويات"; the floor calls them totes.
+function toteWording(text) {
+  return String(text).replace(/الحاويات/g, "التوتات").replace(/حاويات/g, "توتات");
+}
+
 function translateHeader(header) {
   const mappings = [
-    ["الساعة", "time"], ["المستهدف", "targetLabel"], ["المنجز", "actual"],
+    ["الساعة", "time"], ["المستهدف المعد", "adjustedTarget"], ["المستهدف", "targetLabel"], ["المنجز", "actual"],
     ["العمالة النشطة", "activeWorkers"], ["معدل IPH", "iph"],
     ["نسبة الإنجاز", "completionRate"], ["حالة التارجت", "targetStatus"],
     ["المستودع", "warehouse"], ["إجمالي المطلوب", "warehouseTotalRequired"],
@@ -910,14 +1233,14 @@ function translateHeader(header) {
   ];
   const normalized = String(header || "").trim();
   const mapping = mappings.find(([phrase]) => normalized === phrase || normalized.includes(phrase));
-  if (!mapping) return normalized;
+  if (!mapping) return toteWording(normalized);
   if (locale === "ar") {
     if (normalized.includes("المنجز (Closed)")) return "المنجز (Closed)";
     if (normalized.includes("المتبقي (Pending)")) return "المتبقي (Pending)";
     if (normalized.includes("بانتظار الاستيج")) return "بانتظار الاستيج (Pending)";
     if (normalized.includes("تم الاستيج")) return "تم الاستيج (Release)";
     if (normalized.includes("جاهزة للشحن")) return "جاهزة للشحن (Dispatch)";
-    return normalized;
+    return toteWording(normalized);
   }
   return t(mapping[1]);
 }
@@ -958,7 +1281,7 @@ function renderDataTable(target, title, sourceTable, { hourly = false, subtitle 
     const value = translateCell(textAt(row, index), header);
     const identifier = ["الساعة", "المستودع", "كود الوجهة", "باركود البالتة", "موقع التخزين (Location)"].includes(header);
     const numeric = !identifier && !["حالة التارجت"].includes(header);
-    return `<td class="${identifier ? "code-cell" : numeric ? "numeric" : ""}">${escapeHtml(value)}</td>`;
+    return `<td class="${identifier ? "code-cell" : numeric ? `numeric${/^0(?:\.0+)?%?$/.test(value) ? " is-zero" : ""}` : ""}">${escapeHtml(value)}</td>`;
   }).join("")}</tr>`).join("");
   const totalRow = table.total?.length
     ? `<tfoot><tr>${columns.map(({ header, index }) => {
@@ -990,20 +1313,26 @@ function valuesAfterHeader(rows, headerIndex) {
   return [];
 }
 
+function netRemaining(remaining, shortages) {
+  if (!remaining) return "";
+  return formatNumber(Math.max(0, parseNumber(remaining) - parseNumber(shortages)));
+}
+
 function mainMetrics(rows) {
   const header = findRow(rows, (row) => rowHas(row, "إجمالي المطلوب") && rowHas(row, "نسبة الإنجاز العامة"));
   const values = valuesAfterHeader(rows, header);
   if (header < 0 || values.length < 8) throw new Error(t("parseFailed"));
   const annotations = valuesAfterHeader(rows, header + 1);
+  const shortages = textAt(values, 11);
   return {
     target: textAt(values, 1),
     completed: textAt(values, 3),
-    remaining: textAt(values, 5),
+    remaining: netRemaining(textAt(values, 5), shortages),
     completion: textAt(values, 7),
     iph: textAt(values, 9),
     targetHourly: (textAt(annotations, 1).match(/\d[\d,]*/) || [])[0] || "",
     workers: (textAt(annotations, 9).match(/\d[\d,]*/) || [])[0] || "",
-    shortages: textAt(values, 11),
+    shortages,
     shortageRate: (textAt(annotations, 11).match(/\d+(?:\.\d+)?%/) || [])[0] || "",
     headerIndex: header,
   };
@@ -1041,6 +1370,22 @@ function tableAtHeader(rows, headerIndex, keyColumn = 1) {
     if (label) records.push(row);
   }
   return { headers, records, total };
+}
+
+// Branches are keyed by name: a branch with no code yet still has a row.
+function branchSection(rows) {
+  const header = findRow(rows, (row) => textAt(row, 1) === "كود الفرع" && textAt(row, 2) === "اسم الفرع");
+  const records = [];
+  let total = [];
+  if (header < 0) return { records, total };
+  for (let index = header + 1; index < rows.length; index += 1) {
+    if (textAt(rows[index], 1).startsWith("الإجمالي العام")) {
+      total = rows[index];
+      break;
+    }
+    if (textAt(rows[index], 2)) records.push(rows[index]);
+  }
+  return { records, total };
 }
 
 function findTable(rows, predicate, startAt = 0) {
@@ -1100,6 +1445,7 @@ function parseDashboard(rows) {
   const hotspots = hotspotTable.records;
   const palletHeader = findRow(rows, (row) => textAt(row, 1) === "كود الوجهة" && textAt(row, 2) === "اسم الدارك ستور");
   const palletTable = tableAtHeader(rows, palletHeader);
+  const branchStaging = branchSection(rows);
   const pickIssueSection = locateSection(rows, "مؤشرات مشاكل ونواقص تجهيز الطلبات");
   const expirySection = locateSection(rows, "منتهية الصلاحية (Expired)");
   const issueTotalLine = rows.find((row) => row.some((cell) => cell === "إجمالي أعلى 8 مواقع"));
@@ -1111,8 +1457,8 @@ function parseDashboard(rows) {
 
   return {
     main,
-    warehouses: warehouses.records,
-    warehouseTotal: warehouses.total,
+    warehouses: warehouses.records.map((row) => row.map((cell, index) => (index === 4 ? netRemaining(textAt(row, 4), textAt(row, 5)) : cell))),
+    warehouseTotal: warehouses.total.map((cell, index) => (index === 4 ? netRemaining(textAt(warehouses.total, 4), textAt(warehouses.total, 5)) : cell)),
     pickingHourly,
     batch,
     batchHourly,
@@ -1128,6 +1474,7 @@ function parseDashboard(rows) {
     hotspots,
     hotspotTable,
     palletTable,
+    branchStaging,
     issueSectionFound: pickIssueSection >= 0 && expirySection >= 0,
     date: dateFromRows(rows),
   };
@@ -1241,50 +1588,40 @@ function renderAreaChart(rows, { labelIndex, valueIndex }) {
 function renderHourly(data) {
   const rows = hourlyView(data.pickingHourly)?.records || [];
   const dispatchRows = hourlyView(data.dispatchHourly)?.records || [];
-  $("#hourlyChart").innerHTML = renderBarChart(rows, { labelIndex: 1, actualIndex: 3, targetIndex: 2, activeIndex: 4 });
-  const met = rows.filter((row) => parseNumber(textAt(row, 3)) >= parseNumber(textAt(row, 2)) && parseNumber(textAt(row, 2)) > 0).length;
+  $("#hourlyChart").innerHTML = renderBarChart(rows, { labelIndex: 1, actualIndex: 3, targetIndex: hourTargetIndex(data.pickingHourly), activeIndex: 4 });
+  const met = rows.filter((row) => parseNumber(textAt(row, 3)) >= parseNumber(textAt(row, hourTargetIndex(data.pickingHourly))) && parseNumber(textAt(row, hourTargetIndex(data.pickingHourly))) > 0).length;
   $("#hourlyNote").textContent = `${met} ${t("metHours")}`;
   $("#dispatchChart").innerHTML = renderAreaChart(dispatchRows, { labelIndex: 1, valueIndex: 7 });
   renderDataTable("#pickingHourlyTable", t("pickingHourlyDetails"), data.pickingHourly, { hourly: true });
   renderDataTable("#dispatchHourlyTable", t("dispatchHourlyDetails"), data.dispatchHourly, { hourly: true });
   renderDataTable("#issueHourlyTable", t("issuesHourlyDetails"), data.issueHourly, { hourly: true });
   renderDataTable("#hotspotFullTable", t("hotspotDetails"), data.hotspotTable);
-  renderDataTable("#palletTable", t("palletDispatchDetails"), data.palletTable);
+  renderPalletTable(data);
   renderStagingMetrics(data);
   renderSortingTables(data);
 }
 
+// Branches with closed pallets come first; the per-branch tote breakdown stays in the hourly report.
+function renderPalletTable(data) {
+  const rows = (data.branchStaging.records.length
+    ? data.branchStaging.records.map((row) => [textAt(row, 2), textAt(row, 6)])
+    : data.palletTable.records.map((row) => [textAt(row, 2), textAt(row, 3)]))
+    .sort((left, right) => parseNumber(right[1]) - parseNumber(left[1]) || left[0].localeCompare(right[0]));
+  const total = rows.reduce((sum, row) => sum + parseNumber(row[1]), 0);
+  const body = rows.map(([name, count]) => `<tr><td class="code-cell">${escapeHtml(name)}</td><td class="numeric${parseNumber(count) ? "" : " is-zero"}">${escapeHtml(count || "0")}</td></tr>`).join("")
+    || `<tr><td colspan="2" class="empty-state">${t("noChartData")}</td></tr>`;
+  $("#palletTable").innerHTML = `<article class="panel table-panel detail-panel"><div class="panel-heading detail-heading"><div><span class="panel-icon blue">▤</span><div><h3>${t("closedPalletsByBranch")}</h3><p>${t("sheetDataNote")}</p></div></div></div><div class="table-scroll detail-table-scroll"><table><thead><tr><th>${t("branchCol")}</th><th>${t("closedPallets")}</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td>${t("overallTotal")}</td><td class="numeric">${formatNumber(total)}</td></tr></tfoot></table></div></article>`;
+}
+
+// One table per sorting type; the hour-by-hour breakdown per warehouse lives in the heatmap right below.
 function renderSortingTables(data) {
   const sections = [
-    {
-      title: t("batchWarehouseSummary"),
-      summary: data.batch?.table,
-      hourlyTitle: t("batchHourlyDetails"),
-      hourly: data.batchHourly,
-    },
-    {
-      title: t("crossdockWarehouseSummary"),
-      summary: data.crossdock?.table,
-      hourlyTitle: t("crossdockHourlyDetails"),
-      hourly: data.crossdockHourly,
-    },
+    { title: t("batchWarehouseSummary"), summary: data.batch?.table },
+    { title: t("crossdockWarehouseSummary"), summary: data.crossdock?.table },
   ];
-  $("#sortingTables").innerHTML = sections.map((section) => {
-    const summary = section.summary;
-    const hourly = section.hourly;
-    return `<div class="sorting-table-group">
-      <div class="section-heading detail-section-heading"><h3>${section.title}</h3></div>
-      <div class="details-grid inner-details-grid">
-        <div class="embedded-table" data-table-title="${section.title}"></div>
-        <div class="embedded-table" data-table-title="${section.hourlyTitle}"></div>
-      </div>
-    </div>`;
-  }).join("");
+  $("#sortingTables").innerHTML = sections.map(() => '<div class="embedded-table"></div>').join("");
   const embedded = $("#sortingTables").querySelectorAll(".embedded-table");
-  sections.forEach((section, index) => {
-    renderDataTable(embedded[index * 2], section.title, section.summary);
-    renderDataTable(embedded[index * 2 + 1], section.hourlyTitle, section.hourly, { hourly: true });
-  });
+  sections.forEach((section, index) => renderDataTable(embedded[index], section.title, section.summary));
 }
 
 function renderStagingMetrics(data) {
@@ -1295,9 +1632,9 @@ function renderStagingMetrics(data) {
   }
   const metricDefinitions = [
     { header: "حاويات بانتظار الاستيج", label: t("pendingStaging"), color: colors.amber },
-    { header: "إجمالي قطع بانتظار الاستيج", label: t("totalPieces"), color: colors.blue },
+    { header: "إجمالي قطع بانتظار الاستيج", label: t("pendingPieces"), color: colors.blue },
     { header: "حاويات تم استيجها (Release)", label: t("stagedRelease"), color: colors.teal },
-    { header: "سجلات الاستيج للإفراج", label: t("reportsHeader"), color: colors.violet },
+    { header: "سجلات الاستيج للإفراج", label: t("stagingRecords"), color: colors.violet },
     { header: "حاويات جاهزة للشحن", label: t("readyDispatch"), color: colors.green },
     { header: "بالتات مقفلة للشحن", label: t("closedPallets"), color: colors.red },
   ];
@@ -1351,15 +1688,11 @@ function renderWorkflows(data) {
 
   const stageColors = [colors.amber, colors.blue, colors.green];
   const pipelineTotal = data.pipeline.reduce((sum, row) => sum + parseNumber(textAt(row, 4)), 0);
-  const stageNames = {
-    "بانتظار الاستيج (Pending)": locale === "ar" ? "بانتظار الاستيج (Pending)" : "Awaiting staging",
-    "تم الاستيج (Release)": locale === "ar" ? "تم الاستيج (Release)" : "Staged for release",
-    "جاهزة للشحن (Dispatch)": locale === "ar" ? "جاهزة للشحن (Dispatch)" : "Ready to dispatch",
-  };
+  const stageNames = [t("pendingStaging"), t("stagedRelease"), t("readyDispatch")];
   $("#pipelineContent").innerHTML = data.pipeline.length ? `<div class="pipeline-stages">${data.pipeline.map((row, index) => {
     const percent = parseNumber(textAt(row, 6));
-    const stageName = stageNames[textAt(row, 1).replace(/^\d+\.\s*/, "")] || textAt(row, 1).replace(/^\d+\.\s*/, "");
-    return `<div class="pipeline-stage" style="--accent:${stageColors[index]}"><div class="pipeline-stage-title"><i class="stage-dot"></i>${escapeHtml(stageName)}</div><span class="pipeline-stage-value">${escapeHtml(textAt(row, 3))} ${t("containers")}</span><small>${escapeHtml(textAt(row, 2))} · ${escapeHtml(textAt(row, 4))} ${t("units")}</small><div class="pipeline-track"><div class="pipeline-fill" style="width:${Math.max(0, Math.min(percent, 100))}%;background:${stageColors[index]}"></div></div></div>`;
+    const stageName = stageNames[index] || textAt(row, 1).replace(/^\d+\.\s*/, "");
+    return `<div class="pipeline-stage" style="--accent:${stageColors[index]}"><div class="pipeline-stage-title"><i class="stage-dot"></i>${escapeHtml(stageName)}</div><span class="pipeline-stage-value">${escapeHtml(textAt(row, 3))} ${t("containers")}</span><small>${escapeHtml(textAt(row, 4))} ${index === 1 ? t("recordsWord") : t("units")}</small><div class="pipeline-track"><div class="pipeline-fill" style="width:${Math.max(0, Math.min(percent, 100))}%;background:${stageColors[index]}"></div></div></div>`;
   }).join("")}<div class="table-foot"><span>${t("totalUnitsRecorded")}</span><span>${formatNumber(pipelineTotal)}</span></div></div>` : `<div class="empty-state">${t("noPipelineData")}</div>`;
 }
 
@@ -1512,6 +1845,7 @@ document.querySelectorAll(".heatmap-tab").forEach((tab) => {
 });
 
 $("#reportButton").addEventListener("click", generatePdfReport);
+$("#hourlyReportButton").addEventListener("click", generateHourlyReport);
 
 setAutoRefresh(true);
 syncHourOptions();
