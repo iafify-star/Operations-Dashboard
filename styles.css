@@ -480,6 +480,27 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 .report-data b { color: #1d2b3d; font-weight: 800; }
 .report-empty { color: #7d8ca5; text-align: center; }
 .report-zero { color: #b3bdcc; }
+.report-pill { display: inline-block; padding: 0 8px; border-radius: 20px; font-size: 8.5px; font-weight: 700; line-height: 1.6; }
+.report-pill.is-good { background: #e2f6e9; color: #1c7a3e; }
+.report-pill.is-bad { background: #fde7e8; color: #b3262e; }
+.report-pill.is-muted { background: #eef1f6; color: #74839a; }
+.report-footnote { margin: 8px 24px 0; color: #74839a; font-size: 9px; }
+.report-section-title { margin: 12px 24px 0; padding: 5px 10px; background: #1d2b3d; color: #ffffff; font-size: 11px; font-weight: 800; }
+.report-summary { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 6px; color: #66758d; font-size: 9px; }
+.report-summary span { display: inline-flex; align-items: baseline; gap: 5px; }
+.report-summary b { color: #1d2b3d; font: 800 10.5px "Segoe UI", sans-serif; font-variant-numeric: tabular-nums; }
+.report-hourly .report-hours { table-layout: fixed; }
+.report-hourly .report-hours th, .report-hourly .report-hours td { padding: 2px 2px; font-size: 8.5px; line-height: 1.4; }
+.report-hourly .report-hours th:first-child { width: 86px; }
+.report-hourly .report-hours td:first-child, .report-hourly .report-hours th:first-child { padding-inline-start: 7px; white-space: nowrap; }
+.report-hours .report-pill { padding: 0 3px; font-size: 7px; }
+.report-productivity .report-branches .report-table { table-layout: auto; }
+.report-productivity .report-branches th, .report-productivity .report-branches td { padding-inline: 4px; font-size: 8.5px; white-space: nowrap; }
+.report-productivity .report-branches th:first-child { width: auto; }
+.report-productivity .report-branches td:first-child { overflow: visible; text-align: center; }
+.report-productivity .report-branches td:nth-child(2) { direction: ltr; text-align: start; color: #46536c; }
+.report-productivity .report-branches td:nth-child(3) { max-width: 96px; overflow: hidden; direction: ltr; text-align: start; text-overflow: ellipsis; color: #1d2b3d; font-weight: 700; }
+.report-productivity .report-branches .report-pill { padding: 0 5px; font-size: 8px; }
 .report-delta { display: inline-block; direction: ltr; font-weight: 800; }
 .report-delta.is-up { color: #1c7a3e; }
 .report-delta.is-down { color: #b3262e; }
