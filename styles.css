@@ -504,11 +504,13 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 .report-productivity .report-branches .report-pill { padding: 0 5px; font-size: 8px; }
 .report-productivity .report-matrix .report-table { table-layout: fixed; }
 .report-productivity .report-matrix th, .report-productivity .report-matrix td { padding: 1px 2px; font-size: 8px; }
-.report-productivity .report-matrix th:first-child { width: 30px; }
-.report-productivity .report-matrix th:nth-child(2) { width: 68px; }
-.report-productivity .report-matrix th:nth-child(3) { width: 100px; }
-.report-productivity .report-matrix th:nth-last-child(2) { width: 40px; }
-.report-productivity .report-matrix th:last-child { width: 42px; }
+.report-productivity .report-matrix th:first-child { width: 28px; }
+.report-productivity .report-matrix th:nth-child(2) { width: 64px; }
+.report-productivity .report-matrix th:nth-child(3) { width: 88px; }
+.report-productivity .report-matrix th:nth-child(4) { width: 40px; }
+.report-productivity .report-matrix td:nth-child(4) { color: #46536c; font-weight: 700; }
+.report-productivity .report-matrix th:nth-last-child(2) { width: 38px; }
+.report-productivity .report-matrix th:last-child { width: 40px; }
 .report-productivity .report-matrix td:nth-child(2), .report-productivity .report-matrix td:nth-child(3) { overflow: hidden; padding-inline-start: 5px; text-overflow: ellipsis; }
 .report-hit { display: inline-block; line-height: 1.15; }
 .report-hit b { display: block; font-weight: 800; }
