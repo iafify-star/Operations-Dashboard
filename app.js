@@ -170,12 +170,12 @@ const messages = {
     hoursOnTarget: "ساعات محققة", issuesHourlySection: "النواقص الساعية", sectionsProgress: "تقدم الأقسام",
     branchStatus: "حالة التوتات والبالتات حسب الفرع", branchCol: "الفرع", onPallet: "على بالتة",
     productivityReportButton: "تقرير الإنتاجية", productivityReportTitle: "تنزيل تقرير مستهدف وإنتاجية الساعات والعمال بصيغة PDF",
-    productivityReportHeading: "تقرير إنتاجية التجهيز", hourlyTargetsSection: "مستهدف وإنتاجية كل ساعة",
+    productivityReportHeading: "تقرير إنتاجية التجهيز", hourlyTargetsSection: "إنجاز التجهيز كل ساعة", requiredRemainingSection: "المطلوب والمتبقي لكل مخزن",
     pickersSection: "إنتاجية كل عامل", warehouseBreakdown: "كل مخزن على حدة", actualPerPicker: "فعلي لكل عامل", requiredPerPicker: "مطلوب لكل عامل", baseCol: "أساسي", adjustedCol: "معدّل", actualCol: "فعلي", requiredCol: "مطلوب",
-    gapCol: "الفرق", userCol: "اليوزر", nameCol: "الاسم", pickerCol: "العامل", piecesCol: "القطع", hoursCol: "ساعات",
+    gapCol: "الفرق", userCol: "اليوزر", nameCol: "الاسم", warehouseShort: "مخزن", totalShort: "الإجمالي", pickerCol: "العامل", piecesCol: "القطع", hoursCol: "ساعات",
     ippActualAvg: "متوسط الإنتاجية الفعلي", ippRequiredAvg: "متوسط الإنتاجية المطلوب",
     pickersOnTarget: "عمال محققين", pickersBelow: "عمال أقل من المطلوب",
-    productivityNote: "حالة كل مخزن مقابل مستهدفه الساعي، والمطلوب من العامل هو مستهدف مخزنه موزعاً على عماله النشطين، والساعة الجارية لا تدخل في التقييم", hourOpen: "جارية",
+    productivityNote: "في كل خانة: الرقم الأعلى هو المنجز والأسفل هو المطلوب من العامل في الساعة. الأخضر محقق والأحمر أقل من المطلوب، والساعة الجارية لا تدخل في التقييم", hourOpen: "جارية", hourOpenShort: "جارية",
     adjustedTarget: "المستهدف المعدّل", nextHourTarget: "مستهدف الساعة القادمة",
     closedPalletsByBranch: "البالتات المقفولة لكل فرع", recordsWord: "سجل",
     warehouseOutput: "ما أنجزه كل مخزن", pickingDone: "منجز التجهيز",
@@ -339,12 +339,12 @@ const messages = {
     hoursOnTarget: "Hours on target", issuesHourlySection: "Hourly shortages", sectionsProgress: "Section progress",
     branchStatus: "Totes & pallets by branch", branchCol: "Branch", onPallet: "On pallet",
     productivityReportButton: "Productivity report", productivityReportTitle: "Download the hourly target and per-picker productivity report as PDF",
-    productivityReportHeading: "Picking Productivity Report", hourlyTargetsSection: "Target and productivity by hour",
+    productivityReportHeading: "Picking Productivity Report", hourlyTargetsSection: "Picking output by hour", requiredRemainingSection: "Required and remaining by warehouse",
     pickersSection: "Productivity by picker", warehouseBreakdown: "Warehouse by warehouse", actualPerPicker: "Actual / picker", requiredPerPicker: "Required / picker", baseCol: "Base", adjustedCol: "Adjusted", actualCol: "Actual", requiredCol: "Required",
-    gapCol: "Gap", userCol: "User", nameCol: "Name", pickerCol: "Picker", piecesCol: "Units", hoursCol: "Hours",
+    gapCol: "Gap", userCol: "User", nameCol: "Name", warehouseShort: "WH", totalShort: "Total", pickerCol: "Picker", piecesCol: "Units", hoursCol: "Hours",
     ippActualAvg: "Average actual IPP", ippRequiredAvg: "Average required IPP",
     pickersOnTarget: "Pickers on target", pickersBelow: "Pickers below target",
-    productivityNote: "Each warehouse is scored against its own hourly target; a picker's required rate is that target shared across the warehouse's active pickers. The hour in progress is not scored.", hourOpen: "In progress",
+    productivityNote: "In each cell the top figure is the units picked and the bottom is the units required from the picker that hour. Green met it, red fell short. The hour in progress is not scored.", hourOpen: "In progress", hourOpenShort: "Open",
     adjustedTarget: "Adjusted target", nextHourTarget: "Next hour target",
     closedPalletsByBranch: "Closed pallets by branch", recordsWord: "records",
     warehouseOutput: "Output by warehouse", pickingDone: "Picked",
@@ -869,7 +869,6 @@ function buildProductivityReportDocument(data) {
   const signed = (value) => `${value > 0 ? "+" : value < 0 ? "−" : ""}${formatNumber(Math.abs(value))}`;
   const figure = (value) => (value ? formatNumber(value) : { html: '<span class="report-zero">0</span>' });
 
-  const adjustedIndex = hourTargetIndex(data.pickingHourly);
   const hourRows = (hourlyView(data.pickingHourly)?.records || []).filter((row) => {
     const hour = hourValue(textAt(row, 1));
     return hour !== null && reportHour !== null && hour <= reportHour;
@@ -884,13 +883,12 @@ function buildProductivityReportDocument(data) {
     const hour = hourValue(textAt(row, 1));
     const target = parseNumber(textAt(row, 2));
     const done = parseNumber(textAt(row, 3));
-    const workers = parseNumber(textAt(row, 4));
     const met = target > 0 && done >= target;
     if (met && !isOpen(hour)) hoursMet += 1;
     return [
-      formatHour(hour), reportCell(textAt(row, 2)), reportCell(textAt(row, adjustedIndex)),
-      reportCell(textAt(row, 3)), { html: `<span class="report-delta is-${done >= target ? "up" : "down"}">${signed(done - target)}</span>` },
-      reportCell(textAt(row, 4)), reportCell(textAt(row, 5)), workers > 0 ? formatNumber(target / workers) : "—",
+      formatHour(hour), reportCell(textAt(row, 2)), reportCell(textAt(row, 3)),
+      { html: `<span class="report-delta is-${done >= target ? "up" : "down"}">${signed(done - target)}</span>` },
+      reportCell(textAt(row, 4)), reportCell(textAt(row, 5)),
       isOpen(hour) ? openPill() : target > 0 ? status(met) : "—",
     ];
   });
@@ -929,29 +927,33 @@ function buildProductivityReportDocument(data) {
   const pickers = data.pickers.records.map((row) => {
     const warehouse = warehouseKey(textAt(row, 2));
     const shares = shareByWarehouse.get(warehouse) || new Map();
+    const byHour = new Map(data.pickers.hours.map(({ hour, index }) => [hour, parseNumber(textAt(row, index))]));
     let units = 0;
     let worked = 0;
     let share = 0;
-    data.pickers.hours.forEach(({ hour, index }) => {
-      const picked = parseNumber(textAt(row, index));
-      if (!picked || !hours.includes(hour) || isOpen(hour)) return;
+    // Each hour's cell is coloured by whether the picker covered their share of that hour.
+    const cells = hours.map((hour) => {
+      const picked = byHour.get(hour) || 0;
+      if (!picked) return "";
+      if (isOpen(hour)) return { html: `<span class="report-hit is-open"><b>${formatNumber(picked)}</b><small>${escapeHtml(t("hourOpenShort"))}</small></span>` };
+      const required = shares.get(hour) || 0;
       units += picked;
       worked += 1;
-      share += shares.get(hour) || 0;
+      share += required;
+      return { html: `<span class="report-hit is-${picked >= required ? "good" : "bad"}"><b>${formatNumber(picked)}</b><small>${required ? formatNumber(required) : "—"}</small></span>` };
     });
     const fullName = nameIndex >= 0 ? textAt(row, nameIndex) : "";
-    return { user: textAt(row, 1).split("@")[0], name: fullName.split(/\s+/).slice(0, 3).join(" "), warehouse, units, worked, share, met: share > 0 && units >= share };
+    return { user: textAt(row, 1).split("@")[0], name: fullName.split(/\s+/).slice(0, 2).join(" "), warehouse, cells, units, worked, share, met: share > 0 && units >= share };
   }).filter((picker) => picker.worked > 0)
     .sort((left, right) => left.warehouse.localeCompare(right.warehouse) || right.units - left.units);
   const onTarget = pickers.filter((picker) => picker.met).length;
-  const pickerHeaders = [t("warehouse"), t("userCol"), t("nameCol"), t("piecesCol"), t("hoursCol"), t("actualCol"), t("requiredCol"), t("statusCol")];
-  const pickerGroups = [{ label: "", span: 5 }, { label: "IPP", span: 2 }, { label: "", span: 1 }];
+  const pickerHeaders = [t("warehouseShort"), t("userCol"), t("nameCol"), ...hours.map(formatHour), t("totalShort"), t("statusCol")];
   const pickerLine = (picker) => [
-    picker.warehouse, picker.user, picker.name || "—", formatNumber(picker.units), `${picker.worked}`,
-    formatNumber(picker.units / picker.worked), picker.share > 0 ? formatNumber(picker.share / picker.worked) : "—",
-    picker.share > 0 ? status(picker.met) : "—",
+    picker.warehouse, picker.user, picker.name || "—", ...picker.cells,
+    { html: `<span class="report-hit is-${picker.met ? "good" : "bad"}"><b>${formatNumber(picker.units)}</b><small>${picker.share > 0 ? formatNumber(picker.share) : "—"}</small></span>` }, picker.share > 0 ? status(picker.met) : "—",
   ];
   const sum = (index) => closedRows.reduce((total, row) => total + parseNumber(textAt(row, index)), 0);
+  const warehouseLine = (row, first) => [first, ...[2, 3, 5, 4].map((index) => reportCell(textAt(row, index))), { html: reportBar(textAt(row, 7), colors.teal) }];
 
   return `<div class="report-doc report-hourly report-productivity" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
     <header class="report-head">
@@ -967,16 +969,19 @@ function buildProductivityReportDocument(data) {
       [t("pickersOnTarget"), `${onTarget} / ${pickers.length}`, colors.teal],
       [t("pickersBelow"), `${pickers.length - onTarget}`, colors.red],
     ].map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div></section>
+    <section class="report-block"><h2>${escapeHtml(t("requiredRemainingSection"))}</h2>${reportDataTable({
+      headers: [t("warehouse"), t("totalRequired"), t("actualCompleted"), t("shortages"), t("remaining"), t("completionRate")],
+      rows: data.warehouses.map((row) => warehouseLine(row, textAt(row, 1))),
+      foot: data.warehouseTotal.length ? warehouseLine(data.warehouseTotal, t("overallTotal")) : null,
+    })}</section>
     <section class="report-block"><h2>${escapeHtml(t("hourlyTargetsSection"))}</h2>${reportDataTable({
-      headers: [t("time"), t("baseCol"), t("adjustedCol"), t("completed"), t("gapCol"), t("activeStaff"), t("actualCol"), t("requiredCol"), t("statusCol")],
+      headers: [t("time"), t("targetLabel"), t("completed"), t("gapCol"), t("activeStaff"), "IPP", t("statusCol")],
       rows: hourlyTable,
-      groups: [{ label: "", span: 1 }, { label: t("targetLabel"), span: 2 }, { label: "", span: 3 }, { label: "IPP", span: 2 }, { label: "", span: 1 }],
-      className: "report-compact",
     })}</section>
     <div class="report-section-title">${escapeHtml(t("warehouseBreakdown"))}</div>
     ${warehouseBlocks}
     <section class="report-block report-pickers"><h2>${escapeHtml(t("pickersSection"))}</h2>${pickers.length
-      ? `<div class="report-branches">${reportDataTable({ headers: pickerHeaders, rows: pickers.map(pickerLine), groups: pickerGroups })}</div>`
+      ? `<div class="report-branches report-matrix">${reportDataTable({ headers: pickerHeaders, rows: pickers.map(pickerLine) })}</div>`
       : reportDataTable({ headers: pickerHeaders, rows: [] })}</section>
     <p class="report-footnote">${escapeHtml(t("productivityNote"))}</p>
     <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>
