@@ -15,6 +15,20 @@ const colors = {
 
 const messages = {
   ar: {
+    navPickers: "إنتاجية البيكرز", pkEyebrow: "متابعة عمال التجهيز", pkHeadingMain: "إنتاجية", pkHeadingAccent: "البيكرز",
+    pkIntro: "كل بيكر لقط كام في كل ساعة، والمطلوب منه، وحقق ولا لا.", pkSiteUpdate: "آخر تحديث من الموقع",
+    pkKpiPickers: "بيكرز اشتغلوا النهارده", pkKpiPickersSub: "في كل المخازن", pkKpiActive: "شغالين الساعة دي", pkKpiActiveSub: "الساعة الجارية",
+    pkKpiUnits: "قطع اتلقطت", pkKpiUnitsSub: "منها في الساعة الجارية", pkKpiIph: "متوسط القطع في الساعة", pkKpiIphSub: "لكل بيكر في الساعات المقفولة",
+    pkKpiMet: "محققين التارجت", pkKpiMissed: "عندهم عجز", pkOfScored: "من", pkKpiMissedSub: "أقل من المطلوب منهم",
+    pkAllWarehouses: "كل المخازن", pkAllShifts: "كل الشيفتات", pkAllStatus: "كل الحالات", pkStatusActive: "شغالين دلوقتي",
+    pkSortLabel: "الترتيب", pkSortUnits: "الأعلى في القطع", pkSortIph: "الأعلى في القطع/ساعة", pkSortRate: "الأعلى في التحقيق", pkSortLow: "الأقل في التحقيق", pkSortName: "بالاسم",
+    pkSearch: "ابحث بالاسم أو اليوزر…", pkTopTitle: "الأعلى إنتاجية", pkTopSubtitle: "أعلى 5 في القطع في الساعة",
+    pkBottomTitle: "محتاجين متابعة", pkBottomSubtitle: "أقل 5 في نسبة التحقيق", pkWarehouseTitle: "ملخص المخازن", pkWarehouseSubtitle: "البيكرز والإنتاجية في كل مخزن",
+    pkTableTitle: "إنتاجية كل بيكر بالساعة", pkTableSubtitle: "في كل خانة: الرقم الكبير اللي لقطه، والصغير المطلوب منه في الساعة دي",
+    pkNote: "المطلوب من كل بيكر = مستهدف المخزن في الساعة ÷ عدد البيكرز اللي اشتغلوا فيه الساعة دي. الساعة الحالية لسه شغالة فمش داخلة في الحكم.",
+    pkPicker: "البيكر", pkHours: "ساعات", pkDone: "المنجز", pkRequired: "المطلوب", pkRate: "التحقيق", pkPerHour: "قطعة/ساعة",
+    pkPickersCol: "البيكرز", pkMetCol: "محققين", pkMissedCol: "عجز", pkNoData: "مفيش بيانات بيكرز لسه.", pkNoMatch: "مفيش بيكر مطابق للفلتر.",
+    pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     brandLogo: "شعار نون مينتس", navLabel: "التنقل الرئيسي", homeLabel: "العودة للرئيسية",
     brandCaption: "مركز العمليات", navSection: "لوحة المتابعة", navOverview: "نظرة عامة",
     navWarehouses: "أداء المستودعات", navProductivity: "الإنتاجية الساعية",
@@ -201,6 +215,20 @@ const messages = {
     dailyShift: "Daily shift", planProgress: "Progress to plan",
     planProgressSubtitle: "Completion against the total target",
     performanceComparison: "PERFORMANCE", warehousePerformance: "Warehouse performance",
+    navPickers: "Picker productivity", pkEyebrow: "Picker tracking", pkHeadingMain: "Picker", pkHeadingAccent: "productivity",
+    pkIntro: "What each picker picked every hour, what was required of them, and whether they met it.", pkSiteUpdate: "Last site update",
+    pkKpiPickers: "Pickers today", pkKpiPickersSub: "across all warehouses", pkKpiActive: "Working this hour", pkKpiActiveSub: "hour in progress",
+    pkKpiUnits: "Units picked", pkKpiUnitsSub: "in the hour in progress", pkKpiIph: "Avg units per hour", pkKpiIphSub: "per picker, closed hours",
+    pkKpiMet: "On target", pkKpiMissed: "Below target", pkOfScored: "of", pkKpiMissedSub: "picked less than required",
+    pkAllWarehouses: "All warehouses", pkAllShifts: "All shifts", pkAllStatus: "All statuses", pkStatusActive: "Working now",
+    pkSortLabel: "Sort", pkSortUnits: "Most units", pkSortIph: "Most units/hour", pkSortRate: "Highest achievement", pkSortLow: "Lowest achievement", pkSortName: "By name",
+    pkSearch: "Search name or user…", pkTopTitle: "Top performers", pkTopSubtitle: "Top 5 by units per hour",
+    pkBottomTitle: "Needs follow-up", pkBottomSubtitle: "Lowest 5 by achievement", pkWarehouseTitle: "Warehouse summary", pkWarehouseSubtitle: "Pickers and output in each warehouse",
+    pkTableTitle: "Hourly output by picker", pkTableSubtitle: "In each cell the large figure is units picked and the small one is what was required that hour",
+    pkNote: "Required per picker = the warehouse's hourly target ÷ the pickers who worked in it that hour. The hour in progress is not scored yet.",
+    pkPicker: "Picker", pkHours: "Hours", pkDone: "Picked", pkRequired: "Required", pkRate: "Achieved", pkPerHour: "units/h",
+    pkPickersCol: "Pickers", pkMetCol: "On target", pkMissedCol: "Below", pkNoData: "No picker data yet.", pkNoMatch: "No picker matches the filters.",
+    pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     searchWarehouse: "Search warehouses…", warehouse: "Warehouse",
     totalRequired: "Total required", actualCompleted: "Completed",
     remaining: "Remaining", shortages: "OOS", hourlyTarget: "Target / hr",
@@ -856,9 +884,73 @@ function reportPill(label, tone) {
   return { html: `<span class="report-pill is-${tone}">${escapeHtml(label)}</span>` };
 }
 
-// Each warehouse is scored on its own hourly target, shared across the pickers active in it that hour.
-function buildProductivityReportDocument(data) {
+function shiftLabel(value) {
+  return ({ morning: t("shiftMorning"), night: t("shiftNight"), between: t("shiftBetween") })[String(value).toLowerCase()] || value || "—";
+}
+
+// Each warehouse is scored on its own hourly target, shared across the pickers active in it
+// that hour. The latest hour is usually still running, so it is listed but kept out of the scoring.
+function pickerProductivity(data, { allHours = false } = {}) {
   const reportHour = latestReportHour(data);
+  const hourRows = ((allHours ? data.pickingHourly : hourlyView(data.pickingHourly))?.records || []).filter((row) => {
+    const hour = hourValue(textAt(row, 1));
+    return hour !== null && reportHour !== null && hour <= reportHour;
+  });
+  const hours = hourRows.map((row) => hourValue(textAt(row, 1)));
+  const isOpen = (hour) => hours.length > 1 && hour === reportHour;
+  const pivotValues = (section, key) => {
+    const row = section.records.find((record) => warehouseKey(textAt(record, 1)) === key);
+    return new Map(section.hours.map(({ hour, index }) => [hour, row ? parseNumber(textAt(row, index)) : 0]));
+  };
+  const warehouses = data.warehouses.map((warehouse) => {
+    const key = warehouseKey(textAt(warehouse, 1));
+    const target = parseNumber(textAt(warehouse, 6));
+    const units = pivotValues(data.warehouseHourly, key);
+    const staff = pivotValues(data.warehouseStaff, key);
+    const shares = new Map();
+    hours.forEach((hour) => {
+      if (!isOpen(hour) && staff.get(hour)) shares.set(hour, target / staff.get(hour));
+    });
+    return { row: warehouse, key, target, units, staff, shares };
+  });
+  const sharesOf = new Map(warehouses.map((warehouse) => [warehouse.key, warehouse.shares]));
+  const headerIndex = (label) => data.pickers.headers.findIndex((header) => String(header ?? "").trim() === label);
+  const nameIndex = headerIndex("الاسم");
+  const shiftIndex = headerIndex("الشيفت");
+  const pickers = data.pickers.records.map((row) => {
+    const warehouse = warehouseKey(textAt(row, 2));
+    const shares = sharesOf.get(warehouse) || new Map();
+    const byHour = new Map(data.pickers.hours.map(({ hour, index }) => [hour, parseNumber(textAt(row, index))]));
+    let units = 0;
+    let worked = 0;
+    let share = 0;
+    let openUnits = 0;
+    const cells = hours.map((hour) => {
+      const picked = byHour.get(hour) || 0;
+      if (!picked) return null;
+      if (isOpen(hour)) {
+        openUnits += picked;
+        return { hour, picked, required: 0, open: true };
+      }
+      const required = shares.get(hour) || 0;
+      units += picked;
+      worked += 1;
+      share += required;
+      return { hour, picked, required, open: false, met: picked >= required };
+    });
+    const fullName = nameIndex >= 0 ? textAt(row, nameIndex) : "";
+    const shiftKey = (shiftIndex >= 0 ? textAt(row, shiftIndex) : "").toLowerCase();
+    return {
+      user: textAt(row, 1).split("@")[0], fullName, name: fullName.split(/\s+/).slice(0, 2).join(" "),
+      shiftKey, shift: shiftLabel(shiftKey), warehouse, cells, units, worked, share, openUnits,
+      iph: worked ? units / worked : 0, rate: share > 0 ? units / share : 0, met: share > 0 && units >= share,
+    };
+  });
+  return { reportHour, hourRows, hours, isOpen, closedRows: hourRows.filter((row) => !isOpen(hourValue(textAt(row, 1)))), warehouses, pickers };
+}
+
+function buildProductivityReportDocument(data) {
+  const { reportHour, hourRows, hours, isOpen, closedRows, warehouses, pickers: allPickers } = pickerProductivity(data);
   const hourText = reportHour === null ? "—" : formatHour(reportHour);
   const now = new Date();
   const issuedAt = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
@@ -868,15 +960,6 @@ function buildProductivityReportDocument(data) {
   const openPill = () => reportPill(t("hourOpen"), "muted");
   const signed = (value) => `${value > 0 ? "+" : value < 0 ? "−" : ""}${formatNumber(Math.abs(value))}`;
   const figure = (value) => (value ? formatNumber(value) : { html: '<span class="report-zero">0</span>' });
-
-  const hourRows = (hourlyView(data.pickingHourly)?.records || []).filter((row) => {
-    const hour = hourValue(textAt(row, 1));
-    return hour !== null && reportHour !== null && hour <= reportHour;
-  });
-  const hours = hourRows.map((row) => hourValue(textAt(row, 1)));
-  // The latest hour is usually still running, so it is listed but kept out of the scoring.
-  const isOpen = (hour) => hours.length > 1 && hour === reportHour;
-  const closedRows = hourRows.filter((row) => !isOpen(hourValue(textAt(row, 1))));
 
   let hoursMet = 0;
   const hourlyTable = hourRows.map((row) => {
@@ -893,27 +976,13 @@ function buildProductivityReportDocument(data) {
     ];
   });
 
-  const pivotValues = (section, key) => {
-    const row = section.records.find((record) => warehouseKey(textAt(record, 1)) === key);
-    return new Map(section.hours.map(({ hour, index }) => [hour, row ? parseNumber(textAt(row, index)) : 0]));
-  };
-  const shareByWarehouse = new Map();
-  const warehouseBlocks = data.warehouses.map((warehouse) => {
-    const key = warehouseKey(textAt(warehouse, 1));
-    const target = parseNumber(textAt(warehouse, 6));
-    const units = pivotValues(data.warehouseHourly, key);
-    const staff = pivotValues(data.warehouseStaff, key);
-    const shares = new Map();
-    hours.forEach((hour) => {
-      if (!isOpen(hour) && staff.get(hour)) shares.set(hour, target / staff.get(hour));
-    });
-    shareByWarehouse.set(key, shares);
+  const warehouseBlocks = warehouses.map(({ row: warehouse, target, units, staff }) => {
     const line = (label, cell) => [label, ...hours.map(cell)];
     const rows = [
       line(t("completed"), (hour) => figure(units.get(hour) || 0)),
       line(t("activeStaff"), (hour) => figure(staff.get(hour) || 0)),
       line(t("actualPerPicker"), (hour) => (staff.get(hour) ? formatNumber((units.get(hour) || 0) / staff.get(hour)) : "—")),
-      line(t("requiredPerPicker"), (hour) => (staff.get(hour) ? formatNumber(target / staff.get(hour)) : "—")),
+      line(t("requiredPerPicker"), (hour) => (staff.get(hour) && !isOpen(hour) ? formatNumber(target / staff.get(hour)) : "—")),
       line(t("statusCol"), (hour) => (isOpen(hour) ? openPill() : target > 0 ? status((units.get(hour) || 0) >= target) : "—")),
     ];
     const summary = [
@@ -923,31 +992,14 @@ function buildProductivityReportDocument(data) {
     return `<section class="report-block report-warehouse"><h2>${escapeHtml(textAt(warehouse, 1))}</h2><div class="report-summary">${summary}</div>${reportDataTable({ headers: [t("time"), ...hours.map(formatHour)], rows, className: "report-hours" })}</section>`;
   }).join("");
 
-  const headerIndex = (label) => data.pickers.headers.findIndex((header) => String(header ?? "").trim() === label);
-  const nameIndex = headerIndex("الاسم");
-  const shiftIndex = headerIndex("الشيفت");
-  const shiftLabel = (value) => ({ morning: t("shiftMorning"), night: t("shiftNight"), between: t("shiftBetween") })[value.toLowerCase()] || value || "—";
-  const pickers = data.pickers.records.map((row) => {
-    const warehouse = warehouseKey(textAt(row, 2));
-    const shares = shareByWarehouse.get(warehouse) || new Map();
-    const byHour = new Map(data.pickers.hours.map(({ hour, index }) => [hour, parseNumber(textAt(row, index))]));
-    let units = 0;
-    let worked = 0;
-    let share = 0;
-    // Each hour's cell is coloured by whether the picker covered their share of that hour.
-    const cells = hours.map((hour) => {
-      const picked = byHour.get(hour) || 0;
-      if (!picked) return "";
-      if (isOpen(hour)) return { html: `<span class="report-hit is-open"><b>${formatNumber(picked)}</b><small>${escapeHtml(t("hourOpenShort"))}</small></span>` };
-      const required = shares.get(hour) || 0;
-      units += picked;
-      worked += 1;
-      share += required;
-      return { html: `<span class="report-hit is-${picked >= required ? "good" : "bad"}"><b>${formatNumber(picked)}</b><small>${required ? formatNumber(required) : "—"}</small></span>` };
-    });
-    const fullName = nameIndex >= 0 ? textAt(row, nameIndex) : "";
-    return { user: textAt(row, 1).split("@")[0], name: fullName.split(/\s+/).slice(0, 2).join(" "), shift: shiftLabel(shiftIndex >= 0 ? textAt(row, shiftIndex) : ""), warehouse, cells, units, worked, share, met: share > 0 && units >= share };
-  }).filter((picker) => picker.worked > 0)
+  // Each hour's cell is coloured by whether the picker covered their share of that hour.
+  const hitCell = (cell) => {
+    if (!cell) return "";
+    if (cell.open) return { html: `<span class="report-hit is-open"><b>${formatNumber(cell.picked)}</b><small>${escapeHtml(t("hourOpenShort"))}</small></span>` };
+    return { html: `<span class="report-hit is-${cell.met ? "good" : "bad"}"><b>${formatNumber(cell.picked)}</b><small>${cell.required ? formatNumber(cell.required) : "—"}</small></span>` };
+  };
+  const pickers = allPickers.filter((picker) => picker.worked > 0)
+    .map((picker) => ({ ...picker, cells: picker.cells.map(hitCell) }))
     .sort((left, right) => left.warehouse.localeCompare(right.warehouse) || right.units - left.units);
   const onTarget = pickers.filter((picker) => picker.met).length;
   // A full shift has too many hour columns for "04:00" to fit, so the label drops the minutes.
@@ -1623,6 +1675,8 @@ function parseDashboard(rows) {
   const palletTable = tableAtHeader(rows, palletHeader);
   const branchStaging = branchSection(rows);
   const pickers = pivotSection(rows, "العامل");
+  const siteUpdateRow = rows.find((row) => row.some((cell) => cell === "آخر تحديث من الموقع")) || [];
+  const siteUpdatedAt = textAt(siteUpdateRow, siteUpdateRow.indexOf("آخر تحديث من الموقع") + 1);
   const warehouseHourly = pivotSection(rows, "مخزن التجهيز");
   const warehouseStaff = pivotSection(rows, "عمالة المخزن");
   const pickIssueSection = locateSection(rows, "مؤشرات مشاكل ونواقص تجهيز الطلبات");
@@ -1655,6 +1709,7 @@ function parseDashboard(rows) {
     palletTable,
     branchStaging,
     pickers,
+    siteUpdatedAt,
     warehouseHourly,
     warehouseStaff,
     issueSectionFound: pickIssueSection >= 0 && expirySection >= 0,
@@ -1913,8 +1968,118 @@ function renderIssues(data) {
   }).join("") : `<div class="empty-state">${t("noLocations")}</div>`;
 }
 
+const pickerFilter = { warehouse: "all", shift: "all", status: "all", sort: "units", search: "" };
+
+function fillSelect(select, options, value) {
+  select.innerHTML = options.map(([key, label]) => `<option value="${escapeHtml(key)}"${key === value ? " selected" : ""}>${escapeHtml(label)}</option>`).join("");
+}
+
+function pickerStatusPill(picker) {
+  if (picker.share > 0) return `<span class="picker-pill is-${picker.met ? "good" : "bad"}">${escapeHtml(t(picker.met ? "metStatus" : "missStatus"))}</span>`;
+  if (picker.openUnits) return `<span class="picker-pill is-open" title="${escapeHtml(t("pkNowOnly"))}">${escapeHtml(t("hourOpen"))}</span>`;
+  return "—";
+}
+
+function pickerRateBar(picker) {
+  if (!(picker.share > 0)) return `<span class="picker-muted">—</span>`;
+  const percent = Math.round(picker.rate * 100);
+  const tone = picker.met ? colors.green : percent >= 75 ? colors.amber : colors.red;
+  return `<span class="picker-rate"><span class="picker-rate-track"><i style="width:${Math.min(100, percent)}%;background:${tone}"></i></span><b>${percent}%</b></span>`;
+}
+
+function pickerNameCell(picker, rank) {
+  return `<span class="picker-name" title="${escapeHtml(picker.fullName || picker.user)}">${rank ? `<span class="picker-rank-no">${rank}</span>` : ""}<span><strong>${escapeHtml(picker.name || picker.user)}</strong><small>${escapeHtml(picker.user)}</small></span></span>`;
+}
+
+// The picker page uses every hour of the day; the hour filter only applies to the main dashboard.
+function renderPickersPage(data, { animate = true } = {}) {
+  const view = pickerProductivity(data, { allHours: true });
+  const { hours, isOpen } = view;
+  const everyone = view.pickers.filter((picker) => picker.worked > 0 || picker.openUnits > 0);
+  const warehouseKeys = [...new Set(everyone.map((picker) => picker.warehouse))].sort();
+  if (pickerFilter.warehouse !== "all" && !warehouseKeys.includes(pickerFilter.warehouse)) pickerFilter.warehouse = "all";
+  const shiftKeys = [...new Set(everyone.map((picker) => picker.shiftKey).filter(Boolean))].sort();
+
+  const inWarehouse = everyone.filter((picker) => pickerFilter.warehouse === "all" || picker.warehouse === pickerFilter.warehouse);
+  const scored = inWarehouse.filter((picker) => picker.share > 0);
+  const onTarget = scored.filter((picker) => picker.met).length;
+  const closedUnits = inWarehouse.reduce((total, picker) => total + picker.units, 0);
+  const openUnits = inWarehouse.reduce((total, picker) => total + picker.openUnits, 0);
+  const pickerHours = inWarehouse.reduce((total, picker) => total + picker.worked, 0);
+  const metrics = [
+    { label: t("pkKpiPickers"), value: formatNumber(inWarehouse.length), sub: pickerFilter.warehouse === "all" ? t("pkKpiPickersSub") : pickerFilter.warehouse, icon: "♙", accent: colors.blue },
+    { label: t("pkKpiActive"), value: formatNumber(inWarehouse.filter((picker) => picker.openUnits > 0).length), sub: t("pkKpiActiveSub"), icon: "◉", accent: colors.teal },
+    { label: t("pkKpiUnits"), value: formatNumber(closedUnits + openUnits), sub: `<strong>${formatNumber(openUnits)}</strong> ${t("pkKpiUnitsSub")}`, icon: "✓", accent: colors.green },
+    { label: t("pkKpiIph"), value: pickerHours ? formatNumber(closedUnits / pickerHours) : "—", sub: t("pkKpiIphSub"), icon: "⌁", accent: colors.violet },
+    { label: t("pkKpiMet"), value: formatNumber(onTarget), sub: `${t("pkOfScored")} <strong>${formatNumber(scored.length)}</strong>`, icon: "▲", accent: colors.green },
+    { label: t("pkKpiMissed"), value: formatNumber(scored.length - onTarget), sub: t("pkKpiMissedSub"), icon: "!", accent: colors.red },
+  ];
+  $("#pickerKpis").innerHTML = metrics.map((metric, index) => `<article class="kpi-card" style="--accent:${metric.accent};--i:${index}"><div class="kpi-top"><span>${metric.label}</span><span class="kpi-icon">${metric.icon}</span></div><div class="kpi-value" data-count="${escapeHtml(metric.value)}" data-final="${escapeHtml(metric.value)}">${escapeHtml(metric.value)}</div><div class="kpi-sub">${metric.sub}</div></article>`).join("");
+  if (animate) countUpElements($("#pickerKpis"));
+
+  $("#pickerWarehouseTabs").innerHTML = [["all", t("pkAllWarehouses"), everyone.length], ...warehouseKeys.map((key) => [key, key, everyone.filter((picker) => picker.warehouse === key).length])]
+    .map(([key, label, count]) => `<button class="heatmap-tab${pickerFilter.warehouse === key ? " active" : ""}" type="button" role="tab" aria-selected="${pickerFilter.warehouse === key}" data-warehouse="${escapeHtml(key)}">${escapeHtml(label)} <span class="picker-tab-count">${count}</span></button>`).join("");
+  fillSelect($("#pickerShift"), [["all", t("pkAllShifts")], ...shiftKeys.map((key) => [key, shiftLabel(key)])], pickerFilter.shift);
+  fillSelect($("#pickerStatus"), [["all", t("pkAllStatus")], ["met", t("metStatus")], ["missed", t("missStatus")], ["active", t("pkStatusActive")]], pickerFilter.status);
+  fillSelect($("#pickerSort"), [["units", t("pkSortUnits")], ["iph", t("pkSortIph")], ["rate", t("pkSortRate")], ["low", t("pkSortLow")], ["name", t("pkSortName")]], pickerFilter.sort);
+
+  const search = pickerFilter.search.trim().toLowerCase();
+  const list = inWarehouse.filter((picker) => {
+    if (pickerFilter.shift !== "all" && picker.shiftKey !== pickerFilter.shift) return false;
+    if (pickerFilter.status === "met" && !(picker.share > 0 && picker.met)) return false;
+    if (pickerFilter.status === "missed" && !(picker.share > 0 && !picker.met)) return false;
+    if (pickerFilter.status === "active" && !picker.openUnits) return false;
+    return !search || picker.user.toLowerCase().includes(search) || picker.fullName.toLowerCase().includes(search);
+  });
+  const unscoredLast = (picker) => (picker.share > 0 ? 0 : 1);
+  const sorters = {
+    units: (left, right) => right.units + right.openUnits - left.units - left.openUnits,
+    iph: (left, right) => right.iph - left.iph,
+    rate: (left, right) => unscoredLast(left) - unscoredLast(right) || right.rate - left.rate,
+    low: (left, right) => unscoredLast(left) - unscoredLast(right) || left.rate - right.rate,
+    name: (left, right) => (left.name || left.user).localeCompare(right.name || right.user),
+  };
+  list.sort(sorters[pickerFilter.sort] || sorters.units);
+
+  const rankItem = (picker, index, value, unit, tone) => `<div class="picker-rank-item">${pickerNameCell(picker, index + 1)}<span class="picker-rank-meta">${escapeHtml(picker.warehouse)}</span><span class="picker-rank-value" style="--tone:${tone}"><strong>${value}</strong><small>${escapeHtml(unit)}</small></span></div>`;
+  const top = list.filter((picker) => picker.worked > 0).sort(sorters.iph).slice(0, 5);
+  const bottom = list.filter((picker) => picker.share > 0).sort(sorters.low).slice(0, 5);
+  $("#pickerTop").innerHTML = top.length ? top.map((picker, index) => rankItem(picker, index, formatNumber(picker.iph), t("pkPerHour"), colors.green)).join("") : `<div class="empty-state">${t("pkNoData")}</div>`;
+  $("#pickerBottom").innerHTML = bottom.length ? bottom.map((picker, index) => rankItem(picker, index, `${Math.round(picker.rate * 100)}%`, `${formatNumber(picker.units)} / ${formatNumber(picker.share)}`, picker.met ? colors.green : colors.red)).join("") : `<div class="empty-state">${t("pkNoData")}</div>`;
+
+  const summaryLine = (label, group) => {
+    const groupScored = group.filter((picker) => picker.share > 0);
+    const groupMet = groupScored.filter((picker) => picker.met).length;
+    const groupHours = group.reduce((total, picker) => total + picker.worked, 0);
+    const groupUnits = group.reduce((total, picker) => total + picker.units, 0);
+    return `<td class="warehouse-name">${escapeHtml(label)}</td><td>${formatNumber(group.length)}</td><td>${formatNumber(group.filter((picker) => picker.openUnits > 0).length)}</td><td>${formatNumber(groupUnits + group.reduce((total, picker) => total + picker.openUnits, 0))}</td><td>${groupHours ? formatNumber(groupUnits / groupHours) : "—"}</td><td class="picker-good">${formatNumber(groupMet)}</td><td class="picker-bad">${formatNumber(groupScored.length - groupMet)}</td>`;
+  };
+  $("#pickerWarehouses").innerHTML = warehouseKeys.length
+    ? `<table class="picker-summary"><thead><tr><th>${t("warehouse")}</th><th>${t("pkPickersCol")}</th><th>${t("pkStatusActive")}</th><th>${t("pkDone")}</th><th>${t("pkPerHour")}</th><th>${t("pkMetCol")}</th><th>${t("pkMissedCol")}</th></tr></thead><tbody>${warehouseKeys.map((key) => `<tr>${summaryLine(key, everyone.filter((picker) => picker.warehouse === key))}</tr>`).join("")}</tbody><tfoot><tr>${summaryLine(t("overallTotal"), everyone)}</tr></tfoot></table>`
+    : `<div class="empty-state">${t("pkNoData")}</div>`;
+
+  const hourCell = (cell) => {
+    if (!cell) return `<td class="picker-hour"></td>`;
+    if (cell.open) return `<td class="picker-hour"><span class="picker-hit is-open"><b>${formatNumber(cell.picked)}</b><small>${escapeHtml(t("hourOpenShort"))}</small></span></td>`;
+    return `<td class="picker-hour"><span class="picker-hit is-${cell.met ? "good" : "bad"}"><b>${formatNumber(cell.picked)}</b><small>${cell.required ? formatNumber(cell.required) : "—"}</small></span></td>`;
+  };
+  const head = `<thead><tr><th class="picker-sticky">${t("pkPicker")}</th><th>${t("warehouseShort")}</th><th>${t("shiftCol")}</th><th>${t("pkHours")}</th><th>${t("pkDone")}</th><th>${t("pkRequired")}</th><th>${t("pkRate")}</th><th>${t("pkPerHour")}</th><th>${t("statusCol")}</th>${hours.map((hour) => `<th class="picker-hour${isOpen(hour) ? " is-open" : ""}">${formatHour(hour)}</th>`).join("")}</tr></thead>`;
+  const body = list.map((picker, index) => `<tr><td class="picker-sticky">${pickerNameCell(picker, index + 1)}</td><td>${escapeHtml(picker.warehouse)}</td><td>${escapeHtml(picker.shift)}</td><td>${formatNumber(picker.worked)}</td><td><b>${formatNumber(picker.units + picker.openUnits)}</b></td><td>${picker.share > 0 ? formatNumber(picker.share) : "—"}</td><td>${pickerRateBar(picker)}</td><td>${picker.worked ? formatNumber(picker.iph) : "—"}</td><td>${pickerStatusPill(picker)}</td>${picker.cells.map(hourCell).join("")}</tr>`).join("");
+  $("#pickerTable").innerHTML = `${head}<tbody>${body || `<tr><td colspan="${9 + hours.length}" class="empty-state">${t(everyone.length ? "pkNoMatch" : "pkNoData")}</td></tr>`}</tbody>`;
+  $("#pickerCount").textContent = `${list.length} ${t("pkOf")} ${inWarehouse.length} ${t("pkShowing")}`;
+  $("#pickersUpdated").textContent = data.siteUpdatedAt || data.date || "—";
+}
+
+function applyView() {
+  const pickersView = location.hash === "#pickers";
+  const current = pickersView ? "#pickers" : (location.hash || "#overview");
+  document.body.classList.toggle("view-pickers", pickersView);
+  document.querySelectorAll(".main-nav .nav-link").forEach((link) => link.classList.toggle("active", link.getAttribute("href") === current));
+}
+
 function renderDashboard(data) {
   dashboardData = data;
+  renderPickersPage(data);
   syncHourOptions();
   renderKpis(data);
   renderWarehouseTable(data);
@@ -2026,11 +2191,34 @@ document.querySelectorAll(".heatmap-tab").forEach((tab) => {
   });
 });
 
+$("#pickerWarehouseTabs").addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-warehouse]");
+  if (!tab || !dashboardData) return;
+  pickerFilter.warehouse = tab.dataset.warehouse;
+  renderPickersPage(dashboardData, { animate: false });
+});
+[["#pickerShift", "shift"], ["#pickerStatus", "status"], ["#pickerSort", "sort"]].forEach(([selector, key]) => {
+  $(selector).addEventListener("change", (event) => {
+    pickerFilter[key] = event.target.value;
+    if (dashboardData) renderPickersPage(dashboardData, { animate: false });
+  });
+});
+$("#pickerSearch").addEventListener("input", (event) => {
+  pickerFilter.search = event.target.value;
+  if (dashboardData) renderPickersPage(dashboardData, { animate: false });
+});
+window.addEventListener("hashchange", () => {
+  applyView();
+  if (document.body.classList.contains("view-pickers")) window.scrollTo({ top: 0 });
+  else document.getElementById(location.hash.slice(1))?.scrollIntoView();
+});
+
 $("#reportButton").addEventListener("click", generatePdfReport);
 $("#hourlyReportButton").addEventListener("click", generateHourlyReport);
 $("#productivityReportButton").addEventListener("click", generateProductivityReport);
 
 setAutoRefresh(true);
+applyView();
 syncHourOptions();
 applyLocale();
 loadDashboard();

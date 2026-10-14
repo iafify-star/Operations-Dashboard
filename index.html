@@ -7,8 +7,8 @@
     <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
-    <link rel="stylesheet" href="styles.css?v=32">
-    <script src="app.js?v=32" defer></script>
+    <link rel="stylesheet" href="styles.css?v=34">
+    <script src="app.js?v=34" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -22,6 +22,7 @@
           <a class="nav-link active" href="#overview"><span class="nav-icon">◫</span><span data-i18n="navOverview">نظرة عامة</span></a>
           <a class="nav-link" href="#warehouses"><span class="nav-icon">▦</span><span data-i18n="navWarehouses">أداء المستودعات</span></a>
           <a class="nav-link" href="#productivity"><span class="nav-icon">⌁</span><span data-i18n="navProductivity">الإنتاجية الساعية</span></a>
+          <a class="nav-link nav-link-pickers" href="#pickers"><span class="nav-icon">♙</span><span data-i18n="navPickers">إنتاجية البيكرز</span></a>
           <a class="nav-link" href="#workflows"><span class="nav-icon">⇄</span><span data-i18n="navWorkflows">سير العمل والشحن</span></a>
           <a class="nav-link" href="#issues"><span class="nav-icon">⚑</span><span data-i18n="navIssues">النواقص والمشاكل</span></a>
         </nav>
@@ -76,6 +77,55 @@
           </section>
 
           <div class="connection-banner" id="connectionBanner" role="status" hidden></div>
+
+          <section class="pickers-page" id="pickers" aria-labelledby="pickersTitle">
+            <div class="page-heading">
+              <div>
+                <div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="pkEyebrow">متابعة عمال التجهيز</span></div>
+                <h1 id="pickersTitle"><span class="heading-main" data-i18n="pkHeadingMain">إنتاجية</span> <span data-i18n="pkHeadingAccent">البيكرز</span></h1>
+                <p data-i18n="pkIntro">كل بيكر لقط كام في كل ساعة، والمطلوب منه، وحقق ولا لا.</p>
+              </div>
+              <div class="heading-meta">
+                <div class="date-box"><span class="calendar-icon">◷</span><span><small data-i18n="pkSiteUpdate">آخر تحديث من الموقع</small><strong id="pickersUpdated">—</strong></span></div>
+              </div>
+            </div>
+
+            <div class="kpi-grid" id="pickerKpis" aria-live="polite"></div>
+
+            <div class="picker-toolbar">
+              <div class="heatmap-tabs picker-tabs" id="pickerWarehouseTabs" role="tablist" aria-label="المخزن" data-i18n-aria="warehouse"></div>
+              <div class="filter-controls picker-filters">
+                <select id="pickerShift" aria-label="الشيفت" data-i18n-aria="shiftCol"></select>
+                <select id="pickerStatus" aria-label="الحالة" data-i18n-aria="statusCol"></select>
+                <select id="pickerSort" aria-label="الترتيب" data-i18n-aria="pkSortLabel"></select>
+                <label class="search-box"><span>⌕</span><input id="pickerSearch" type="search" placeholder="ابحث بالاسم أو اليوزر…" aria-label="ابحث بالاسم أو اليوزر" data-i18n-placeholder="pkSearch" data-i18n-aria="pkSearch"></label>
+              </div>
+            </div>
+
+            <section class="dashboard-grid picker-grid">
+              <article class="panel picker-panel">
+                <div class="panel-heading"><div><span class="panel-icon teal">▲</span><div><h3 data-i18n="pkTopTitle">الأعلى إنتاجية</h3><p data-i18n="pkTopSubtitle">أعلى 5 في القطع في الساعة</p></div></div></div>
+                <div class="picker-rank-list" id="pickerTop"></div>
+              </article>
+              <article class="panel picker-panel">
+                <div class="panel-heading"><div><span class="panel-icon red">▼</span><div><h3 data-i18n="pkBottomTitle">محتاجين متابعة</h3><p data-i18n="pkBottomSubtitle">أقل 5 في نسبة التحقيق</p></div></div></div>
+                <div class="picker-rank-list" id="pickerBottom"></div>
+              </article>
+              <article class="panel picker-panel picker-warehouse-panel">
+                <div class="panel-heading"><div><span class="panel-icon blue">▦</span><div><h3 data-i18n="pkWarehouseTitle">ملخص المخازن</h3><p data-i18n="pkWarehouseSubtitle">البيكرز والإنتاجية في كل مخزن</p></div></div></div>
+                <div class="table-scroll" id="pickerWarehouses"></div>
+              </article>
+            </section>
+
+            <article class="panel picker-table-panel">
+              <div class="panel-heading">
+                <div><span class="panel-icon violet">♙</span><div><h3 data-i18n="pkTableTitle">إنتاجية كل بيكر بالساعة</h3><p data-i18n="pkTableSubtitle">في كل خانة: الرقم الكبير اللي لقطه، والصغير المطلوب منه في الساعة دي</p></div></div>
+                <span class="warehouse-count" id="pickerCount"></span>
+              </div>
+              <div class="table-scroll picker-table-scroll"><table class="picker-table" id="pickerTable"></table></div>
+              <p class="picker-note" data-i18n="pkNote">المطلوب من كل بيكر = مستهدف المخزن في الساعة ÷ عدد البيكرز اللي اشتغلوا فيه الساعة دي. الساعة الحالية لسه شغالة فمش داخلة في الحكم.</p>
+            </article>
+          </section>
 
           <section class="section-block" aria-labelledby="overviewTitle">
             <div class="section-heading">

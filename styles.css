@@ -626,3 +626,71 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
   body.printing-report .report-host { position: static; inset: auto; z-index: auto; pointer-events: auto; }
   body.printing-report { background: #ffffff; }
 }
+
+/* Picker productivity page: shown instead of the dashboard sections when the URL hash is #pickers. */
+.pickers-page { display: none; }
+body.view-pickers .pickers-page { display: block; }
+body.view-pickers .page-wrap > :not(.pickers-page):not(.connection-banner):not(.page-footer) { display: none; }
+.pickers-page .page-heading { margin-bottom: 22px; }
+.picker-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 20px 0 14px; }
+.picker-tabs { flex-wrap: wrap; }
+.picker-tab-count { margin-inline-start: 4px; padding: 0 6px; border-radius: 10px; background: #ffffff12; color: inherit; font-size: 8.5px; }
+.picker-filters select { min-width: 120px; }
+.picker-filters .search-box input { width: 160px; }
+.picker-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); gap: 14px; margin-bottom: 14px; }
+.picker-panel, .picker-table-panel { padding: 17px 18px; }
+.picker-panel .panel-heading { margin-bottom: 12px; }
+.picker-rank-list { display: grid; gap: 7px; }
+.picker-rank-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: #0f1b2d; }
+.picker-rank-meta { color: var(--muted); font-size: 9px; }
+.picker-rank-value { display: grid; justify-items: end; min-width: 54px; }
+.picker-rank-value strong { color: var(--tone); font: 800 14px "Segoe UI", sans-serif; }
+.picker-rank-value small { color: var(--muted-2); font-size: 8px; direction: ltr; }
+.picker-name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.picker-name > span:last-child { display: grid; min-width: 0; }
+.picker-name strong { overflow: hidden; color: #eef3fb; font-size: 10.5px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.picker-name small { color: var(--muted-2); font: 500 8.5px "Segoe UI", sans-serif; }
+.picker-rank-no { display: grid; place-items: center; flex: 0 0 21px; width: 21px; height: 21px; border-radius: 6px; background: #ffe90014; color: var(--brand-yellow); font: 700 9px "Segoe UI", sans-serif; }
+.picker-summary td, .picker-summary th { padding: 9px 10px; }
+.picker-good { color: var(--green) !important; font-weight: 700; }
+.picker-bad { color: var(--red) !important; font-weight: 700; }
+.picker-muted { color: var(--muted-2); }
+.picker-table-panel .panel-heading { margin-bottom: 13px; }
+.picker-table-scroll { max-height: 72vh; overflow: auto; border: 1px solid var(--border); border-radius: 11px; }
+.picker-table th, .picker-table td { padding: 8px 10px; }
+.picker-table tbody tr:hover td { background: #16253c; }
+.picker-table .picker-sticky { position: sticky; inset-inline-start: 0; z-index: 2; min-width: 170px; max-width: 210px; background: #111d30; box-shadow: inset -1px 0 var(--border); }
+.picker-table th.picker-sticky { z-index: 3; background: #15243a; }
+.is-en .picker-table .picker-sticky { box-shadow: inset 1px 0 var(--border); }
+.picker-table th.picker-hour, .picker-table td.picker-hour { min-width: 46px; text-align: center; }
+.picker-table th.picker-hour.is-open { color: var(--brand-yellow); }
+.picker-hit { display: inline-grid; min-width: 38px; padding: 3px 5px; border-radius: 7px; line-height: 1.15; text-align: center; }
+.picker-hit b { font: 800 11px "Segoe UI", sans-serif; }
+.picker-hit small { color: #ffffff8c; font: 500 8px "Segoe UI", sans-serif; }
+.picker-hit.is-good { background: #62d08722; color: #7ee3a0; }
+.picker-hit.is-bad { background: #f04b5422; color: #ff8a90; }
+.picker-hit.is-open { background: #ffe90014; color: var(--brand-yellow); }
+.picker-pill { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 9px; font-weight: 700; }
+.picker-pill.is-good { background: #62d08722; color: #7ee3a0; }
+.picker-pill.is-bad { background: #f04b5422; color: #ff8a90; }
+.picker-pill.is-open { background: #ffe90014; color: var(--brand-yellow); }
+.picker-rate { display: inline-flex; align-items: center; gap: 7px; }
+.picker-rate-track { position: relative; width: 58px; height: 5px; overflow: hidden; border-radius: 4px; background: #26364b; }
+.picker-rate-track i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 4px; }
+.picker-rate b { min-width: 34px; font: 700 10px "Segoe UI", sans-serif; }
+.picker-note { margin: 12px 2px 0; color: var(--muted); font-size: 9.5px; line-height: 1.7; }
+@media (max-width: 1180px) {
+  .picker-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .picker-warehouse-panel { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .picker-grid { grid-template-columns: minmax(0, 1fr); }
+  .picker-toolbar { align-items: stretch; flex-direction: column; }
+  .picker-tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .picker-tabs .heatmap-tab { flex: 0 0 auto; }
+  .picker-filters select { flex: 1; min-width: 0; }
+  .picker-filters .search-box { width: 100%; }
+  .picker-filters .search-box input { width: 100%; }
+  .picker-panel, .picker-table-panel { padding: 14px 13px; }
+  .picker-table .picker-sticky { min-width: 130px; }
+}
