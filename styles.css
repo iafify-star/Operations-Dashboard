@@ -627,10 +627,8 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
   body.printing-report { background: #ffffff; }
 }
 
-/* Picker productivity page: shown instead of the dashboard sections when the URL hash is #pickers. */
-.pickers-page { display: none; }
-body.view-pickers .pickers-page { display: block; }
-body.view-pickers .page-wrap > :not(.pickers-page):not(.connection-banner):not(.page-footer) { display: none; }
+/* The site now shows only the picker productivity page; the older dashboard sections stay in the markup, hidden. */
+.page-wrap > :not(.pickers-page):not(.connection-banner):not(.page-footer) { display: none; }
 .pickers-page .page-heading { margin-bottom: 22px; }
 .picker-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 20px 0 14px; }
 .picker-tabs { flex-wrap: wrap; }
@@ -679,12 +677,36 @@ body.view-pickers .page-wrap > :not(.pickers-page):not(.connection-banner):not(.
 .picker-rate-track i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 4px; }
 .picker-rate b { min-width: 34px; font: 700 10px "Segoe UI", sans-serif; }
 .picker-note { margin: 12px 2px 0; color: var(--muted); font-size: 9.5px; line-height: 1.7; }
+.picker-heading-meta { flex-wrap: wrap; gap: 10px; }
+.picker-heading-meta .report-button { min-height: 42px; }
+.picker-section-head { margin: 24px 0 11px; }
+.picker-section-head h2 { margin: 0; font-size: 14px; font-weight: 800; }
+.picker-section-head p { margin: 3px 0 0; color: var(--muted); font-size: 9.5px; }
+.remaining-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 11px; }
+.remaining-card { display: grid; gap: 6px; padding: 14px 15px; border: 1px solid var(--border); border-radius: 13px; background: linear-gradient(145deg, #142239, #101b2e 78%); color: var(--text); font: inherit; text-align: start; cursor: pointer; transition: border-color .18s ease, transform .18s ease; }
+.remaining-card:hover { border-color: #ffe90040; transform: translateY(-1px); }
+.remaining-card.active { border-color: #ffe90080; box-shadow: 0 0 0 1px #ffe90033 inset; }
+.remaining-card:focus-visible { outline: 2px solid var(--brand-yellow); outline-offset: 2px; }
+.remaining-top { display: flex; justify-content: space-between; align-items: center; }
+.remaining-top strong { color: var(--brand-yellow); font-size: 12px; }
+.remaining-top span { color: var(--teal); font: 700 10px "Segoe UI", sans-serif; }
+.remaining-value { font: 800 24px/1.1 "Segoe UI", Tahoma, sans-serif; color: #f3f6fc; }
+.remaining-sub { color: var(--muted); font-size: 9px; }
+.remaining-track { position: relative; height: 5px; overflow: hidden; border-radius: 4px; background: #26364b; }
+.remaining-track i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: 4px; background: var(--teal); }
+.remaining-foot { color: #aab8cd; font-size: 9px; }
+.remaining-foot b { color: var(--brand-yellow); }
+.picker-filters label { gap: 6px; }
 @media (max-width: 1180px) {
   .picker-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .picker-warehouse-panel { grid-column: 1 / -1; }
 }
 @media (max-width: 620px) {
   .picker-grid { grid-template-columns: minmax(0, 1fr); }
+  .pickers-page .report-button-label { display: inline; }
+  .picker-heading-meta .report-button { flex: 1; justify-content: center; }
+  .remaining-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .picker-filters label { flex: 1 1 45%; }
   .picker-toolbar { align-items: stretch; flex-direction: column; }
   .picker-tabs { flex-wrap: nowrap; overflow-x: auto; }
   .picker-tabs .heatmap-tab { flex: 0 0 auto; }

@@ -17,7 +17,7 @@ const messages = {
   ar: {
     navPickers: "إنتاجية البيكرز", pkEyebrow: "متابعة عمال التجهيز", pkHeadingMain: "إنتاجية", pkHeadingAccent: "البيكرز",
     pkIntro: "كل بيكر لقط كام في كل ساعة، والمطلوب منه، وحقق ولا لا.", pkSiteUpdate: "آخر تحديث من الموقع",
-    pkKpiPickers: "بيكرز اشتغلوا النهارده", pkKpiPickersSub: "في كل المخازن", pkKpiActive: "شغالين الساعة دي", pkKpiActiveSub: "الساعة الجارية",
+    pkKpiPickers: "بيكرز اشتغلوا", pkKpiPickersSub: "في كل المخازن", pkKpiActive: "شغالين الساعة دي", pkKpiActiveSub: "الساعة الجارية",
     pkKpiUnits: "قطع اتلقطت", pkKpiUnitsSub: "منها في الساعة الجارية", pkKpiIph: "متوسط القطع في الساعة", pkKpiIphSub: "لكل بيكر في الساعات المقفولة",
     pkKpiMet: "محققين التارجت", pkKpiMissed: "عندهم عجز", pkOfScored: "من", pkKpiMissedSub: "أقل من المطلوب منهم",
     pkAllWarehouses: "كل المخازن", pkAllShifts: "كل الشيفتات", pkAllStatus: "كل الحالات", pkStatusActive: "شغالين دلوقتي",
@@ -29,6 +29,14 @@ const messages = {
     pkPicker: "البيكر", pkHours: "ساعات", pkDone: "المنجز", pkRequired: "المطلوب", pkRate: "التحقيق", pkPerHour: "قطعة/ساعة",
     pkPickersCol: "البيكرز", pkMetCol: "محققين", pkMissedCol: "عجز", pkNoData: "مفيش بيانات بيكرز لسه.", pkNoMatch: "مفيش بيكر مطابق للفلتر.",
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
+    pkRemainingTitle: "الفاضل في كل مخزن", pkRemainingSub: "المتبقي من المطلوب ومين شغال دلوقتي، دوس على المخزن عشان تفلتر عليه",
+    pkOfRequired: "من", pkPerActive: "على كل بيكر شغال", pkNoneActive: "مفيش حد شغال الساعة دي", pkFrom: "من الساعة", pkTo: "إلى الساعة",
+    pkHourReport: "تقرير الساعة", pkHourReportTitle: "تنزيل تقرير بالمنجز كل ساعة والفاضل في كل مخزن",
+    pkShiftReport: "تقرير آخر الشيفت", pkShiftReportTitle: "تنزيل تقرير الشيفت حسب الفترة والمخزن والشيفت المختارين",
+    rptPickHourHeading: "تقرير التجهيز الساعي", rptShiftHeading: "تقرير آخر الشيفت", rptPeriod: "الفترة", rptShift: "الشيفت", rptWarehouse: "المخزن",
+    rptHoursSection: "عملنا كام كل ساعة", rptRemainingSection: "الفاضل في كل مخزن", rptTopSection: "الأعلى إنتاجية", rptBottomSection: "محتاجين متابعة",
+    rptPickersSection: "إنتاجية كل بيكر في الفترة", rptLastHourDone: "منجز الساعة", rptCumulative: "المنجز في الفترة", rptHoursMet: "ساعات محققة",
+    rptNote: "الأرقام من Minutes Central. المطلوب من كل بيكر = مستهدف المخزن في الساعة ÷ عدد البيكرز اللي اشتغلوا فيه الساعة دي. الساعة الجارية مش داخلة في الحكم.",
     brandLogo: "شعار نون مينتس", navLabel: "التنقل الرئيسي", homeLabel: "العودة للرئيسية",
     brandCaption: "مركز العمليات", navSection: "لوحة المتابعة", navOverview: "نظرة عامة",
     navWarehouses: "أداء المستودعات", navProductivity: "الإنتاجية الساعية",
@@ -217,7 +225,7 @@ const messages = {
     performanceComparison: "PERFORMANCE", warehousePerformance: "Warehouse performance",
     navPickers: "Picker productivity", pkEyebrow: "Picker tracking", pkHeadingMain: "Picker", pkHeadingAccent: "productivity",
     pkIntro: "What each picker picked every hour, what was required of them, and whether they met it.", pkSiteUpdate: "Last site update",
-    pkKpiPickers: "Pickers today", pkKpiPickersSub: "across all warehouses", pkKpiActive: "Working this hour", pkKpiActiveSub: "hour in progress",
+    pkKpiPickers: "Pickers worked", pkKpiPickersSub: "across all warehouses", pkKpiActive: "Working this hour", pkKpiActiveSub: "hour in progress",
     pkKpiUnits: "Units picked", pkKpiUnitsSub: "in the hour in progress", pkKpiIph: "Avg units per hour", pkKpiIphSub: "per picker, closed hours",
     pkKpiMet: "On target", pkKpiMissed: "Below target", pkOfScored: "of", pkKpiMissedSub: "picked less than required",
     pkAllWarehouses: "All warehouses", pkAllShifts: "All shifts", pkAllStatus: "All statuses", pkStatusActive: "Working now",
@@ -229,6 +237,14 @@ const messages = {
     pkPicker: "Picker", pkHours: "Hours", pkDone: "Picked", pkRequired: "Required", pkRate: "Achieved", pkPerHour: "units/h",
     pkPickersCol: "Pickers", pkMetCol: "On target", pkMissedCol: "Below", pkNoData: "No picker data yet.", pkNoMatch: "No picker matches the filters.",
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
+    pkRemainingTitle: "Remaining by warehouse", pkRemainingSub: "What is left of the plan and who is working now; click a warehouse to filter",
+    pkOfRequired: "of", pkPerActive: "per active picker", pkNoneActive: "nobody working this hour", pkFrom: "From", pkTo: "To",
+    pkHourReport: "Hourly report", pkHourReportTitle: "Download the units picked each hour and what is left in each warehouse",
+    pkShiftReport: "End of shift", pkShiftReportTitle: "Download the shift report for the selected hours, warehouse and shift",
+    rptPickHourHeading: "Hourly Picking Report", rptShiftHeading: "End of Shift Report", rptPeriod: "Period", rptShift: "Shift", rptWarehouse: "Warehouse",
+    rptHoursSection: "Units picked each hour", rptRemainingSection: "Remaining by warehouse", rptTopSection: "Top performers", rptBottomSection: "Needs follow-up",
+    rptPickersSection: "Each picker in the period", rptLastHourDone: "Picked at", rptCumulative: "Picked in period", rptHoursMet: "Hours on target",
+    rptNote: "Figures come from Minutes Central. Required per picker = the warehouse's hourly target ÷ the pickers who worked in it that hour. The hour in progress is not scored.",
     searchWarehouse: "Search warehouses…", warehouse: "Warehouse",
     totalRequired: "Total required", actualCompleted: "Completed",
     remaining: "Remaining", shortages: "OOS", hourlyTarget: "Target / hr",
@@ -890,11 +906,11 @@ function shiftLabel(value) {
 
 // Each warehouse is scored on its own hourly target, shared across the pickers active in it
 // that hour. The latest hour is usually still running, so it is listed but kept out of the scoring.
-function pickerProductivity(data, { allHours = false } = {}) {
+function pickerProductivity(data, { allHours = false, from = null, to = null } = {}) {
   const reportHour = latestReportHour(data);
   const hourRows = ((allHours ? data.pickingHourly : hourlyView(data.pickingHourly))?.records || []).filter((row) => {
     const hour = hourValue(textAt(row, 1));
-    return hour !== null && reportHour !== null && hour <= reportHour;
+    return hour !== null && reportHour !== null && hour <= reportHour && (from === null || hour >= from) && (to === null || hour <= to);
   });
   const hours = hourRows.map((row) => hourValue(textAt(row, 1)));
   const isOpen = (hour) => hours.length > 1 && hour === reportHour;
@@ -1045,7 +1061,150 @@ function buildProductivityReportDocument(data) {
   </div>`;
 }
 
-const PDF_LIBRARY_URL = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+// Remaining work is a snapshot of now, so it ignores the hour range; "active" is the latest hour's staff.
+function warehouseRemaining(view) {
+  return view.warehouses.map(({ row, key, staff }) => {
+    const remaining = parseNumber(textAt(row, 4));
+    const active = view.reportHour === null ? 0 : staff.get(view.reportHour) || 0;
+    return { key, required: parseNumber(textAt(row, 2)), done: parseNumber(textAt(row, 3)), remaining, rate: textAt(row, 7), active, perActive: active ? remaining / active : 0 };
+  });
+}
+
+// One line per hour, for every warehouse together or for one warehouse against its own hourly target.
+function hourLines(view, scope = "all") {
+  const warehouse = view.warehouses.find((item) => item.key === scope);
+  return view.hourRows.map((row) => {
+    const hour = hourValue(textAt(row, 1));
+    const byWarehouse = new Map(view.warehouses.map((item) => [item.key, item.units.get(hour) || 0]));
+    const target = warehouse ? warehouse.target : parseNumber(textAt(row, 2));
+    const done = warehouse ? byWarehouse.get(warehouse.key) : parseNumber(textAt(row, 3));
+    const staff = warehouse ? warehouse.staff.get(hour) || 0 : parseNumber(textAt(row, 4));
+    return { hour, open: view.isOpen(hour), target, done, staff, ipp: staff ? done / staff : 0, byWarehouse, met: target > 0 && done >= target };
+  });
+}
+
+function pickerScope(view, { warehouse = "all", shift = "all" } = {}) {
+  return view.pickers.filter((picker) => (picker.worked > 0 || picker.openUnits > 0)
+    && (warehouse === "all" || picker.warehouse === warehouse)
+    && (shift === "all" || picker.shiftKey === shift));
+}
+
+// "hour" reports the day so far for the hourly update; "shift" follows the picker page's hour range and filters.
+function buildPickerReportDocument(data, mode) {
+  const shiftMode = mode === "shift";
+  const view = pickerProductivity(data, shiftMode ? { allHours: true, from: pickerFilter.from, to: pickerFilter.to } : { allHours: true });
+  const { reportHour, hours } = view;
+  const scope = shiftMode ? pickerFilter.warehouse : "all";
+  const now = new Date();
+  const issuedAt = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const heading = t(shiftMode ? "rptShiftHeading" : "rptPickHourHeading");
+  const chip = (label, value, key = false) => `<div class="report-chip${key ? " is-key" : ""}"><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`;
+  const status = (met) => reportPill(met ? t("metStatus") : t("missStatus"), met ? "good" : "bad");
+  const signed = (value) => `${value > 0 ? "+" : value < 0 ? "−" : ""}${formatNumber(Math.abs(value))}`;
+  const figure = (value) => (value ? formatNumber(value) : { html: '<span class="report-zero">0</span>' });
+  const sum = (items, pick) => items.reduce((total, item) => total + pick(item), 0);
+
+  const lines = hourLines(view, scope);
+  const closed = lines.filter((line) => !line.open);
+  const lastClosed = closed[closed.length - 1];
+  const hoursScored = closed.filter((line) => line.target > 0).length;
+  const hoursMet = closed.filter((line) => line.met).length;
+  const keys = scope === "all" ? view.warehouses.map((item) => item.key) : [];
+  const hourHeaders = [t("time"), ...keys, scope === "all" ? t("totalShort") : t("completed"), t("targetLabel"), t("gapCol"), t("activeStaff"), "IPP", t("statusCol")];
+  const hourRows = lines.map((line) => [
+    formatHour(line.hour), ...keys.map((key) => figure(line.byWarehouse.get(key))), { html: `<b>${formatNumber(line.done)}</b>` },
+    line.target ? formatNumber(line.target) : "—",
+    line.open || !line.target ? "—" : { html: `<span class="report-delta is-${line.done >= line.target ? "up" : "down"}">${signed(line.done - line.target)}</span>` },
+    figure(line.staff), line.staff ? formatNumber(line.ipp) : "—",
+    line.open ? reportPill(t("hourOpen"), "muted") : line.target ? status(line.met) : "—",
+  ]);
+  const closedTarget = sum(closed, (line) => line.target);
+  const closedDone = sum(closed, (line) => line.done);
+  const closedStaff = sum(closed, (line) => line.staff);
+  const hourFoot = [
+    t("overallTotal"), ...keys.map((key) => formatNumber(sum(lines, (line) => line.byWarehouse.get(key)))), formatNumber(sum(lines, (line) => line.done)),
+    formatNumber(closedTarget), closedTarget ? signed(closedDone - closedTarget) : "—", "—", closedStaff ? formatNumber(closedDone / closedStaff) : "—", `${hoursMet} / ${hoursScored}`,
+  ];
+
+  const remaining = warehouseRemaining(view).filter((item) => scope === "all" || item.key === scope);
+  const remainingLine = (label, item) => [label, formatNumber(item.required), formatNumber(item.done), { html: `<b>${formatNumber(item.remaining)}</b>` }, { html: reportBar(item.rate || (item.required ? `${Math.round((item.done / item.required) * 100)}%` : "0%"), colors.teal) }, figure(item.active), item.active ? formatNumber(item.perActive) : "—"];
+  const remainingTotal = { required: sum(remaining, (item) => item.required), done: sum(remaining, (item) => item.done), remaining: sum(remaining, (item) => item.remaining), active: sum(remaining, (item) => item.active), rate: "" };
+  remainingTotal.perActive = remainingTotal.active ? remainingTotal.remaining / remainingTotal.active : 0;
+  const remainingTable = reportDataTable({
+    headers: [t("warehouse"), t("totalRequired"), t("actualCompleted"), t("remaining"), t("completionRate"), t("pkStatusActive"), t("pkPerActive")],
+    rows: remaining.map((item) => remainingLine(item.key, item)),
+    foot: remaining.length > 1 ? remainingLine(t("overallTotal"), remainingTotal) : null,
+  });
+
+  const pickers = pickerScope(view, shiftMode ? pickerFilter : {});
+  const scored = pickers.filter((picker) => picker.share > 0);
+  const met = scored.filter((picker) => picker.met).length;
+  const units = sum(pickers, (picker) => picker.units);
+  const openUnits = sum(pickers, (picker) => picker.openUnits);
+  const pickerHours = sum(pickers, (picker) => picker.worked);
+  const active = sum(warehouseRemaining(view), (item) => item.active);
+  const statItems = shiftMode ? [
+    [t("pkKpiPickers"), formatNumber(pickers.length), colors.blue],
+    [t("pkKpiUnits"), formatNumber(units + openUnits), colors.green],
+    [t("pkKpiIph"), pickerHours ? formatNumber(units / pickerHours) : "—", colors.violet],
+    [t("pkKpiMet"), `${met} / ${scored.length}`, colors.teal],
+    [t("pkKpiMissed"), formatNumber(scored.length - met), colors.red],
+    [t("rptHoursMet"), `${hoursMet} / ${hoursScored}`, colors.amber],
+  ] : [
+    [t("hourlyTargetShort"), data.main.targetHourly, colors.blue],
+    [`${t("rptLastHourDone")} ${lastClosed ? formatHour(lastClosed.hour) : ""}`, lastClosed ? formatNumber(lastClosed.done) : "—", colors.green],
+    [t("rptCumulative"), formatNumber(sum(lines, (line) => line.done)), colors.teal],
+    [t("remaining"), data.main.remaining, colors.amber],
+    [t("pkKpiActive"), formatNumber(active), colors.violet],
+    [t("rptHoursMet"), `${hoursMet} / ${hoursScored}`, colors.red],
+  ];
+
+  const rankTable = (list, value, header) => reportDataTable({
+    headers: ["#", t("pkPicker"), t("warehouseShort"), header],
+    rows: list.map((picker, index) => [String(index + 1), `${picker.name || picker.user} · ${picker.user}`, picker.warehouse, value(picker)]),
+  });
+  const top = pickers.filter((picker) => picker.worked > 0).sort((left, right) => right.iph - left.iph).slice(0, 5);
+  const bottom = scored.slice().sort((left, right) => left.rate - right.rate).slice(0, 5);
+  const leaders = `<div class="report-split"><section class="report-block"><h2>${escapeHtml(t("rptTopSection"))}</h2>${rankTable(top, (picker) => `${formatNumber(picker.iph)} ${t("pkPerHour")}`, t("pkPerHour"))}</section><section class="report-block"><h2>${escapeHtml(t("rptBottomSection"))}</h2>${rankTable(bottom, (picker) => `${Math.round(picker.rate * 100)}% (${formatNumber(picker.units)} / ${formatNumber(picker.share)})`, t("pkRate"))}</section></div>`;
+
+  const hitCell = (cell) => {
+    if (!cell) return "";
+    if (cell.open) return { html: `<span class="report-hit is-open"><b>${formatNumber(cell.picked)}</b><small>${escapeHtml(t("hourOpenShort"))}</small></span>` };
+    return { html: `<span class="report-hit is-${cell.met ? "good" : "bad"}"><b>${formatNumber(cell.picked)}</b><small>${cell.required ? formatNumber(cell.required) : "—"}</small></span>` };
+  };
+  const hourLabel = (hour) => (hours.length > 12 ? String(hour).padStart(2, "0") : formatHour(hour));
+  const pickerMatrix = reportDataTable({
+    headers: [t("warehouseShort"), t("userCol"), t("nameCol"), t("shiftCol"), ...hours.map(hourLabel), t("totalShort"), t("statusCol")],
+    rows: pickers.slice().sort((left, right) => left.warehouse.localeCompare(right.warehouse) || right.units + right.openUnits - left.units - left.openUnits).map((picker) => [
+      picker.warehouse, picker.user, picker.name || "—", picker.shift, ...picker.cells.map(hitCell),
+      { html: `<span class="report-hit is-${picker.met ? "good" : "bad"}"><b>${formatNumber(picker.units + picker.openUnits)}</b><small>${picker.share > 0 ? formatNumber(picker.share) : "—"}</small></span>` },
+      picker.share > 0 ? status(picker.met) : picker.openUnits ? reportPill(t("hourOpen"), "muted") : "—",
+    ]),
+  });
+
+  const period = hours.length ? `${formatHour(hours[0])} – ${formatHour(hours[hours.length - 1])}` : "—";
+  const chips = shiftMode
+    ? `${chip(t("reportDateLabel"), data.date || t("unknownDate"))}${chip(t("rptPeriod"), period, true)}${chip(t("rptWarehouse"), scope === "all" ? t("pkAllWarehouses") : scope)}${chip(t("rptShift"), pickerFilter.shift === "all" ? t("pkAllShifts") : shiftLabel(pickerFilter.shift))}${chip(t("reportIssuedLabel"), issuedAt)}`
+    : `${chip(t("reportDateLabel"), data.date || t("unknownDate"))}${chip(t("reportHourLabel"), reportHour === null ? "—" : formatHour(reportHour), true)}${chip(t("reportIssuedLabel"), issuedAt)}${chip(t("pkSiteUpdate"), data.siteUpdatedAt || "—")}`;
+
+  return `<div class="report-doc report-hourly report-productivity" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
+    <header class="report-head">
+      <img src="assets/noon-minutes-logo.png" alt="noon minutes">
+      <div class="report-head-copy"><strong>noon minutes</strong><h1>${escapeHtml(heading)}</h1></div>
+      <div class="report-chips">${chips}</div>
+    </header>
+    <section class="report-block"><h2>${escapeHtml(t("reportKpiSection"))}</h2><div class="report-stats">${statItems.map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div></section>
+    <section class="report-block"><h2>${escapeHtml(t("rptHoursSection"))}</h2>${reportDataTable({ headers: hourHeaders, rows: hourRows, foot: hourFoot, current: lines.findIndex((line) => line.open) })}</section>
+    <section class="report-block"><h2>${escapeHtml(t("rptRemainingSection"))}</h2>${remainingTable}</section>
+    ${shiftMode
+      ? `<section class="report-block report-pickers"><h2>${escapeHtml(t("rptPickersSection"))}</h2><div class="report-branches report-matrix">${pickerMatrix}</div></section>`
+      : leaders}
+    <p class="report-footnote">${escapeHtml(t("rptNote"))}</p>
+    <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>
+  </div>`;
+}
+
+const PDF_LIBRARY_URL ="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
 let pdfLibraryPromise;
 
 function ensurePdfLibrary() {
@@ -1180,6 +1339,28 @@ function generateProductivityReport() {
     buildDocument: buildProductivityReportDocument,
     filename: `noon-productivity-report-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
     pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-warehouse"] },
+  });
+}
+
+function generatePickerHourReport() {
+  const hour = dashboardData ? latestReportHour(dashboardData) : null;
+  return exportReport({
+    buttonSelector: "#pickerHourReportButton",
+    labelKey: "pkHourReport",
+    buildDocument: (data) => buildPickerReportDocument(data, "hour"),
+    filename: `noon-picking-hour-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-split"] },
+  });
+}
+
+function generatePickerShiftReport() {
+  const pad = (hour) => (hour === null ? "" : String(hour).padStart(2, "0"));
+  return exportReport({
+    buttonSelector: "#pickerShiftReportButton",
+    labelKey: "pkShiftReport",
+    buildDocument: (data) => buildPickerReportDocument(data, "shift"),
+    filename: `noon-shift-report-${reportStamp()}-${pad(pickerFilter.from)}00-${pad(pickerFilter.to)}00.pdf`,
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
   });
 }
 
@@ -1968,7 +2149,7 @@ function renderIssues(data) {
   }).join("") : `<div class="empty-state">${t("noLocations")}</div>`;
 }
 
-const pickerFilter = { warehouse: "all", shift: "all", status: "all", sort: "units", search: "" };
+const pickerFilter = { warehouse: "all", shift: "all", status: "all", sort: "units", search: "", from: null, to: null };
 
 function fillSelect(select, options, value) {
   select.innerHTML = options.map(([key, label]) => `<option value="${escapeHtml(key)}"${key === value ? " selected" : ""}>${escapeHtml(label)}</option>`).join("");
@@ -1993,12 +2174,34 @@ function pickerNameCell(picker, rank) {
 
 // The picker page uses every hour of the day; the hour filter only applies to the main dashboard.
 function renderPickersPage(data, { animate = true } = {}) {
-  const view = pickerProductivity(data, { allHours: true });
+  // Tabs, shifts and the hour range come from the whole day so a narrow range never hides its own options.
+  const day = pickerProductivity(data, { allHours: true });
+  const dayPickers = pickerScope(day);
+  const dayHours = day.hours;
+  if (!dayHours.includes(pickerFilter.from)) pickerFilter.from = dayHours[0] ?? null;
+  if (!dayHours.includes(pickerFilter.to)) pickerFilter.to = dayHours[dayHours.length - 1] ?? null;
+  if (pickerFilter.from !== null && pickerFilter.to !== null && pickerFilter.from > pickerFilter.to) pickerFilter.to = pickerFilter.from;
+  const view = pickerProductivity(data, { allHours: true, from: pickerFilter.from, to: pickerFilter.to });
   const { hours, isOpen } = view;
-  const everyone = view.pickers.filter((picker) => picker.worked > 0 || picker.openUnits > 0);
-  const warehouseKeys = [...new Set(everyone.map((picker) => picker.warehouse))].sort();
+  const everyone = pickerScope(view);
+  const warehouseKeys = [...new Set(dayPickers.map((picker) => picker.warehouse))].sort();
   if (pickerFilter.warehouse !== "all" && !warehouseKeys.includes(pickerFilter.warehouse)) pickerFilter.warehouse = "all";
-  const shiftKeys = [...new Set(everyone.map((picker) => picker.shiftKey).filter(Boolean))].sort();
+  const shiftKeys = [...new Set(dayPickers.map((picker) => picker.shiftKey).filter(Boolean))].sort();
+  const hourOptions = dayHours.map((hour) => [String(hour), formatHour(hour)]);
+  fillSelect($("#pickerFrom"), hourOptions, String(pickerFilter.from));
+  fillSelect($("#pickerTo"), hourOptions, String(pickerFilter.to));
+
+  const remaining = warehouseRemaining(view).filter((item) => pickerFilter.warehouse === "all" || item.key === pickerFilter.warehouse);
+  $("#pickerRemaining").innerHTML = remaining.length ? remaining.map((item) => {
+    const percent = item.required ? Math.min(100, Math.round((item.done / item.required) * 100)) : 0;
+    return `<button class="remaining-card${pickerFilter.warehouse === item.key ? " active" : ""}" type="button" data-warehouse="${escapeHtml(item.key)}">
+      <span class="remaining-top"><strong>${escapeHtml(item.key)}</strong><span>${percent}%</span></span>
+      <span class="remaining-value">${formatNumber(item.remaining)}</span>
+      <span class="remaining-sub">${escapeHtml(t("remaining"))} · ${escapeHtml(t("pkOfRequired"))} ${formatNumber(item.required)}</span>
+      <span class="remaining-track"><i style="width:${percent}%"></i></span>
+      <span class="remaining-foot">${item.active ? `${formatNumber(item.active)} ${escapeHtml(t("pkStatusActive"))} · <b>${formatNumber(item.perActive)}</b> ${escapeHtml(t("pkPerActive"))}` : escapeHtml(t("pkNoneActive"))}</span>
+    </button>`;
+  }).join("") : `<div class="empty-state">${t("pkNoData")}</div>`;
 
   const inWarehouse = everyone.filter((picker) => pickerFilter.warehouse === "all" || picker.warehouse === pickerFilter.warehouse);
   const scored = inWarehouse.filter((picker) => picker.share > 0);
@@ -2070,26 +2273,12 @@ function renderPickersPage(data, { animate = true } = {}) {
   $("#pickersUpdated").textContent = data.siteUpdatedAt || data.date || "—";
 }
 
-function applyView() {
-  const pickersView = location.hash === "#pickers";
-  const current = pickersView ? "#pickers" : (location.hash || "#overview");
-  document.body.classList.toggle("view-pickers", pickersView);
-  document.querySelectorAll(".main-nav .nav-link").forEach((link) => link.classList.toggle("active", link.getAttribute("href") === current));
-}
-
 function renderDashboard(data) {
   dashboardData = data;
-  renderPickersPage(data);
+  // The site shows only the picker page; the older dashboard sections are hidden and no longer drawn.
   syncHourOptions();
-  renderKpis(data);
-  renderWarehouseTable(data);
-  renderHourly(data);
-  renderWorkflows(data);
-  renderIssues(data);
-  renderHeatmap(data);
-  $("#sheetDate").textContent = data.date || t("unknownDate");
+  renderPickersPage(data);
   $("#connectionBanner").hidden = !lastSyncError;
-  updateTimeFilterLabel();
 }
 
 async function loadDashboard() {
@@ -2197,6 +2386,22 @@ $("#pickerWarehouseTabs").addEventListener("click", (event) => {
   pickerFilter.warehouse = tab.dataset.warehouse;
   renderPickersPage(dashboardData, { animate: false });
 });
+$("#pickerRemaining").addEventListener("click", (event) => {
+  const card = event.target.closest("[data-warehouse]");
+  if (!card || !dashboardData) return;
+  pickerFilter.warehouse = pickerFilter.warehouse === card.dataset.warehouse ? "all" : card.dataset.warehouse;
+  renderPickersPage(dashboardData, { animate: false });
+});
+[["#pickerFrom", "from"], ["#pickerTo", "to"]].forEach(([selector, key]) => {
+  $(selector).addEventListener("change", (event) => {
+    pickerFilter[key] = Number(event.target.value);
+    if (key === "from" && pickerFilter.to < pickerFilter.from) pickerFilter.to = pickerFilter.from;
+    if (key === "to" && pickerFilter.from > pickerFilter.to) pickerFilter.from = pickerFilter.to;
+    if (dashboardData) renderPickersPage(dashboardData, { animate: false });
+  });
+});
+$("#pickerHourReportButton").addEventListener("click", generatePickerHourReport);
+$("#pickerShiftReportButton").addEventListener("click", generatePickerShiftReport);
 [["#pickerShift", "shift"], ["#pickerStatus", "status"], ["#pickerSort", "sort"]].forEach(([selector, key]) => {
   $(selector).addEventListener("change", (event) => {
     pickerFilter[key] = event.target.value;
@@ -2207,18 +2412,7 @@ $("#pickerSearch").addEventListener("input", (event) => {
   pickerFilter.search = event.target.value;
   if (dashboardData) renderPickersPage(dashboardData, { animate: false });
 });
-window.addEventListener("hashchange", () => {
-  applyView();
-  if (document.body.classList.contains("view-pickers")) window.scrollTo({ top: 0 });
-  else document.getElementById(location.hash.slice(1))?.scrollIntoView();
-});
-
-$("#reportButton").addEventListener("click", generatePdfReport);
-$("#hourlyReportButton").addEventListener("click", generateHourlyReport);
-$("#productivityReportButton").addEventListener("click", generateProductivityReport);
-
 setAutoRefresh(true);
-applyView();
 syncHourOptions();
 applyLocale();
 loadDashboard();

@@ -7,24 +7,19 @@
     <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
-    <link rel="stylesheet" href="styles.css?v=34">
-    <script src="app.js?v=34" defer></script>
+    <link rel="stylesheet" href="styles.css?v=35">
+    <script src="app.js?v=35" defer></script>
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar" aria-label="التنقل الرئيسي" data-i18n-aria="navLabel">
-        <a class="brand" href="#overview" aria-label="العودة للرئيسية" data-i18n-aria="homeLabel">
+        <a class="brand" href="#pickers" aria-label="العودة للرئيسية" data-i18n-aria="homeLabel">
           <img class="brand-logo" src="assets/noon-minutes-logo.png" alt="نون مينتس" data-i18n-alt="brandLogo">
           <span class="brand-copy"><strong>noon<span> minutes</span></strong><small data-i18n="brandCaption">مركز العمليات</small></span>
         </a>
         <div class="nav-label" data-i18n="navSection">لوحة المتابعة</div>
         <nav class="main-nav">
-          <a class="nav-link active" href="#overview"><span class="nav-icon">◫</span><span data-i18n="navOverview">نظرة عامة</span></a>
-          <a class="nav-link" href="#warehouses"><span class="nav-icon">▦</span><span data-i18n="navWarehouses">أداء المستودعات</span></a>
-          <a class="nav-link" href="#productivity"><span class="nav-icon">⌁</span><span data-i18n="navProductivity">الإنتاجية الساعية</span></a>
-          <a class="nav-link nav-link-pickers" href="#pickers"><span class="nav-icon">♙</span><span data-i18n="navPickers">إنتاجية البيكرز</span></a>
-          <a class="nav-link" href="#workflows"><span class="nav-icon">⇄</span><span data-i18n="navWorkflows">سير العمل والشحن</span></a>
-          <a class="nav-link" href="#issues"><span class="nav-icon">⚑</span><span data-i18n="navIssues">النواقص والمشاكل</span></a>
+          <a class="nav-link nav-link-pickers active" href="#pickers"><span class="nav-icon">♙</span><span data-i18n="navPickers">إنتاجية البيكرز</span></a>
         </nav>
         <div class="sidebar-spacer"></div>
         <div class="source-card">
@@ -41,9 +36,6 @@
           <div class="topbar-actions">
             <span class="live-pill"><i></i><span data-i18n="live">بث مباشر</span></span>
             <button class="language-button" id="languageButton" type="button" aria-label="Switch to English">EN</button>
-            <button class="report-button" id="reportButton" type="button" title="تنزيل تقرير الأداء بصيغة PDF" aria-label="تنزيل تقرير الأداء بصيغة PDF" data-i18n-title="reportTitle" data-i18n-aria="reportTitle"><span class="report-icon">⤓</span><span class="report-button-label" data-i18n="reportButton">تقرير PDF</span></button>
-            <button class="report-button report-button-hourly" id="hourlyReportButton" type="button" title="تنزيل التقرير الساعي لكل الأقسام بصيغة PDF" aria-label="تنزيل التقرير الساعي لكل الأقسام بصيغة PDF" data-i18n-title="hourlyReportTitle" data-i18n-aria="hourlyReportTitle"><span class="report-icon">◷</span><span class="report-button-label" data-i18n="hourlyReportButton">تقرير الساعة</span></button>
-            <button class="report-button" id="productivityReportButton" type="button" title="تنزيل تقرير مستهدف وإنتاجية الساعات والعمال بصيغة PDF" aria-label="تنزيل تقرير مستهدف وإنتاجية الساعات والعمال بصيغة PDF" data-i18n-title="productivityReportTitle" data-i18n-aria="productivityReportTitle"><span class="report-icon">⌁</span><span class="report-button-label" data-i18n="productivityReportButton">تقرير الإنتاجية</span></button>
             <button class="icon-button" id="refreshButton" type="button" title="تحديث البيانات الآن" aria-label="تحديث البيانات الآن" data-i18n-title="refreshNow" data-i18n-aria="refreshNow"><span class="refresh-icon">↻</span></button>
             <span class="avatar" aria-label="لوحة تشغيل المستودعات" data-i18n-aria="dashboard">ن</span>
           </div>
@@ -85,16 +77,23 @@
                 <h1 id="pickersTitle"><span class="heading-main" data-i18n="pkHeadingMain">إنتاجية</span> <span data-i18n="pkHeadingAccent">البيكرز</span></h1>
                 <p data-i18n="pkIntro">كل بيكر لقط كام في كل ساعة، والمطلوب منه، وحقق ولا لا.</p>
               </div>
-              <div class="heading-meta">
+              <div class="heading-meta picker-heading-meta">
                 <div class="date-box"><span class="calendar-icon">◷</span><span><small data-i18n="pkSiteUpdate">آخر تحديث من الموقع</small><strong id="pickersUpdated">—</strong></span></div>
+                <button class="report-button report-button-hourly" id="pickerHourReportButton" type="button" title="تنزيل تقرير بالمنجز كل ساعة والفاضل في كل مخزن" data-i18n-title="pkHourReportTitle"><span class="report-icon">◷</span><span class="report-button-label" data-i18n="pkHourReport">تقرير الساعة</span></button>
+                <button class="report-button" id="pickerShiftReportButton" type="button" title="تنزيل تقرير الشيفت حسب الفترة والمخزن والشيفت المختارين" data-i18n-title="pkShiftReportTitle"><span class="report-icon">⤓</span><span class="report-button-label" data-i18n="pkShiftReport">تقرير آخر الشيفت</span></button>
               </div>
             </div>
 
             <div class="kpi-grid" id="pickerKpis" aria-live="polite"></div>
 
+            <div class="picker-section-head"><h2 data-i18n="pkRemainingTitle">الفاضل في كل مخزن</h2><p data-i18n="pkRemainingSub">المتبقي من المطلوب ومين شغال دلوقتي، دوس على المخزن عشان تفلتر عليه</p></div>
+            <div class="remaining-grid" id="pickerRemaining"></div>
+
             <div class="picker-toolbar">
               <div class="heatmap-tabs picker-tabs" id="pickerWarehouseTabs" role="tablist" aria-label="المخزن" data-i18n-aria="warehouse"></div>
               <div class="filter-controls picker-filters">
+                <label><span data-i18n="pkFrom">من الساعة</span><select id="pickerFrom" aria-label="من الساعة" data-i18n-aria="pkFrom"></select></label>
+                <label><span data-i18n="pkTo">إلى الساعة</span><select id="pickerTo" aria-label="إلى الساعة" data-i18n-aria="pkTo"></select></label>
                 <select id="pickerShift" aria-label="الشيفت" data-i18n-aria="shiftCol"></select>
                 <select id="pickerStatus" aria-label="الحالة" data-i18n-aria="statusCol"></select>
                 <select id="pickerSort" aria-label="الترتيب" data-i18n-aria="pkSortLabel"></select>
