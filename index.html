@@ -7,8 +7,8 @@
     <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
-    <link rel="stylesheet" href="styles.css?v=40">
-    <script src="app.js?v=41" defer></script>
+    <link rel="stylesheet" href="styles.css?v=44">
+    <script src="app.js?v=45" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -88,6 +88,7 @@
               <h2>Picking Summary</h2>
               <div class="summary-controls">
                 <span class="summary-date"><span aria-hidden="true">▦</span><span id="summaryDate">—</span></span>
+                <div class="summary-time" role="group" aria-label="فلتر الوقت" data-i18n-aria="pkTimeFilter"><span aria-hidden="true">◷</span><label><span data-i18n="pkFrom">من الساعة</span><select id="pickerFrom" aria-label="من الساعة" data-i18n-aria="pkFrom"></select></label><span class="summary-time-sep" aria-hidden="true">–</span><label><span data-i18n="pkTo">إلى الساعة</span><select id="pickerTo" aria-label="إلى الساعة" data-i18n-aria="pkTo"></select></label></div>
                 <div class="wh-picker" id="warehousePicker">
                   <button class="wh-button" id="warehouseButton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="warehouseMenu"><span class="wh-flag" aria-hidden="true"></span><span class="wh-group">EGNIM</span><span class="wh-divider" aria-hidden="true">|</span><span class="wh-list" id="warehouseButtonLabel"></span><span class="summary-chevron" aria-hidden="true">⌄</span></button>
                   <div class="wh-menu" id="warehouseMenu" hidden></div>
@@ -103,8 +104,6 @@
 
             <div class="picker-toolbar">
               <div class="filter-controls picker-filters">
-                <label><span data-i18n="pkFrom">من الساعة</span><select id="pickerFrom" aria-label="من الساعة" data-i18n-aria="pkFrom"></select></label>
-                <label><span data-i18n="pkTo">إلى الساعة</span><select id="pickerTo" aria-label="إلى الساعة" data-i18n-aria="pkTo"></select></label>
                 <select id="pickerShift" aria-label="الشيفت" data-i18n-aria="shiftCol"></select>
                 <select id="pickerStatus" aria-label="الحالة" data-i18n-aria="statusCol"></select>
                 <select id="pickerSort" aria-label="الترتيب" data-i18n-aria="pkSortLabel"></select>
