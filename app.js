@@ -32,6 +32,7 @@ const messages = {
     pkPickersCol: "البيكرز", pkMetCol: "محققين", pkMissedCol: "عجز", pkNoData: "مفيش بيانات بيكرز لسه.", pkNoMatch: "مفيش بيكر مطابق للفلتر.",
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     pkNoLive: "أرقام الموقع مش متاحة دلوقتي، هتظهر مع التحديث الجاي.",
+    pkExcel: "تنزيل Excel", pkExcelTitle: "تنزيل جدول البيكرز زي ما هو ظاهر بالفلاتر في ملف Excel", pkExcelFailed: "تعذر تجهيز ملف Excel، جرّب تاني.",
     pkRemainingTitle: "الفاضل في كل مخزن", pkRemainingSub: "المتبقي من المطلوب ومين شغال دلوقتي، دوس على المخزن عشان تفلتر عليه",
     pkOfRequired: "من", pkPerActive: "على كل بيكر شغال", pkNoneActive: "مفيش حد شغال الساعة دي", pkFrom: "من الساعة", pkTo: "إلى الساعة",
     pkHourReport: "تقرير الساعة", pkHourReportTitle: "تنزيل تقرير بالمنجز كل ساعة والفاضل في كل مخزن",
@@ -241,6 +242,7 @@ const messages = {
     pkPickersCol: "Pickers", pkMetCol: "On target", pkMissedCol: "Below", pkNoData: "No picker data yet.", pkNoMatch: "No picker matches the filters.",
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     pkNoLive: "Site figures are not available right now; they will appear with the next update.",
+    pkExcel: "Download Excel", pkExcelTitle: "Download the picker table as shown, with its filters, as an Excel file", pkExcelFailed: "The Excel file could not be prepared. Please try again.",
     pkRemainingTitle: "Remaining by warehouse", pkRemainingSub: "What is left of the plan and who is working now; click a warehouse to filter",
     pkOfRequired: "of", pkPerActive: "per active picker", pkNoneActive: "nobody working this hour", pkFrom: "From", pkTo: "To",
     pkHourReport: "Hourly report", pkHourReportTitle: "Download the units picked each hour and what is left in each warehouse",
@@ -1212,7 +1214,7 @@ function buildPickerReportDocument(data, mode) {
   const pickerHours = sum(pickers, (picker) => picker.worked);
   const active = remainingTotal.active;
   const statItems = shiftMode ? [
-    [t("pkKpiPickers"), formatNumber(pickers.length), colors.blue],
+    [t("pkKpiActive"), formatNumber(active), colors.blue],
     [t("pkKpiUnits"), formatNumber(units + openUnits), colors.green],
     [t("pkKpiIph"), pickerHours ? formatNumber(units / pickerHours) : "—", colors.violet],
     [t("pkKpiMet"), `${met} / ${scored.length}`, colors.teal],
@@ -1233,7 +1235,7 @@ function buildPickerReportDocument(data, mode) {
   });
   const top = pickers.filter((picker) => picker.worked > 0).sort((left, right) => right.iph - left.iph).slice(0, 5);
   const bottom = scored.slice().sort((left, right) => left.rate - right.rate).slice(0, 5);
-  const leaders = `<div class="report-split"><section class="report-block"><h2>${escapeHtml(t("rptTopSection"))}</h2>${rankTable(top, (picker) => `${formatNumber(picker.iph)} ${t("pkPerHour")}`, t("pkPerHour"))}</section><section class="report-block"><h2>${escapeHtml(t("rptBottomSection"))}</h2>${rankTable(bottom, (picker) => `${Math.round(picker.rate * 100)}% (${formatNumber(picker.units)} / ${formatNumber(picker.share)})`, t("pkRate"))}</section></div>`;
+  const leaders = `<section class="report-block"><h2>${escapeHtml(t("rptTopSection"))}</h2>${rankTable(top, (picker) => `${formatNumber(picker.iph)} ${t("pkPerHour")}`, t("pkPerHour"))}</section><section class="report-block"><h2>${escapeHtml(t("rptBottomSection"))}</h2>${rankTable(bottom, (picker) => `${Math.round(picker.rate * 100)}% (${formatNumber(picker.units)} / ${formatNumber(picker.share)})`, t("pkRate"))}</section>`;
 
   const hitCell = (cell) => {
     if (!cell) return "";
@@ -1272,7 +1274,7 @@ function buildPickerReportDocument(data, mode) {
   </div>`;
 }
 
-const PDF_LIBRARY_URL ="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+const PDF_LIBRARY_URL = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
 let pdfLibraryPromise;
 
 function ensurePdfLibrary() {
@@ -1293,6 +1295,87 @@ function ensurePdfLibrary() {
     document.body.appendChild(script);
   });
   return pdfLibraryPromise;
+}
+
+const XLSX_LIBRARY_URL = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+let xlsxLibraryPromise;
+
+function ensureXlsxLibrary() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (xlsxLibraryPromise) return xlsxLibraryPromise;
+  xlsxLibraryPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = XLSX_LIBRARY_URL;
+    script.onload = () => (window.XLSX ? resolve(window.XLSX) : reject(new Error("Excel writer missing")));
+    script.onerror = () => {
+      xlsxLibraryPromise = null;
+      reject(new Error("Excel writer failed to load"));
+    };
+    document.body.appendChild(script);
+  });
+  return xlsxLibraryPromise;
+}
+
+// Saves the picker table exactly as filtered and sorted on the page, plus the hour-by-warehouse output.
+async function exportPickersExcel() {
+  const button = $("#pickerExcelButton");
+  if (!pickerExport || button.disabled) return;
+  const label = button.querySelector(".report-button-label");
+  button.disabled = true;
+  button.classList.add("is-loading");
+  label.textContent = t("reportPreparing");
+  try {
+    const XLSX = await ensureXlsxLibrary();
+    const { list, hours, lines, columns } = pickerExport;
+    const period = hours.length ? `${formatHour(hours[0])} – ${formatHour(hours[hours.length - 1])}` : "—";
+    const intro = [
+      [t("pkTableTitle")],
+      [t("reportDateLabel"), dashboardData?.date || ""],
+      [t("rptPeriod"), period],
+      [t("rptWarehouse"), selectionLabel()],
+      [t("pkSiteUpdate"), dashboardData?.siteUpdatedAt || ""],
+      [],
+    ];
+    const status = (picker) => (picker.share > 0 ? t(picker.met ? "metStatus" : "missStatus") : picker.openUnits ? t("hourOpen") : "");
+    const header = ["#", t("nameCol"), t("userCol"), t("warehouse"), t("shiftCol"), t("pkHours"), t("pkDone"), t("pkRequired"), t("pkRate"), t("pkPerHour"), t("statusCol"),
+      ...hours.flatMap((hour) => [`${formatHour(hour)} ${t("pkDone")}`, `${formatHour(hour)} ${t("pkRequired")}`])];
+    const rows = list.map((picker, index) => [
+      index + 1, picker.fullName || picker.name || "", picker.user, picker.warehouse, picker.shift === "—" ? "" : picker.shift, picker.worked,
+      Math.round(picker.units + picker.openUnits), picker.share > 0 ? Math.round(picker.share) : "", picker.share > 0 ? picker.rate : "",
+      picker.worked ? Math.round(picker.iph) : "", status(picker),
+      ...picker.cells.flatMap((cell) => (cell ? [Math.round(cell.picked), cell.open ? t("hourOpen") : cell.required ? Math.round(cell.required) : ""] : ["", ""])),
+    ]);
+    const pickerSheet = XLSX.utils.aoa_to_sheet([...intro, header, ...rows]);
+    // The achievement column is stored as a fraction so Excel can sort and chart it; it shows as a percentage.
+    rows.forEach((row, index) => {
+      const cell = pickerSheet[XLSX.utils.encode_cell({ r: intro.length + 1 + index, c: 8 })];
+      if (cell && typeof cell.v === "number") cell.z = "0%";
+    });
+    pickerSheet["!cols"] = [{ wch: 4 }, { wch: 30 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 7 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 10 }, ...hours.flatMap(() => [{ wch: 9 }, { wch: 9 }])];
+
+    const hourHeader = [t("time"), ...columns, t("totalShort"), t("targetLabel"), t("gapCol"), t("activeStaff"), "IPP", t("statusCol")];
+    const hourRows = lines.map((line) => [
+      formatHour(line.hour), ...columns.map((key) => Math.round(line.byWarehouse.get(key) || 0)), Math.round(line.done), line.target ? Math.round(line.target) : "",
+      line.open || !line.target ? "" : Math.round(line.done - line.target), line.staff, line.staff ? Math.round(line.ipp) : "",
+      line.open ? t("hourOpen") : line.target ? t(line.met ? "metStatus" : "missStatus") : "",
+    ]);
+    const hourSheet = XLSX.utils.aoa_to_sheet([[t("rptHoursSection")], [t("rptWarehouse"), selectionLabel()], [], hourHeader, ...hourRows]);
+    hourSheet["!cols"] = hourHeader.map((_, index) => ({ wch: index ? 10 : 8 }));
+
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, pickerSheet, locale === "ar" ? "البيكرز" : "Pickers");
+    XLSX.utils.book_append_sheet(book, hourSheet, locale === "ar" ? "كل ساعة" : "Hourly");
+    if (locale === "ar") book.Workbook = { Views: [{ RTL: true }] };
+    const pad = (hour) => String(hour ?? "").padStart(2, "0");
+    XLSX.writeFile(book, `noon-pickers-${reportStamp()}-${pad(hours[0])}00-${pad(hours[hours.length - 1])}00.xlsx`);
+  } catch (error) {
+    console.error("Excel export failed:", error);
+    alert(t("pkExcelFailed"));
+  } finally {
+    label.textContent = t("pkExcel");
+    button.disabled = false;
+    button.classList.remove("is-loading");
+  }
 }
 
 function getReportContainer() {
@@ -1417,7 +1500,7 @@ function generatePickerHourReport() {
     labelKey: "pkHourReport",
     buildDocument: (data) => buildPickerReportDocument(data, "hour"),
     filename: `noon-picking-hour-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
-    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-split"] },
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
   });
 }
 
@@ -2242,6 +2325,7 @@ function pickerNameCell(picker, rank) {
 
 const WAREHOUSE_STORAGE_KEY = "pickerWarehouses";
 let selectedCodes = null;
+let pickerExport = null;
 let offeredCodes = [];
 const openSummaries = new Set();
 
@@ -2418,6 +2502,9 @@ function renderPickersPage(data, { animate = true } = {}) {
     name: (left, right) => (left.name || left.user).localeCompare(right.name || right.user),
   };
   list.sort(sorters[pickerFilter.sort] || sorters.units);
+  const lines = hourLines(view, keys);
+  const columns = view.warehouses.filter((item) => (!keys || keys.includes(item.key)) && lines.some((line) => line.byWarehouse.get(item.key))).map((item) => item.key);
+  pickerExport = { list, hours, lines, columns };
 
   const rankItem = (picker, index, value, unit, tone) => `<div class="picker-rank-item">${pickerNameCell(picker, index + 1)}<span class="picker-rank-meta">${escapeHtml(picker.warehouse)}</span><span class="picker-rank-value" style="--tone:${tone}"><strong>${value}</strong><small>${escapeHtml(unit)}</small></span></div>`;
   const top = list.filter((picker) => picker.worked > 0).sort(sorters.iph).slice(0, 5);
@@ -2613,6 +2700,7 @@ $("#pickerSummary").addEventListener("click", (event) => {
     if (dashboardData) renderPickersPage(dashboardData, { animate: false });
   });
 });
+$("#pickerExcelButton").addEventListener("click", exportPickersExcel);
 $("#pickerHourReportButton").addEventListener("click", generatePickerHourReport);
 $("#pickerShiftReportButton").addEventListener("click", generatePickerShiftReport);
 [["#pickerShift", "shift"], ["#pickerStatus", "status"], ["#pickerSort", "sort"]].forEach(([selector, key]) => {

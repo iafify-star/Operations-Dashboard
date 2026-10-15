@@ -764,3 +764,10 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
   .summary-value strong { font-size: 20px; }
   .picker-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+.picker-table-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.picker-excel-button { min-height: 36px; background: #1d6f42; border-color: #2a8a55; color: #ffffff; }
+.picker-excel-button:hover { background: #22804c; }
+@media (max-width: 620px) {
+  .picker-table-panel .panel-heading { flex-direction: column; }
+  .picker-table-tools { width: 100%; justify-content: space-between; }
+}

@@ -7,8 +7,8 @@
     <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
-    <link rel="stylesheet" href="styles.css?v=38">
-    <script src="app.js?v=38" defer></script>
+    <link rel="stylesheet" href="styles.css?v=40">
+    <script src="app.js?v=41" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -130,7 +130,10 @@
             <article class="panel picker-table-panel">
               <div class="panel-heading">
                 <div><span class="panel-icon violet">♙</span><div><h3 data-i18n="pkTableTitle">إنتاجية كل بيكر بالساعة</h3><p data-i18n="pkTableSubtitle">في كل خانة: الرقم الكبير اللي لقطه، والصغير المطلوب منه في الساعة دي</p></div></div>
-                <span class="warehouse-count" id="pickerCount"></span>
+                <div class="picker-table-tools">
+                  <span class="warehouse-count" id="pickerCount"></span>
+                  <button class="report-button picker-excel-button" id="pickerExcelButton" type="button" title="تنزيل جدول البيكرز زي ما هو ظاهر بالفلاتر في ملف Excel" data-i18n-title="pkExcelTitle"><span class="report-icon">▦</span><span class="report-button-label" data-i18n="pkExcel">تنزيل Excel</span></button>
+                </div>
               </div>
               <div class="table-scroll picker-table-scroll"><table class="picker-table" id="pickerTable"></table></div>
               <p class="picker-note" data-i18n="pkNote">المطلوب من كل بيكر = مستهدف المخزن في الساعة ÷ عدد البيكرز اللي اشتغلوا فيه الساعة دي. الساعة الحالية لسه شغالة فمش داخلة في الحكم.</p>
