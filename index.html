@@ -7,8 +7,9 @@
     <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
-    <link rel="stylesheet" href="styles.css?v=44">
-    <script src="app.js?v=45" defer></script>
+    <script>try { if (localStorage.getItem("dashboardTheme") === "light") document.documentElement.dataset.theme = "light"; } catch (error) {}</script>
+    <link rel="stylesheet" href="styles.css?v=46">
+    <script src="app.js?v=46" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -35,6 +36,7 @@
           <div class="breadcrumb"><span data-i18n="brandCaption">مركز العمليات</span><b>/</b><strong data-i18n="dashboard">لوحة القيادة</strong></div>
           <div class="topbar-actions">
             <span class="live-pill"><i></i><span data-i18n="live">بث مباشر</span></span>
+            <button class="icon-button theme-button" id="themeButton" type="button" aria-label="الوضع النهاري" title="الوضع النهاري"><span aria-hidden="true">☀</span></button>
             <button class="language-button" id="languageButton" type="button" aria-label="Switch to English">EN</button>
             <button class="icon-button" id="refreshButton" type="button" title="تحديث البيانات الآن" aria-label="تحديث البيانات الآن" data-i18n-title="refreshNow" data-i18n-aria="refreshNow"><span class="refresh-icon">↻</span></button>
             <span class="avatar" aria-label="لوحة تشغيل المستودعات" data-i18n-aria="dashboard">ن</span>

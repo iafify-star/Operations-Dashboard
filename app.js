@@ -33,6 +33,7 @@ const messages = {
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     pkNoLive: "أرقام الموقع مش متاحة دلوقتي، هتظهر مع التحديث الجاي.",
     pkTimeFilter: "فلتر الوقت",
+    themeLight: "الوضع النهاري", themeDark: "الوضع الليلي",
     rptHourMet: "محققين من الشغالين",
     rptHourBanner: "بيانات الساعة", rptHourClosed: "الساعة دي خلصت", rptHourRunning: "الساعة دي لسه شغالة", rptHourDone: "منجز الساعة", rptHourTarget: "مستهدف الساعة",
     rptHourGap: "الفرق عن المستهدف", rptHourWorkers: "شغالين الساعة دي", rptHourPerPicker: "قطع لكل بيكر", rptVsPrevious: "عن الساعة اللي قبلها",
@@ -250,6 +251,7 @@ const messages = {
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     pkNoLive: "Site figures are not available right now; they will appear with the next update.",
     pkTimeFilter: "Time filter",
+    themeLight: "Day mode", themeDark: "Night mode",
     rptHourMet: "Pickers on target",
     rptHourBanner: "Figures for", rptHourClosed: "This hour is closed", rptHourRunning: "This hour is still running", rptHourDone: "Picked this hour", rptHourTarget: "Target this hour",
     rptHourGap: "Gap to target", rptHourWorkers: "Pickers this hour", rptHourPerPicker: "Units per picker", rptVsPrevious: "Versus the hour before",
@@ -1768,6 +1770,7 @@ function applyLocale() {
     element.alt = t(element.dataset.i18nAlt);
   });
   $("#languageButton").textContent = isEnglish ? "عربي" : "EN";
+  syncThemeButton();
   $("#languageButton").setAttribute("aria-label", isEnglish ? "التبديل إلى العربية" : "Switch to English");
   $("#autoRefresh").setAttribute("aria-label", t("autoRefresh"));
   document.title = isEnglish ? "noon minutes | Operations Dashboard" : "نون مينتس | لوحة العمليات";
@@ -2693,6 +2696,25 @@ function setAutoRefresh(enabled) {
   if (enabled) refreshTimer = window.setInterval(loadDashboard, REFRESH_INTERVAL_MS);
 }
 
+// Day or night look, remembered per browser; the head script applies it before the first paint.
+function syncThemeButton() {
+  const light = document.documentElement.dataset.theme === "light";
+  const label = t(light ? "themeDark" : "themeLight");
+  $("#themeButton").firstElementChild.textContent = light ? "☾" : "☀";
+  $("#themeButton").setAttribute("aria-label", label);
+  $("#themeButton").title = label;
+}
+$("#themeButton").addEventListener("click", () => {
+  const light = document.documentElement.dataset.theme !== "light";
+  if (light) document.documentElement.dataset.theme = "light";
+  else delete document.documentElement.dataset.theme;
+  try {
+    localStorage.setItem("dashboardTheme", light ? "light" : "dark");
+  } catch (error) {
+    // Storage can be blocked; the choice then lasts until the page closes.
+  }
+  syncThemeButton();
+});
 $("#refreshButton").addEventListener("click", loadDashboard);
 $("#languageButton").addEventListener("click", () => {
   locale = locale === "ar" ? "en" : "ar";
