@@ -7,8 +7,8 @@
     <meta name="description" content="لوحة متابعة تشغيلية مباشرة لأداء مستودعات التجهيز والفرز والشحن.">
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
-    <link rel="stylesheet" href="styles.css?v=35">
-    <script src="app.js?v=35" defer></script>
+    <link rel="stylesheet" href="styles.css?v=38">
+    <script src="app.js?v=38" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -84,13 +84,24 @@
               </div>
             </div>
 
-            <div class="kpi-grid" id="pickerKpis" aria-live="polite"></div>
+            <div class="summary-bar">
+              <h2>Picking Summary</h2>
+              <div class="summary-controls">
+                <span class="summary-date"><span aria-hidden="true">▦</span><span id="summaryDate">—</span></span>
+                <div class="wh-picker" id="warehousePicker">
+                  <button class="wh-button" id="warehouseButton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="warehouseMenu"><span class="wh-flag" aria-hidden="true"></span><span class="wh-group">EGNIM</span><span class="wh-divider" aria-hidden="true">|</span><span class="wh-list" id="warehouseButtonLabel"></span><span class="summary-chevron" aria-hidden="true">⌄</span></button>
+                  <div class="wh-menu" id="warehouseMenu" hidden></div>
+                </div>
+              </div>
+            </div>
+            <div class="summary-grid" id="pickerSummary" aria-live="polite"></div>
 
             <div class="picker-section-head"><h2 data-i18n="pkRemainingTitle">الفاضل في كل مخزن</h2><p data-i18n="pkRemainingSub">المتبقي من المطلوب ومين شغال دلوقتي، دوس على المخزن عشان تفلتر عليه</p></div>
             <div class="remaining-grid" id="pickerRemaining"></div>
 
+            <div class="kpi-grid picker-kpis" id="pickerKpis" aria-live="polite"></div>
+
             <div class="picker-toolbar">
-              <div class="heatmap-tabs picker-tabs" id="pickerWarehouseTabs" role="tablist" aria-label="المخزن" data-i18n-aria="warehouse"></div>
               <div class="filter-controls picker-filters">
                 <label><span data-i18n="pkFrom">من الساعة</span><select id="pickerFrom" aria-label="من الساعة" data-i18n-aria="pkFrom"></select></label>
                 <label><span data-i18n="pkTo">إلى الساعة</span><select id="pickerTo" aria-label="إلى الساعة" data-i18n-aria="pkTo"></select></label>

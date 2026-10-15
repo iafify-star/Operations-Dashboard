@@ -631,8 +631,6 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 .page-wrap > :not(.pickers-page):not(.connection-banner):not(.page-footer) { display: none; }
 .pickers-page .page-heading { margin-bottom: 22px; }
 .picker-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 20px 0 14px; }
-.picker-tabs { flex-wrap: wrap; }
-.picker-tab-count { margin-inline-start: 4px; padding: 0 6px; border-radius: 10px; background: #ffffff12; color: inherit; font-size: 8.5px; }
 .picker-filters select { min-width: 120px; }
 .picker-filters .search-box input { width: 160px; }
 .picker-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); gap: 14px; margin-bottom: 14px; }
@@ -708,11 +706,61 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
   .remaining-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .picker-filters label { flex: 1 1 45%; }
   .picker-toolbar { align-items: stretch; flex-direction: column; }
-  .picker-tabs { flex-wrap: nowrap; overflow-x: auto; }
-  .picker-tabs .heatmap-tab { flex: 0 0 auto; }
   .picker-filters select { flex: 1; min-width: 0; }
   .picker-filters .search-box { width: 100%; }
   .picker-filters .search-box input { width: 100%; }
   .picker-panel, .picker-table-panel { padding: 14px 13px; }
   .picker-table .picker-sticky { min-width: 130px; }
+}
+
+/* Picking Summary: a copy of Minutes Central's header, warehouse filter and four cards. */
+.summary-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 6px 0 12px; }
+.summary-bar h2 { margin: 0; font-size: 16px; font-weight: 800; }
+.summary-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.summary-date { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 13px; border: 1px solid var(--border); border-radius: 9px; background: #0f1b2d; color: var(--text); font: 600 11px "Segoe UI", sans-serif; }
+.summary-date span:first-child { color: var(--muted); }
+#summaryDate { direction: ltr; unicode-bidi: isolate; }
+.wh-picker { position: relative; }
+.wh-button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; max-width: min(420px, 82vw); padding: 0 12px; border: 1px solid var(--border); border-radius: 9px; background: #0f1b2d; color: var(--text); font: 600 11px "Segoe UI", sans-serif; cursor: pointer; }
+.wh-button:hover, .wh-button[aria-expanded="true"] { border-color: #ffe90066; }
+.wh-button:focus-visible { outline: 2px solid var(--brand-yellow); outline-offset: 2px; }
+.wh-flag { flex: 0 0 22px; width: 22px; height: 15px; border-radius: 2px; background: linear-gradient(#ce1126 0 33.3%, #ffffff 33.3% 66.6%, #111111 66.6%); box-shadow: 0 0 0 1px #ffffff22; }
+.wh-group { font-weight: 800; }
+.wh-divider { color: var(--muted-2); }
+.wh-list { overflow: hidden; color: #c4d1e3; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
+.summary-chevron { color: var(--muted); font-size: 13px; line-height: 1; transition: transform .18s ease; }
+.wh-menu { position: absolute; inset-inline-end: 0; top: calc(100% + 6px); z-index: 30; display: grid; gap: 2px; min-width: 230px; max-height: 320px; overflow: auto; padding: 6px; border: 1px solid var(--border); border-radius: 11px; background: #12203a; box-shadow: 0 14px 34px #0009; }
+.wh-menu[hidden] { display: none; }
+.wh-option { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 8px; color: var(--text); font: 600 11px "Segoe UI", sans-serif; cursor: pointer; }
+.wh-option:hover { background: #1a2b47; }
+.wh-option input { accent-color: var(--brand-yellow); width: 15px; height: 15px; }
+.wh-option small { margin-inline-start: auto; color: var(--muted); font-size: 10px; }
+.wh-option-all { border-bottom: 1px solid var(--border); border-radius: 8px 8px 0 0; margin-bottom: 3px; color: var(--brand-yellow); }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; align-items: start; }
+.summary-card { display: grid; gap: 9px; padding: 13px 15px 14px; border: 1px solid var(--border); border-radius: 12px; background: linear-gradient(145deg, #142239, #101b2e 78%); }
+.summary-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0; border: 0; background: none; color: #aab8cd; font: 600 11px "Segoe UI", sans-serif; text-align: start; cursor: pointer; }
+.summary-head:focus-visible { outline: 2px solid var(--brand-yellow); outline-offset: 3px; border-radius: 4px; }
+.summary-card.is-open .summary-chevron { transform: rotate(180deg); }
+.summary-value { display: flex; align-items: center; gap: 9px; }
+.summary-value strong { color: #f3f6fc; font: 800 24px/1.1 "Segoe UI", Tahoma, sans-serif; direction: ltr; }
+.summary-pill { padding: 2px 7px; border-radius: 6px; font: 700 10px "Segoe UI", sans-serif; direction: ltr; }
+.summary-pill.is-warn { background: #f2a34226; color: #f6b86a; }
+.summary-pill.is-info { background: #ac91ff26; color: #c4b2ff; }
+.summary-pill.is-good { background: #62d08726; color: #7ee3a0; }
+.summary-chip { justify-self: start; padding: 3px 9px; border: 1px solid var(--border); border-radius: 7px; color: #c4d1e3; font: 600 10px "Segoe UI", sans-serif; direction: ltr; }
+.summary-details { display: none; gap: 6px; margin: 2px 0 0; padding-top: 9px; border-top: 1px solid var(--border); }
+.summary-card.is-open .summary-details { display: grid; }
+.summary-details div { display: flex; justify-content: space-between; gap: 8px; }
+.summary-details dt { color: var(--muted); font-size: 10px; }
+.summary-details dd { margin: 0; color: var(--text); font: 700 11px "Segoe UI", sans-serif; direction: ltr; }
+.picker-kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 18px; }
+@media (max-width: 1180px) {
+  .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .picker-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .summary-controls, .wh-picker, .wh-button { width: 100%; max-width: none; }
+  .wh-menu { inset-inline: 0; min-width: 0; }
+  .summary-value strong { font-size: 20px; }
+  .picker-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
