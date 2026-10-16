@@ -1195,8 +1195,8 @@ function buildProductivityReportDocument(data) {
 }
 
 // Remaining work is a snapshot of now, so it ignores the hour range. It comes from the site's own
-// cards: what is still pending or in progress. Total minus picked would also count cancelled units,
-// which are in the site's total but will never be picked. The sheet's plan is the fallback.
+// cards: the Pending quantity only (in-progress units already have a picker). Total minus picked
+// would also count cancelled units, which never get picked. The sheet's plan is the fallback.
 function warehouseRemaining(view, keys = null) {
   const inScope = (key) => !keys || keys.includes(key);
   if (liveData) {
@@ -1205,7 +1205,7 @@ function warehouseRemaining(view, keys = null) {
       const done = liveData.value("picked_qty", code);
       const oos = liveData.value("oos", code);
       const active = liveData.value("active_pickers", code);
-      const remaining = liveData.value("pending_qty", code) + liveData.value("in_progress_qty", code);
+      const remaining = liveData.value("pending_qty", code);
       return { key: warehouseKey(code), code, required, done, remaining, oos, active, perActive: active ? Math.max(0, remaining - oos) / active : 0 };
     });
   }
