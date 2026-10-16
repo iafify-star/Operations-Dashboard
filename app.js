@@ -4,6 +4,8 @@ const REFRESH_INTERVAL_MS = 60_000;
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
 // The "Live" tab holds Minutes Central's picking cards: one row per metric, one column for ALL and per warehouse.
 const LIVE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1697017325`;
+// "LiveJobs" holds one row per picking job and hour, with the picker, warehouse and picking type.
+const LIVE_JOBS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=220728301`;
 
 const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const colors = {
@@ -33,6 +35,7 @@ const messages = {
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     pkNoLive: "أرقام الموقع مش متاحة دلوقتي، هتظهر مع التحديث الجاي.",
     pkTimeFilter: "فلتر الوقت",
+    pkTypeCol: "نوع البيك", pkAllTypes: "كل الأنواع", rptByType: "حسب نوع البيك", rptShare: "من الساعة",
     themeLight: "الوضع النهاري", themeDark: "الوضع الليلي",
     rptHourMet: "محققين من الشغالين",
     rptHourBanner: "بيانات الساعة", rptHourClosed: "الساعة دي خلصت", rptHourRunning: "الساعة دي لسه شغالة", rptHourDone: "منجز الساعة", rptHourTarget: "مستهدف الساعة",
@@ -251,6 +254,7 @@ const messages = {
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     pkNoLive: "Site figures are not available right now; they will appear with the next update.",
     pkTimeFilter: "Time filter",
+    pkTypeCol: "Picking type", pkAllTypes: "All types", rptByType: "By picking type", rptShare: "Share of hour",
     themeLight: "Day mode", themeDark: "Night mode",
     rptHourMet: "Pickers on target",
     rptHourBanner: "Figures for", rptHourClosed: "This hour is closed", rptHourRunning: "This hour is still running", rptHourDone: "Picked this hour", rptHourTarget: "Target this hour",
@@ -424,6 +428,22 @@ const $ = (selector) => document.querySelector(selector);
 let refreshTimer;
 let dashboardData;
 let liveData = null;
+let liveJobs = null;
+
+// Reads today's LiveJobs rows (the sheet's own date sits next to "today_key" in the header row).
+function parseLiveJobs(rows) {
+  const header = (rows[0] || []).map((cell) => String(cell ?? "").trim());
+  const columns = ["date_key", "hour", "picker", "warehouse", "picking_type", "picked_qty"].map((name) => header.indexOf(name));
+  const todayAt = header.indexOf("today_key");
+  if (columns.some((index) => index < 0) || todayAt < 0) return null;
+  const [day, hour, picker, warehouse, type, picked] = columns;
+  const today = textAt(rows[0], todayAt + 1);
+  const list = rows.slice(1)
+    .filter((row) => textAt(row, day) === today && textAt(row, picker))
+    .map((row) => ({ hour: parseNumber(textAt(row, hour)), user: textAt(row, picker), warehouse: textAt(row, warehouse), type: textAt(row, type), picked: parseNumber(textAt(row, picked)) }))
+    .filter((row) => row.picked > 0);
+  return list.length ? { rows: list } : null;
+}
 
 // Reads the Live tab into a lookup of metric by warehouse code ("ALL" for every warehouse together).
 function parseLive(rows) {
@@ -945,6 +965,72 @@ function shiftLabel(value) {
 
 // Each warehouse is scored on its own hourly target, shared across the pickers active in it
 // that hour. The latest hour is usually still running, so it is listed but kept out of the scoring.
+const PICKING_TYPES = [["batch_dynamic", "Batch Dynamic"], ["batch_static", "Batch Static"], ["multi_store_picking", "Multi Store Picking"]];
+const PICKING_TYPE_SHORT = { batch_dynamic: "Batch Dynamic", batch_static: "Batch Static", multi_store_picking: "Multi Store" };
+// The site's card breakdowns use their own names for each picking type.
+const PICKING_TYPE_METRIC = { batch_dynamic: "batch_dynamic", batch_static: "batch_static", multi_store_picking: "multi_store" };
+
+// Picking types a set of units came from, largest first, such as "Batch Dynamic + Multi Store".
+function typeLabel(types) {
+  if (!types || !types.size) return "—";
+  return [...types.entries()].sort((left, right) => right[1] - left[1]).map(([type]) => PICKING_TYPE_SHORT[type] || type).join(" + ");
+}
+
+function addTypes(target, source) {
+  source?.forEach((units, type) => target.set(type, (target.get(type) || 0) + units));
+  return target;
+}
+
+// Rebuilds the sheet's picker and warehouse pivots from the LiveJobs rows, keeping only the chosen
+// picking types, so every figure on the page can follow the type filter. Names and shifts still come
+// from the sheet, which matches users against the attendance list.
+function jobPivots(data) {
+  if (!liveJobs) return null;
+  const types = pickerFilter.types;
+  const rows = liveJobs.rows.filter((row) => !types || types.includes(row.type));
+  const nameIndex = data.pickers.headers.findIndex((header) => String(header ?? "").trim() === "الاسم");
+  const shiftIndex = data.pickers.headers.findIndex((header) => String(header ?? "").trim() === "الشيفت");
+  const people = new Map(data.pickers.records.map((record) => [textAt(record, 1).toLowerCase(), [nameIndex >= 0 ? textAt(record, nameIndex) : "", shiftIndex >= 0 ? textAt(record, shiftIndex) : ""]]));
+  const hourList = [...new Set(liveJobs.rows.map((row) => row.hour))].sort((left, right) => left - right);
+  const perPicker = new Map();
+  const perWarehouse = new Map();
+  rows.forEach((row) => {
+    const pickerKey = `${row.user}|${row.warehouse}`;
+    if (!perPicker.has(pickerKey)) perPicker.set(pickerKey, { user: row.user, warehouse: row.warehouse, units: new Map(), types: new Map() });
+    const picker = perPicker.get(pickerKey);
+    picker.units.set(row.hour, (picker.units.get(row.hour) || 0) + row.picked);
+    if (!picker.types.has(row.hour)) picker.types.set(row.hour, new Map());
+    addTypes(picker.types.get(row.hour), new Map([[row.type, row.picked]]));
+    if (!perWarehouse.has(row.warehouse)) perWarehouse.set(row.warehouse, { units: new Map(), staff: new Map() });
+    const warehouse = perWarehouse.get(row.warehouse);
+    warehouse.units.set(row.hour, (warehouse.units.get(row.hour) || 0) + row.picked);
+    if (!warehouse.staff.has(row.hour)) warehouse.staff.set(row.hour, new Set());
+    warehouse.staff.get(row.hour).add(row.user);
+  });
+  const hours = hourList.map((hour, position) => ({ hour, index: position + 5 }));
+  const pickerRecords = [...perPicker.values()].filter((picker) => [...picker.units.values()].some((units) => units > 0)).map((picker) => {
+    const [name, shift] = people.get(picker.user.toLowerCase()) || ["", ""];
+    return ["", picker.user, picker.warehouse, name, shift, ...hourList.map((hour) => Math.round(picker.units.get(hour) || 0))];
+  });
+  const pivot = (pick) => ({ headers: [], hours: hours.map(({ hour }, position) => ({ hour, index: position + 2 })), records: [...perWarehouse.entries()].map(([code, warehouse]) => ["", code, ...hourList.map((hour) => pick(warehouse, hour))]) });
+  return {
+    pickers: { headers: ["", "العامل", "المخزن", "الاسم", "الشيفت", ...hourList.map(String)], hours, records: pickerRecords },
+    warehouseHourly: pivot((warehouse, hour) => Math.round(warehouse.units.get(hour) || 0)),
+    warehouseStaff: pivot((warehouse, hour) => warehouse.staff.get(hour)?.size || 0),
+    typeHours: new Map([...perPicker.values()].map((picker) => [`${picker.user.split("@")[0]}|${warehouseKey(picker.warehouse)}`, picker.types])),
+  };
+}
+
+// A warehouse's hourly target belongs to all its picking; with some types chosen, the target is
+// scaled to those types' share of the warehouse's work today, from the site's own cards.
+function typeShare(code) {
+  const types = pickerFilter.types;
+  if (!types || !liveData) return 1;
+  const workOf = (type) => ["picked", "in_progress", "pending"].reduce((total, stage) => total + liveData.value(`${stage}_${PICKING_TYPE_METRIC[type]}`, code), 0);
+  const all = PICKING_TYPES.reduce((total, [type]) => total + workOf(type), 0);
+  return all ? types.reduce((total, type) => total + workOf(type), 0) / all : 1;
+}
+
 function pickerProductivity(data, { allHours = false, from = null, to = null } = {}) {
   const reportHour = latestReportHour(data);
   const hourRows = ((allHours ? data.pickingHourly : hourlyView(data.pickingHourly))?.records || []).filter((row) => {
@@ -953,18 +1039,19 @@ function pickerProductivity(data, { allHours = false, from = null, to = null } =
   });
   const hours = hourRows.map((row) => hourValue(textAt(row, 1)));
   const isOpen = (hour) => hours.length > 1 && hour === reportHour;
+  const source = jobPivots(data) || { pickers: data.pickers, warehouseHourly: data.warehouseHourly, warehouseStaff: data.warehouseStaff, typeHours: null };
   const pivotValues = (section, key) => {
     const row = section.records.find((record) => warehouseKey(textAt(record, 1)) === key);
     return new Map(section.hours.map(({ hour, index }) => [hour, row ? parseNumber(textAt(row, index)) : 0]));
   };
   // Warehouses without a plan in the sheet (such as cross-dock ones) still show their output, with no target.
   const planned = new Set(data.warehouses.map((warehouse) => warehouseKey(textAt(warehouse, 1))));
-  const unplanned = data.warehouseHourly.records.map((record) => textAt(record, 1)).filter((code) => code && !planned.has(warehouseKey(code)));
+  const unplanned = source.warehouseHourly.records.map((record) => textAt(record, 1)).filter((code) => code && !planned.has(warehouseKey(code)));
   const warehouses = [...data.warehouses, ...unplanned.map((code) => [null, code])].map((warehouse) => {
     const key = warehouseKey(textAt(warehouse, 1));
-    const target = planned.has(key) ? parseNumber(textAt(warehouse, 6)) : 0;
-    const units = pivotValues(data.warehouseHourly, key);
-    const staff = pivotValues(data.warehouseStaff, key);
+    const target = planned.has(key) ? parseNumber(textAt(warehouse, 6)) * typeShare(textAt(warehouse, 1)) : 0;
+    const units = pivotValues(source.warehouseHourly, key);
+    const staff = pivotValues(source.warehouseStaff, key);
     const shares = new Map();
     hours.forEach((hour) => {
       if (!isOpen(hour) && staff.get(hour) && target) shares.set(hour, target / staff.get(hour));
@@ -972,13 +1059,15 @@ function pickerProductivity(data, { allHours = false, from = null, to = null } =
     return { row: planned.has(key) ? warehouse : null, code: textAt(warehouse, 1), key, target, units, staff, shares };
   });
   const sharesOf = new Map(warehouses.map((warehouse) => [warehouse.key, warehouse.shares]));
-  const headerIndex = (label) => data.pickers.headers.findIndex((header) => String(header ?? "").trim() === label);
+  const headerIndex = (label) => source.pickers.headers.findIndex((header) => String(header ?? "").trim() === label);
   const nameIndex = headerIndex("الاسم");
   const shiftIndex = headerIndex("الشيفت");
-  const pickers = data.pickers.records.map((row) => {
+  const pickers = source.pickers.records.map((row) => {
     const warehouse = warehouseKey(textAt(row, 2));
     const shares = sharesOf.get(warehouse) || new Map();
-    const byHour = new Map(data.pickers.hours.map(({ hour, index }) => [hour, parseNumber(textAt(row, index))]));
+    const typesByHour = source.typeHours?.get(`${textAt(row, 1).split("@")[0]}|${warehouse}`) || new Map();
+    const types = new Map();
+    const byHour = new Map(source.pickers.hours.map(({ hour, index }) => [hour, parseNumber(textAt(row, index))]));
     let units = 0;
     let worked = 0;
     let share = 0;
@@ -986,21 +1075,23 @@ function pickerProductivity(data, { allHours = false, from = null, to = null } =
     const cells = hours.map((hour) => {
       const picked = byHour.get(hour) || 0;
       if (!picked) return null;
+      const cellTypes = typesByHour.get(hour) || new Map();
+      addTypes(types, cellTypes);
       if (isOpen(hour)) {
         openUnits += picked;
-        return { hour, picked, required: 0, open: true };
+        return { hour, picked, required: 0, open: true, types: cellTypes };
       }
       const required = shares.get(hour) || 0;
       units += picked;
       worked += 1;
       share += required;
-      return { hour, picked, required, open: false, met: picked >= required };
+      return { hour, picked, required, open: false, met: picked >= required, types: cellTypes };
     });
     const fullName = nameIndex >= 0 ? textAt(row, nameIndex) : "";
     const shiftKey = (shiftIndex >= 0 ? textAt(row, shiftIndex) : "").toLowerCase();
     return {
       user: textAt(row, 1).split("@")[0], fullName, name: fullName.split(/\s+/).slice(0, 2).join(" "),
-      shiftKey, shift: shiftLabel(shiftKey), warehouse, cells, units, worked, share, openUnits,
+      shiftKey, shift: shiftLabel(shiftKey), warehouse, cells, units, worked, share, openUnits, types,
       iph: worked ? units / worked : 0, rate: share > 0 ? units / share : 0, met: share > 0 && units >= share,
     };
   });
@@ -1150,9 +1241,10 @@ function mergePickers(pickers) {
       const parts = group.map((picker) => picker.cells[index]).filter(Boolean);
       if (!parts.length) return null;
       const picked = parts.reduce((total, cell) => total + cell.picked, 0);
-      if (parts.some((cell) => cell.open)) return { hour: parts[0].hour, picked, required: 0, open: true };
+      const types = parts.reduce((total, cell) => addTypes(total, cell.types), new Map());
+      if (parts.some((cell) => cell.open)) return { hour: parts[0].hour, picked, required: 0, open: true, types };
       const required = parts.reduce((total, cell) => total + cell.required, 0);
-      return { hour: parts[0].hour, picked, required, open: false, met: picked >= required };
+      return { hour: parts[0].hour, picked, required, open: false, met: picked >= required, types };
     });
     const closed = cells.filter((cell) => cell && !cell.open);
     const units = closed.reduce((total, cell) => total + cell.picked, 0);
@@ -1160,6 +1252,7 @@ function mergePickers(pickers) {
     const named = group.find((picker) => picker.fullName) || group[0];
     return {
       ...named, warehouse: group.map((picker) => picker.warehouse).join(" / "), warehouses: group.map((picker) => picker.warehouse), cells, units, share,
+      types: group.reduce((total, picker) => addTypes(total, picker.types), new Map()),
       worked: closed.length, openUnits: group.reduce((total, picker) => total + picker.openUnits, 0),
       iph: closed.length ? units / closed.length : 0, rate: share > 0 ? units / share : 0, met: share > 0 && units >= share,
     };
@@ -1236,22 +1329,38 @@ function buildHourReportDocument(data) {
     foot: warehouses.length > 1 ? warehouseLine(t("overallTotal"), line.done, line.target, workers, sum([...remainingOf.values()], (item) => item.remaining)).map((cell, position) => (position === 6 ? "—" : cell)) : null,
   });
 
+  // Each picking type's part of the hour, from the pickers who worked it.
+  const byType = new Map();
+  worked.forEach((picker) => cellAt(picker).types?.forEach((units, type) => {
+    const entry = byType.get(type) || { units: 0, pickers: 0 };
+    entry.units += units;
+    entry.pickers += 1;
+    byType.set(type, entry);
+  }));
+  const typeTable = byType.size
+    ? reportDataTable({
+      headers: [t("pkTypeCol"), t("rptPicked"), t("rptHourWorkers"), t("rptHourPerPicker"), t("rptShare")],
+      rows: [...byType.entries()].sort((left, right) => right[1].units - left[1].units).map(([type, entry]) => [PICKING_TYPE_SHORT[type] || type, { html: `<b>${formatNumber(entry.units)}</b>` }, formatNumber(entry.pickers), formatNumber(entry.units / entry.pickers), percent(entry.units, line.done)]),
+    })
+    : "";
+
+  const person = (picker) => ({ html: `<span class="report-person"><b>${escapeHtml(picker.name || picker.user)}</b><small>${escapeHtml(picker.user)}</small></span>` });
   const pickerLine = (picker, position) => {
     const cell = cellAt(picker);
-    return [String(position + 1), picker.name || picker.user, picker.user, picker.warehouse, picker.shift, { html: `<b>${formatNumber(cell.picked)}</b>` },
+    return [String(position + 1), person(picker), picker.warehouse, picker.shift, typeLabel(cell.types), { html: `<b>${formatNumber(cell.picked)}</b>` },
       cell.required ? formatNumber(cell.required) : "—", cell.required ? percent(cell.picked, cell.required) : "—",
       cell.open ? reportPill(t("hourOpen"), "muted") : cell.required ? status(cell.met) : "—"];
   };
   const workedTable = reportDataTable({
-    headers: ["#", t("nameCol"), t("userCol"), t("warehouseShort"), t("shiftCol"), t("rptPicked"), t("pkRequired"), t("pkRate"), t("statusCol")],
+    headers: ["#", t("nameCol"), t("warehouseShort"), t("shiftCol"), t("pkTypeCol"), t("rptPicked"), t("pkRequired"), t("pkRate"), t("statusCol")],
     rows: worked.map(pickerLine),
   });
   const focusTable = focus.length
     ? reportDataTable({
-      headers: ["#", t("nameCol"), t("userCol"), t("warehouseShort"), t("rptPicked"), t("pkRequired"), t("rptShort"), t("pkRate")],
+      headers: ["#", t("nameCol"), t("warehouseShort"), t("pkTypeCol"), t("rptPicked"), t("pkRequired"), t("rptShort"), t("pkRate")],
       rows: focus.map((picker, position) => {
         const cell = cellAt(picker);
-        return [String(position + 1), picker.name || picker.user, picker.user, picker.warehouse, formatNumber(cell.picked), formatNumber(cell.required), { html: `<span class="report-delta is-down">−${formatNumber(cell.required - cell.picked)}</span>` }, percent(cell.picked, cell.required)];
+        return [String(position + 1), person(picker), picker.warehouse, typeLabel(cell.types), formatNumber(cell.picked), formatNumber(cell.required), { html: `<span class="report-delta is-down">−${formatNumber(cell.required - cell.picked)}</span>` }, percent(cell.picked, cell.required)];
       }),
     })
     : `<p class="report-good-note">${escapeHtml(t(running ? "rptFocusRunning" : "rptNoFocus"))}</p>`;
@@ -1266,7 +1375,7 @@ function buildHourReportDocument(data) {
   const runningNote = openLine ? `<p class="report-footnote">${escapeHtml(`${t("rptRunningNote")} ${formatHour(openLine.hour)}: ${formatNumber(openLine.done)}`)}</p>` : "";
   const hourText = hour === null ? "—" : `${formatHour(hour)} – ${formatHour(nextHour)}`;
   const banner = `<div class="report-hour-banner"><div><small>${escapeHtml(t("rptHourBanner"))}</small><strong>${escapeHtml(hourText)}</strong></div><span>${escapeHtml(t(running ? "rptHourRunning" : "rptHourClosed"))} · <bdi dir="ltr">${escapeHtml(data.date || "")}</bdi></span></div>`;
-  const chips = `${chip(t("reportHourLabel"), hourText, true)}${chip(t("rptWarehouse"), selectionLabel())}${chip(t("reportIssuedLabel"), issuedAt)}${chip(t("pkSiteUpdate"), data.siteUpdatedAt || "—")}`;
+  const chips = `${chip(t("reportHourLabel"), hourText, true)}${chip(t("rptWarehouse"), selectionLabel())}${chip(t("pkTypeCol"), typesLabel())}${chip(t("reportIssuedLabel"), issuedAt)}${chip(t("pkSiteUpdate"), data.siteUpdatedAt || "—")}`;
 
   return `<div class="report-doc report-hourly report-productivity" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
     <header class="report-head">
@@ -1277,6 +1386,7 @@ function buildHourReportDocument(data) {
     ${banner}
     <section class="report-block"><h2>${escapeHtml(t("reportKpiSection"))}</h2><div class="report-stats report-stats-4">${statItems.map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div></section>
     <section class="report-block"><h2>${escapeHtml(t("rptHourWarehouses"))}</h2>${warehouseTable}</section>
+    ${typeTable ? `<section class="report-block"><h2>${escapeHtml(t("rptByType"))}</h2>${typeTable}</section>` : ""}
     <section class="report-block"><h2>${escapeHtml(t("rptFocus"))}</h2>${focusTable}</section>
     ${stoppedBlock}
     <section class="report-block"><h2>${escapeHtml(`${t("rptHourPickers")} (${workers})`)}</h2>${workedTable}</section>
@@ -1356,16 +1466,16 @@ function buildShiftReportDocument(data) {
   };
   const hourLabel = (hour) => (hours.length > 12 ? String(hour).padStart(2, "0") : formatHour(hour));
   const pickerMatrix = reportDataTable({
-    headers: [t("warehouseShort"), t("userCol"), t("nameCol"), t("shiftCol"), ...hours.map(hourLabel), t("totalShort"), t("statusCol")],
+    headers: [t("warehouseShort"), t("userCol"), t("nameCol"), t("shiftCol"), t("pkTypeCol"), ...hours.map(hourLabel), t("totalShort"), t("statusCol")],
     rows: pickers.slice().sort((left, right) => left.warehouse.localeCompare(right.warehouse) || right.units + right.openUnits - left.units - left.openUnits).map((picker) => [
-      picker.warehouse, picker.user, picker.name || "—", picker.shift, ...picker.cells.map(hitCell),
+      picker.warehouse, picker.user, picker.name || "—", picker.shift, typeLabel(picker.types), ...picker.cells.map(hitCell),
       { html: `<span class="report-hit is-${picker.met ? "good" : "bad"}"><b>${formatNumber(picker.units + picker.openUnits)}</b><small>${picker.share > 0 ? formatNumber(picker.share) : "—"}</small></span>` },
       picker.share > 0 ? status(picker.met) : picker.openUnits ? reportPill(t("hourOpen"), "muted") : "—",
     ]),
   });
 
   const period = hours.length ? `${formatHour(hours[0])} – ${formatHour(hours[hours.length - 1])}` : "—";
-  const chips = `${chip(t("reportDateLabel"), data.date || t("unknownDate"))}${chip(t("rptPeriod"), period, true)}${chip(t("rptWarehouse"), selectionLabel())}${chip(t("rptShift"), pickerFilter.shift === "all" ? t("pkAllShifts") : shiftLabel(pickerFilter.shift))}${chip(t("reportIssuedLabel"), issuedAt)}`;
+  const chips = `${chip(t("reportDateLabel"), data.date || t("unknownDate"))}${chip(t("rptPeriod"), period, true)}${chip(t("rptWarehouse"), selectionLabel())}${chip(t("rptShift"), pickerFilter.shift === "all" ? t("pkAllShifts") : shiftLabel(pickerFilter.shift))}${chip(t("pkTypeCol"), typesLabel())}${chip(t("reportIssuedLabel"), issuedAt)}`;
 
   return `<div class="report-doc report-hourly report-productivity" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
     <header class="report-head">
@@ -1441,14 +1551,15 @@ async function exportPickersExcel() {
       [t("reportDateLabel"), dashboardData?.date || ""],
       [t("rptPeriod"), period],
       [t("rptWarehouse"), selectionLabel()],
+      [t("pkTypeCol"), typesLabel()],
       [t("pkSiteUpdate"), dashboardData?.siteUpdatedAt || ""],
       [],
     ];
     const status = (picker) => (picker.share > 0 ? t(picker.met ? "metStatus" : "missStatus") : picker.openUnits ? t("hourOpen") : "");
-    const header = ["#", t("nameCol"), t("userCol"), t("warehouse"), t("shiftCol"), t("pkHours"), t("pkDone"), t("pkRequired"), t("pkRate"), t("pkPerHour"), t("statusCol"),
+    const header = ["#", t("nameCol"), t("userCol"), t("warehouse"), t("shiftCol"), t("pkTypeCol"), t("pkHours"), t("pkDone"), t("pkRequired"), t("pkRate"), t("pkPerHour"), t("statusCol"),
       ...hours.flatMap((hour) => [`${formatHour(hour)} ${t("pkDone")}`, `${formatHour(hour)} ${t("pkRequired")}`])];
     const rows = list.map((picker, index) => [
-      index + 1, picker.fullName || picker.name || "", picker.user, picker.warehouse, picker.shift === "—" ? "" : picker.shift, picker.worked,
+      index + 1, picker.fullName || picker.name || "", picker.user, picker.warehouse, picker.shift === "—" ? "" : picker.shift, typeLabel(picker.types), picker.worked,
       Math.round(picker.units + picker.openUnits), picker.share > 0 ? Math.round(picker.share) : "", picker.share > 0 ? picker.rate : "",
       picker.worked ? Math.round(picker.iph) : "", status(picker),
       ...picker.cells.flatMap((cell) => (cell ? [Math.round(cell.picked), cell.open ? t("hourOpen") : cell.required ? Math.round(cell.required) : ""] : ["", ""])),
@@ -1456,10 +1567,10 @@ async function exportPickersExcel() {
     const pickerSheet = XLSX.utils.aoa_to_sheet([...intro, header, ...rows]);
     // The achievement column is stored as a fraction so Excel can sort and chart it; it shows as a percentage.
     rows.forEach((row, index) => {
-      const cell = pickerSheet[XLSX.utils.encode_cell({ r: intro.length + 1 + index, c: 8 })];
+      const cell = pickerSheet[XLSX.utils.encode_cell({ r: intro.length + 1 + index, c: 9 })];
       if (cell && typeof cell.v === "number") cell.z = "0%";
     });
-    pickerSheet["!cols"] = [{ wch: 4 }, { wch: 30 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 7 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 10 }, ...hours.flatMap(() => [{ wch: 9 }, { wch: 9 }])];
+    pickerSheet["!cols"] = [{ wch: 4 }, { wch: 30 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 26 }, { wch: 7 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 10 }, ...hours.flatMap(() => [{ wch: 9 }, { wch: 9 }])];
 
     const hourHeader = [t("time"), ...columns, t("totalShort"), t("targetLabel"), t("gapCol"), t("activeStaff"), "IPP", t("statusCol")];
     const hourRows = lines.map((line) => [
@@ -2409,7 +2520,16 @@ function renderIssues(data) {
   }).join("") : `<div class="empty-state">${t("noLocations")}</div>`;
 }
 
-const pickerFilter = { shift: "all", status: "all", sort: "units", search: "", from: null, to: null };
+const pickerFilter = { types: null, shift: "all", status: "all", sort: "units", search: "", from: null, to: null };
+try {
+  const savedTypes = JSON.parse(localStorage.getItem("pickerTypes") || "null");
+  if (Array.isArray(savedTypes)) {
+    const valid = savedTypes.filter((type) => PICKING_TYPES.some(([key]) => key === type));
+    pickerFilter.types = valid.length && valid.length < PICKING_TYPES.length ? valid : null;
+  }
+} catch (error) {
+  // Private windows can refuse storage; every type is shown then.
+}
 
 function fillSelect(select, options, value) {
   select.innerHTML = options.map(([key, label]) => `<option value="${escapeHtml(key)}"${key === value ? " selected" : ""}>${escapeHtml(label)}</option>`).join("");
@@ -2533,6 +2653,18 @@ function renderSiteSummary(data) {
   }).join("");
 }
 
+function typesLabel() {
+  return pickerFilter.types ? pickerFilter.types.map((type) => PICKING_TYPE_SHORT[type]).join(", ") : t("pkAllTypes");
+}
+
+// The type filter needs the per-job rows; without them the page falls back to the sheet's totals and hides it.
+function renderTypePicker() {
+  $("#typePicker").hidden = !liveJobs;
+  $("#typeButtonLabel").textContent = typesLabel();
+  const chosen = pickerFilter.types || PICKING_TYPES.map(([type]) => type);
+  $("#typeMenu").innerHTML = `<label class="wh-option wh-option-all"><input type="checkbox" data-type="all"${pickerFilter.types ? "" : " checked"}><span>${escapeHtml(t("pkAllTypes"))}</span></label>${PICKING_TYPES.map(([type, label]) => `<label class="wh-option"><input type="checkbox" data-type="${type}"${chosen.includes(type) ? " checked" : ""}><span>${escapeHtml(label)}</span></label>`).join("")}`;
+}
+
 function renderWarehousePicker() {
   const all = offeredCodes.every((code) => selectedCodes.has(code));
   $("#warehouseButtonLabel").textContent = all ? offeredCodes.join(", ") : [...selectedCodes].join(", ");
@@ -2554,6 +2686,7 @@ function renderPickersPage(data, { animate = true } = {}) {
   const keys = selectedKeys();
   renderWarehousePicker();
   renderSiteSummary(data);
+  renderTypePicker();
 
   const shiftKeys = [...new Set(day.pickers.filter((picker) => picker.worked > 0 || picker.openUnits > 0).map((picker) => picker.shiftKey).filter(Boolean))].sort();
   const hourOptions = dayHours.map((hour) => [String(hour), formatHour(hour)]);
@@ -2579,7 +2712,9 @@ function renderPickersPage(data, { animate = true } = {}) {
   const closedUnits = inScope.reduce((total, picker) => total + picker.units, 0);
   const openUnits = inScope.reduce((total, picker) => total + picker.openUnits, 0);
   const pickerHours = inScope.reduce((total, picker) => total + picker.worked, 0);
-  const activeNow = liveData ? remaining.reduce((total, item) => total + item.active, 0) : inScope.filter((picker) => picker.openUnits > 0).length;
+  // The site's Active Pickers cover every picking type, so a type filter counts from the jobs instead.
+  const siteActive = liveData && !pickerFilter.types;
+  const activeNow = siteActive ? remaining.reduce((total, item) => total + item.active, 0) : inScope.filter((picker) => picker.openUnits > 0).length;
   const metrics = [
     { label: t("pkKpiActive"), value: formatNumber(activeNow), sub: keys ? escapeHtml(keys.join(" · ")) : t("pkKpiPickersSub"), icon: "◉", accent: colors.teal },
     { label: t("pkKpiUnits"), value: formatNumber(closedUnits + openUnits), sub: `<strong>${formatNumber(openUnits)}</strong> ${t("pkKpiUnitsSub")}`, icon: "✓", accent: colors.green },
@@ -2631,7 +2766,7 @@ function renderPickersPage(data, { animate = true } = {}) {
     const groupUnits = group.reduce((total, picker) => total + picker.units, 0);
     return `<td class="warehouse-name">${escapeHtml(label)}</td><td>${formatNumber(active)}</td><td>${formatNumber(groupUnits + group.reduce((total, picker) => total + picker.openUnits, 0))}</td><td>${groupHours ? formatNumber(groupUnits / groupHours) : "—"}</td><td class="picker-good">${formatNumber(groupMet)}</td><td class="picker-bad">${formatNumber(groupScored.length - groupMet)}</td>`;
   };
-  const warehouseActive = (key, group) => (liveData ? activeOf.get(key) || 0 : group.filter((picker) => picker.openUnits > 0).length);
+  const warehouseActive = (key, group) => (siteActive ? activeOf.get(key) || 0 : group.filter((picker) => picker.openUnits > 0).length);
   $("#pickerWarehouses").innerHTML = tableKeys.length
     ? `<table class="picker-summary"><thead><tr><th>${t("warehouse")}</th><th>${t("pkStatusActive")}</th><th>${t("pkDone")}</th><th>${t("pkPerHour")}</th><th>${t("pkMetCol")}</th><th>${t("pkMissedCol")}</th></tr></thead><tbody>${tableKeys.map((key) => {
       const group = pickerScope(view, { keys: [key] });
@@ -2644,9 +2779,9 @@ function renderPickersPage(data, { animate = true } = {}) {
     if (cell.open) return `<td class="picker-hour"><span class="picker-hit is-open"><b>${formatNumber(cell.picked)}</b><small>${escapeHtml(t("hourOpenShort"))}</small></span></td>`;
     return `<td class="picker-hour"><span class="picker-hit is-${cell.met ? "good" : "bad"}"><b>${formatNumber(cell.picked)}</b><small>${cell.required ? formatNumber(cell.required) : "—"}</small></span></td>`;
   };
-  const head = `<thead><tr><th class="picker-sticky">${t("pkPicker")}</th><th>${t("warehouseShort")}</th><th>${t("shiftCol")}</th><th>${t("pkHours")}</th><th>${t("pkDone")}</th><th>${t("pkRequired")}</th><th>${t("pkRate")}</th><th>${t("pkPerHour")}</th><th>${t("statusCol")}</th>${hours.map((hour) => `<th class="picker-hour${isOpen(hour) ? " is-open" : ""}">${formatHour(hour)}</th>`).join("")}</tr></thead>`;
-  const body = list.map((picker, index) => `<tr><td class="picker-sticky">${pickerNameCell(picker, index + 1)}</td><td>${escapeHtml(picker.warehouse)}</td><td>${escapeHtml(picker.shift)}</td><td>${formatNumber(picker.worked)}</td><td><b>${formatNumber(picker.units + picker.openUnits)}</b></td><td>${picker.share > 0 ? formatNumber(picker.share) : "—"}</td><td>${pickerRateBar(picker)}</td><td>${picker.worked ? formatNumber(picker.iph) : "—"}</td><td>${pickerStatusPill(picker)}</td>${picker.cells.map(hourCell).join("")}</tr>`).join("");
-  $("#pickerTable").innerHTML = `${head}<tbody>${body || `<tr><td colspan="${9 + hours.length}" class="empty-state">${t(inScope.length ? "pkNoMatch" : "pkNoData")}</td></tr>`}</tbody>`;
+  const head = `<thead><tr><th class="picker-sticky">${t("pkPicker")}</th><th>${t("warehouseShort")}</th><th>${t("shiftCol")}</th><th>${t("pkTypeCol")}</th><th>${t("pkHours")}</th><th>${t("pkDone")}</th><th>${t("pkRequired")}</th><th>${t("pkRate")}</th><th>${t("pkPerHour")}</th><th>${t("statusCol")}</th>${hours.map((hour) => `<th class="picker-hour${isOpen(hour) ? " is-open" : ""}">${formatHour(hour)}</th>`).join("")}</tr></thead>`;
+  const body = list.map((picker, index) => `<tr><td class="picker-sticky">${pickerNameCell(picker, index + 1)}</td><td>${escapeHtml(picker.warehouse)}</td><td>${escapeHtml(picker.shift)}</td><td class="picker-type">${escapeHtml(typeLabel(picker.types))}</td><td>${formatNumber(picker.worked)}</td><td><b>${formatNumber(picker.units + picker.openUnits)}</b></td><td>${picker.share > 0 ? formatNumber(picker.share) : "—"}</td><td>${pickerRateBar(picker)}</td><td>${picker.worked ? formatNumber(picker.iph) : "—"}</td><td>${pickerStatusPill(picker)}</td>${picker.cells.map(hourCell).join("")}</tr>`).join("");
+  $("#pickerTable").innerHTML = `${head}<tbody>${body || `<tr><td colspan="${10 + hours.length}" class="empty-state">${t(inScope.length ? "pkNoMatch" : "pkNoData")}</td></tr>`}</tbody>`;
   $("#pickerCount").textContent = `${list.length} ${t("pkOf")} ${inScope.length} ${t("pkShowing")}`;
   $("#pickersUpdated").textContent = data.siteUpdatedAt || data.date || "—";
 }
@@ -2666,7 +2801,7 @@ async function loadDashboard() {
   try {
     const request = (url) => fetch(`${url}&_=${Date.now()}`, { cache: "no-store", headers: { Accept: "text/csv" } });
     // The site's own cards live in a separate tab; the page still works from the dashboard tab if they fail to load.
-    const [response, liveResponse] = await Promise.all([request(SHEET_URL), request(LIVE_URL).catch(() => null)]);
+    const [response, liveResponse, jobsResponse] = await Promise.all([request(SHEET_URL), request(LIVE_URL).catch(() => null), request(LIVE_JOBS_URL).catch(() => null)]);
     if (!response.ok) throw new Error(`${t("requestFailed")} (${response.status}).`);
     const csv = await response.text();
     if (!csv.trim() || csv.includes("<!DOCTYPE html")) throw new Error(t("invalidCsv"));
@@ -2674,6 +2809,8 @@ async function loadDashboard() {
     const data = parseDashboard(rows);
     const liveCsv = liveResponse?.ok ? await liveResponse.text().catch(() => "") : "";
     liveData = liveCsv && !liveCsv.includes("<!DOCTYPE html") ? parseLive(parseCsv(liveCsv)) : null;
+    const jobsCsv = jobsResponse?.ok ? await jobsResponse.text().catch(() => "") : "";
+    liveJobs = jobsCsv && !jobsCsv.includes("<!DOCTYPE html") ? parseLiveJobs(parseCsv(jobsCsv)) : null;
     lastSyncAt = new Date();
     lastSyncError = "";
     renderDashboard(data);
@@ -2783,11 +2920,35 @@ function setWarehouseMenu(open) {
   $("#warehouseButton").setAttribute("aria-expanded", String(open));
 }
 $("#warehouseButton").addEventListener("click", () => setWarehouseMenu($("#warehouseMenu").hidden));
+function setTypeMenu(open) {
+  $("#typeMenu").hidden = !open;
+  $("#typeButton").setAttribute("aria-expanded", String(open));
+}
+$("#typeButton").addEventListener("click", () => setTypeMenu($("#typeMenu").hidden));
 document.addEventListener("click", (event) => {
   if (!event.target.closest("#warehousePicker")) setWarehouseMenu(false);
+  if (!event.target.closest("#typePicker")) setTypeMenu(false);
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") setWarehouseMenu(false);
+  if (event.key !== "Escape") return;
+  setWarehouseMenu(false);
+  setTypeMenu(false);
+});
+// Ticking every type, or "All", clears the filter; the last ticked type cannot be unticked.
+$("#typeMenu").addEventListener("change", (event) => {
+  const box = event.target.closest("[data-type]");
+  if (!box || !dashboardData) return;
+  const chosen = new Set(pickerFilter.types || PICKING_TYPES.map(([type]) => type));
+  if (box.dataset.type === "all") chosen.clear();
+  else if (box.checked) chosen.add(box.dataset.type);
+  else if (chosen.size > 1) chosen.delete(box.dataset.type);
+  pickerFilter.types = chosen.size && chosen.size < PICKING_TYPES.length ? PICKING_TYPES.map(([type]) => type).filter((type) => chosen.has(type)) : null;
+  try {
+    localStorage.setItem("pickerTypes", JSON.stringify(pickerFilter.types));
+  } catch (error) {
+    // Storage can be blocked; the choice then lasts until the page closes.
+  }
+  renderPickersPage(dashboardData, { animate: false });
 });
 $("#warehouseMenu").addEventListener("change", (event) => {
   const box = event.target.closest("[data-code]");

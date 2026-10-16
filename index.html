@@ -8,8 +8,8 @@
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
     <script>try { if (localStorage.getItem("dashboardTheme") === "light") document.documentElement.dataset.theme = "light"; } catch (error) {}</script>
-    <link rel="stylesheet" href="styles.css?v=46">
-    <script src="app.js?v=46" defer></script>
+    <link rel="stylesheet" href="styles.css?v=48">
+    <script src="app.js?v=49" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -106,6 +106,10 @@
 
             <div class="picker-toolbar">
               <div class="filter-controls picker-filters">
+                <div class="wh-picker type-picker" id="typePicker" hidden>
+                  <button class="wh-button type-button" id="typeButton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="typeMenu"><span class="type-button-title" data-i18n="pkTypeCol">نوع البيك</span><span class="wh-divider" aria-hidden="true">|</span><span class="wh-list" id="typeButtonLabel"></span><span class="summary-chevron" aria-hidden="true">⌄</span></button>
+                  <div class="wh-menu" id="typeMenu" hidden></div>
+                </div>
                 <select id="pickerShift" aria-label="الشيفت" data-i18n-aria="shiftCol"></select>
                 <select id="pickerStatus" aria-label="الحالة" data-i18n-aria="statusCol"></select>
                 <select id="pickerSort" aria-label="الترتيب" data-i18n-aria="pkSortLabel"></select>

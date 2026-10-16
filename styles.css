@@ -870,3 +870,11 @@ html[data-theme="light"] .page-footer .footer-brand { color: #4f5d74; }
 html[data-theme="light"] .page-footer .footer-brand > span:first-child { color: var(--gold); }
 html[data-theme="light"] .updated-at b { color: #18233a; }
 html[data-theme="light"] .live-pill { background: #e2f6e9; color: #1c7a3e; }
+.type-picker[hidden] { display: none; }
+.type-button { min-height: 36px; max-width: 320px; }
+.type-button-title { color: var(--muted); }
+@media (max-width: 620px) {
+  .type-picker, .type-button { width: 100%; max-width: none; }
+}
+.report-person { display: grid; line-height: 1.25; }
+.report-person small { color: #74839a; font-size: 7.5px; font-weight: 500; }
