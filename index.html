@@ -8,8 +8,8 @@
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
     <script>try { if (localStorage.getItem("dashboardTheme") === "light") document.documentElement.dataset.theme = "light"; } catch (error) {}</script>
-    <link rel="stylesheet" href="styles.css?v=49">
-    <script src="app.js?v=53" defer></script>
+    <link rel="stylesheet" href="styles.css?v=50">
+    <script src="app.js?v=55" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -143,6 +143,42 @@
               <div class="table-scroll picker-table-scroll"><table class="picker-table" id="pickerTable"></table></div>
               <p class="picker-note" data-i18n="pkNote">المطلوب من كل بيكر = مستهدف المخزن في الساعة ÷ عدد البيكرز اللي اشتغلوا فيه الساعة دي. الساعة الحالية لسه شغالة فمش داخلة في الحكم.</p>
             </article>
+
+            <section class="incidents-section" id="incidents" aria-labelledby="incidentsTitle" hidden>
+              <div class="summary-bar incidents-bar">
+                <div><h2 id="incidentsTitle" data-i18n="icTitle">مشاكل التجهيز (Incident Reported)</h2><p class="incidents-sub" data-i18n="icSubtitle">البلاغات اللي البيكرز عملوها في Minutes Central، بنفس فلاتر المخازن ونوع البيك والوقت اللي فوق</p></div>
+                <div class="summary-controls">
+                  <button class="report-button report-button-hourly" id="incidentHourReportButton" type="button" title="تنزيل تقرير مشاكل آخر ساعة خلصت بكل بلاغاتها" data-i18n-title="icHourReportTitle"><span class="report-icon">◷</span><span class="report-button-label" data-i18n="icHourReport">مشاكل الساعة</span></button>
+                  <button class="report-button" id="incidentDayReportButton" type="button" title="تنزيل تقرير إجمالي مشاكل اليوم" data-i18n-title="icDayReportTitle"><span class="report-icon">⤓</span><span class="report-button-label" data-i18n="icDayReport">مشاكل اليوم</span></button>
+                  <button class="report-button picker-excel-button" id="incidentExcelButton" type="button" title="تنزيل كل البلاغات بكل تفاصيلها في ملف Excel" data-i18n-title="icExcelTitle"><span class="report-icon">▦</span><span class="report-button-label" data-i18n="icExcel">البلاغات Excel</span></button>
+                </div>
+              </div>
+              <div class="kpi-grid incident-kpis" id="incidentKpis" aria-live="polite"></div>
+              <section class="dashboard-grid incident-grid">
+                <article class="panel picker-panel">
+                  <div class="panel-heading"><div><span class="panel-icon blue">▦</span><div><h3 data-i18n="icByWarehouse">المشاكل في كل مخزن</h3><p data-i18n="icByWarehouseSub">عدد البلاغات والقطع وكل سبب</p></div></div></div>
+                  <div class="table-scroll" id="incidentWarehouses"></div>
+                </article>
+                <article class="panel picker-panel">
+                  <div class="panel-heading"><div><span class="panel-icon amber">◷</span><div><h3 data-i18n="icByHour">المشاكل كل ساعة</h3><p data-i18n="icByHourSub">البلاغات حسب ساعة التبليغ</p></div></div></div>
+                  <div class="table-scroll" id="incidentHours"></div>
+                </article>
+              </section>
+              <section class="dashboard-grid incident-grid-3">
+                <article class="panel picker-panel">
+                  <div class="panel-heading"><div><span class="panel-icon red">⌖</span><div><h3 data-i18n="icTopLocations">أكتر اللوكيشنات</h3><p data-i18n="icTopSub">أعلى 10 في القطع المتخطاة</p></div></div></div>
+                  <div class="table-scroll" id="incidentLocations"></div>
+                </article>
+                <article class="panel picker-panel">
+                  <div class="panel-heading"><div><span class="panel-icon violet">▤</span><div><h3 data-i18n="icTopSkus">أكتر المنتجات</h3><p data-i18n="icTopSub">أعلى 10 في القطع المتخطاة</p></div></div></div>
+                  <div class="table-scroll" id="incidentSkus"></div>
+                </article>
+                <article class="panel picker-panel">
+                  <div class="panel-heading"><div><span class="panel-icon teal">♙</span><div><h3 data-i18n="icTopPickers">أكتر البيكرز في البلاغات</h3><p data-i18n="icTopSub">أعلى 10 في القطع المتخطاة</p></div></div></div>
+                  <div class="table-scroll" id="incidentPickers"></div>
+                </article>
+              </section>
+            </section>
           </section>
 
           <section class="section-block" aria-labelledby="overviewTitle">

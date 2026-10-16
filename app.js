@@ -6,6 +6,8 @@ const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?for
 const LIVE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1697017325`;
 // "LiveJobs" holds one row per picking job and hour, with the picker, warehouse and picking type.
 const LIVE_JOBS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=220728301`;
+// "LiveIncidents" mirrors the Incident Reported tab: one row per skipped location.
+const LIVE_INCIDENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=737990709`;
 
 const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const colors = {
@@ -35,6 +37,16 @@ const messages = {
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     pkNoLive: "أرقام الموقع مش متاحة دلوقتي، هتظهر مع التحديث الجاي.",
     pkTimeFilter: "فلتر الوقت",
+    icTitle: "مشاكل التجهيز (Incident Reported)", icSubtitle: "البلاغات اللي البيكرز عملوها في Minutes Central، بنفس فلاتر المخازن ونوع البيك والوقت اللي فوق",
+    icHourReport: "مشاكل الساعة", icHourReportTitle: "تنزيل تقرير مشاكل آخر ساعة خلصت بكل بلاغاتها", icDayReport: "مشاكل اليوم", icDayReportTitle: "تنزيل تقرير إجمالي مشاكل اليوم",
+    icExcel: "البلاغات Excel", icExcelTitle: "تنزيل كل البلاغات بكل تفاصيلها في ملف Excel", icByWarehouse: "المشاكل في كل مخزن", icByWarehouseSub: "عدد البلاغات والقطع وكل سبب",
+    icByHour: "المشاكل كل ساعة", icByHourSub: "البلاغات حسب ساعة التبليغ", icByType: "المشاكل حسب نوع البيك", icTopLocations: "أكتر اللوكيشنات", icTopSkus: "أكتر المنتجات",
+    icTopPickers: "أكتر البيكرز في البلاغات", icTopSub: "أعلى 10 في القطع المتخطاة", icReports: "بلاغات", icReportsSub: "عدد مرات التبليغ", icUnits: "قطع متخطاة",
+    icOfPicked: "من القطع (متلقط + متخطى)", icOfUnits: "من القطع المتخطاة", icPickers: "بيكرز بلّغوا", icPickersSub: "عدد البيكرز اللي عملوا بلاغات", icNone: "مفيش بلاغات في الفترة دي.",
+    icLocation: "اللوكيشن", icLocations: "لوكيشنات", icSkus: "منتجات", icMainReason: "السبب الأكتر", icHourHeading: "تقرير مشاكل الساعة", icDayHeading: "تقرير مشاكل اليوم",
+    icHourBanner: "مشاكل الساعة", icDayBanner: "مشاكل الفترة", icAllList: "كل بلاغات الساعة", icTime: "وقت البلاغ", icReason: "السبب", icQty: "العدد", icZone: "الزون",
+    icBarcode: "الباركود", icJob: "رقم الـ Job", icReportedBy: "بلّغ", icExcelNote: "القايمة الكاملة لكل بلاغات الفترة بكل تفاصيلها موجودة في زرار \"البلاغات Excel\".",
+    rsMissing: "مش موجود (Missing)", rsDamaged: "تالف (Damaged)", rsExpired: "منتهي (Expired)",
     pkTypeCol: "نوع البيك", pkAllTypes: "كل الأنواع", rptByType: "حسب نوع البيك", rptShare: "من الساعة",
     themeLight: "الوضع النهاري", themeDark: "الوضع الليلي",
     rptHourMet: "محققين من الشغالين",
@@ -254,6 +266,16 @@ const messages = {
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     pkNoLive: "Site figures are not available right now; they will appear with the next update.",
     pkTimeFilter: "Time filter",
+    icTitle: "Picking incidents (Incident Reported)", icSubtitle: "Reports pickers raised in Minutes Central, with the warehouse, picking type and time filters above",
+    icHourReport: "Hour incidents", icHourReportTitle: "Download every incident in the last finished hour", icDayReport: "Day incidents", icDayReportTitle: "Download the incident summary for the day",
+    icExcel: "Incidents Excel", icExcelTitle: "Download every incident with all its details as an Excel file", icByWarehouse: "Incidents by warehouse", icByWarehouseSub: "Reports, units and each reason",
+    icByHour: "Incidents by hour", icByHourSub: "Reports by the hour they were raised", icByType: "Incidents by picking type", icTopLocations: "Top locations", icTopSkus: "Top products",
+    icTopPickers: "Pickers with most reports", icTopSub: "Top 10 by skipped units", icReports: "Reports", icReportsSub: "times an incident was raised", icUnits: "Skipped units",
+    icOfPicked: "of units (picked + skipped)", icOfUnits: "of skipped units", icPickers: "Pickers reporting", icPickersSub: "pickers who raised a report", icNone: "No incidents in this period.",
+    icLocation: "Location", icLocations: "Locations", icSkus: "Products", icMainReason: "Main reason", icHourHeading: "Hourly Incident Report", icDayHeading: "Daily Incident Report",
+    icHourBanner: "Incidents for", icDayBanner: "Incidents for the period", icAllList: "Every report this hour", icTime: "Reported at", icReason: "Reason", icQty: "Qty", icZone: "Zone",
+    icBarcode: "Barcode", icJob: "Job", icReportedBy: "Reported by", icExcelNote: "The full list of every incident in the period, with all details, is in \"Incidents Excel\".",
+    rsMissing: "Missing", rsDamaged: "Damaged", rsExpired: "Expired",
     pkTypeCol: "Picking type", pkAllTypes: "All types", rptByType: "By picking type", rptShare: "Share of hour",
     themeLight: "Day mode", themeDark: "Night mode",
     rptHourMet: "Pickers on target",
@@ -429,6 +451,7 @@ let refreshTimer;
 let dashboardData;
 let liveData = null;
 let liveJobs = null;
+let liveIncidents = null;
 
 // Reads today's LiveJobs rows (the sheet's own date sits next to "today_key" in the header row).
 function parseLiveJobs(rows) {
@@ -442,7 +465,22 @@ function parseLiveJobs(rows) {
     .filter((row) => textAt(row, day) === today && textAt(row, picker))
     .map((row) => ({ hour: parseNumber(textAt(row, hour)), user: textAt(row, picker), warehouse: textAt(row, warehouse), type: textAt(row, type), picked: parseNumber(textAt(row, picked)) }))
     .filter((row) => row.picked > 0);
-  return list.length ? { rows: list } : null;
+  return list.length ? { rows: list, today } : null;
+}
+
+// Reads the LiveIncidents tab for one day. An empty tab (nothing synced yet) gives null so the section stays hidden.
+function parseIncidents(rows, dayKey) {
+  const header = (rows[0] || []).map((cell) => String(cell ?? "").trim());
+  const at = (name) => header.indexOf(name);
+  if (rows.length < 2 || at("reason") < 0 || at("qty") < 0) return null;
+  const text = (row, name) => textAt(row, at(name)).replace(/^'/, "");
+  const list = rows.slice(1).filter((row) => text(row, "date_key") === dayKey).map((row) => ({
+    hour: parseNumber(text(row, "hour")), time: text(row, "time"), code: text(row, "warehouse"), key: warehouseKey(text(row, "warehouse")),
+    zone: text(row, "zone"), location: text(row, "location"), sku: text(row, "sku"), wmsBarcode: text(row, "wms_barcode"), barcode: text(row, "barcode"),
+    partner: text(row, "partner"), job: text(row, "job_nr"), type: text(row, "job_type"), reason: text(row, "reason"), by: text(row, "skipped_by"),
+    user: text(row, "picker"), qty: parseNumber(text(row, "qty")),
+  }));
+  return { rows: list };
 }
 
 // Reads the Live tab into a lookup of metric by warehouse code ("ALL" for every warehouse together).
@@ -1387,6 +1425,86 @@ function buildHourReportDocument(data) {
   </div>`;
 }
 
+// Incident reports: "hour" lists every report in the last finished hour; "day" sums the page's hour range.
+function buildIncidentReportDocument(data, mode) {
+  const hourMode = mode === "hour";
+  const view = pickerProductivity(data, { allHours: true });
+  const hour = hourMode ? reportHourChoice(view) : null;
+  const items = incidentsInScope(hourMode ? { hour } : {});
+  const names = pickerNames(data);
+  const total = incidentTotals(items);
+  const previous = hourMode && hour !== null ? incidentTotals(incidentsInScope({ hour: hour - 1 })) : null;
+  const now = new Date();
+  const issuedAt = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const heading = t(hourMode ? "icHourHeading" : "icDayHeading");
+  const chip = (label, value, key = false) => `<div class="report-chip${key ? " is-key" : ""}"><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`;
+  const signed = (value) => `${value > 0 ? "+" : value < 0 ? "−" : ""}${formatNumber(Math.abs(value))}`;
+  const figure = (value) => (value ? formatNumber(value) : { html: '<span class="report-zero">0</span>' });
+  const stacked = (main, sub) => ({ html: `<span class="report-person"><b class="report-break">${escapeHtml(main)}</b><small class="report-break">${escapeHtml(sub)}</small></span>` });
+  const rangeHours = view.hours.filter((item) => (pickerFilter.from === null || item >= pickerFilter.from) && (pickerFilter.to === null || item <= pickerFilter.to));
+  const period = hourMode
+    ? (hour === null ? "—" : `${formatHour(hour)} – ${formatHour((hour + 1) % 24)}`)
+    : (rangeHours.length ? `${formatHour(rangeHours[0])} – ${formatHour(rangeHours[rangeHours.length - 1])}` : "—");
+
+  const statItems = [
+    [t("icReports"), formatNumber(total.reports), colors.amber],
+    [t("icUnits"), formatNumber(total.units), colors.red],
+    ...INCIDENT_REASONS.map((reason, index) => [reasonLabel(reason), formatNumber(total.reasons.get(reason) || 0), [colors.violet, colors.red, colors.amber][index]]),
+    [t("icPickers"), formatNumber(new Set(items.map((item) => item.user)).size), colors.blue],
+    [t("icLocations"), formatNumber(new Set(items.map((item) => `${item.key}|${item.location}`)).size), colors.teal],
+    hourMode ? [t("rptVsPrevious"), previous ? signed(total.units - previous.units) : "—", previous && total.units > previous.units ? colors.red : colors.green] : [t("icSkus"), formatNumber(new Set(items.map((item) => item.sku)).size), colors.green],
+  ];
+
+  const reasonHeads = INCIDENT_REASONS.map(reasonLabel);
+  const groupLine = (label, group) => [label, formatNumber(group.reports), { html: `<b>${formatNumber(group.units)}</b>` }, ...INCIDENT_REASONS.map((reason) => figure(group.reasons.get(reason) || 0))];
+  const groupTable = (firstHeader, groups, labelOf) => reportDataTable({
+    headers: [firstHeader, t("icReports"), t("icUnits"), ...reasonHeads],
+    rows: groups.map((group) => groupLine(labelOf(group), group)),
+    foot: groups.length > 1 ? groupLine(t("overallTotal"), total) : null,
+  });
+  const block = (title, content) => `<section class="report-block"><h2>${escapeHtml(title)}</h2>${content}</section>`;
+  const byWarehouse = incidentGroups(items, (item) => item.key).sort((left, right) => right.units - left.units);
+  const byType = incidentGroups(items, (item) => item.type).sort((left, right) => right.units - left.units);
+  const nameOf = (user) => names.get(user.toLowerCase()) || user.split("@")[0];
+  const topTable = (keyOf, headers, line, limit = 15) => reportDataTable({
+    headers: ["#", ...headers, t("icReports"), t("icUnits"), t("icMainReason")],
+    rows: incidentGroups(items, keyOf).sort((left, right) => right.units - left.units || right.reports - left.reports).slice(0, limit)
+      .map((group, position) => [String(position + 1), ...line(group), formatNumber(group.reports), { html: `<b>${formatNumber(group.units)}</b>` }, topReason(group)]),
+  });
+
+  let details;
+  if (hourMode) {
+    const list = items.slice().sort((left, right) => left.key.localeCompare(right.key) || left.location.localeCompare(right.location) || left.time.localeCompare(right.time));
+    details = block(`${t("icAllList")} (${formatNumber(list.length)})`, reportDataTable({
+      // The picking type is left to the table above so the list keeps to the page width.
+      headers: ["#", t("icTime"), t("warehouseShort"), t("icLocation"), "SKU", t("icReason"), t("icQty"), t("pkPicker")],
+      rows: list.map((item, position) => [String(position + 1), item.time, item.key, stacked(item.location, item.zone), stacked(item.sku, item.barcode), REASON_SHORT[item.reason] || item.reason, { html: `<b>${formatNumber(item.qty)}</b>` }, stacked(nameOf(item.user), item.user.split("@")[0])]),
+    }));
+  } else {
+    details = [
+      block(t("icByHour"), groupTable(t("time"), incidentGroups(items, (item) => item.hour).sort((left, right) => left.key - right.key), (group) => formatHour(group.key))),
+      block(t("icTopLocations"), topTable((item) => `${item.key}|${item.location}`, [t("icLocation"), t("warehouseShort")], (group) => [stacked(group.items[0].location, group.items[0].zone), group.items[0].key])),
+      block(t("icTopSkus"), topTable((item) => item.sku, ["SKU", t("icLocations")], (group) => [stacked(group.key, group.items[0].barcode), formatNumber(new Set(group.items.map((item) => item.location)).size)])),
+      block(t("icTopPickers"), topTable((item) => item.user.toLowerCase(), [t("pkPicker"), t("warehouseShort")], (group) => [stacked(nameOf(group.items[0].user), group.items[0].user.split("@")[0]), [...new Set(group.items.map((item) => item.key))].join(" / ")])),
+    ].join("");
+  }
+
+  const chips = `${chip(hourMode ? t("reportHourLabel") : t("rptPeriod"), period, true)}${chip(t("rptWarehouse"), selectionLabel())}${chip(t("pkTypeCol"), typesLabel())}${chip(t("reportIssuedLabel"), issuedAt)}${chip(t("pkSiteUpdate"), data.siteUpdatedAt || "—")}`;
+  const banner = `<div class="report-hour-banner"><div><small>${escapeHtml(t(hourMode ? "icHourBanner" : "icDayBanner"))}</small><strong>${escapeHtml(period)}</strong></div><span><bdi dir="ltr">${escapeHtml(data.date || "")}</bdi></span></div>`;
+  return `<div class="report-doc report-hourly report-productivity" lang="${locale}" dir="${locale === "en" ? "ltr" : "rtl"}">
+    <header class="report-head">
+      <img src="assets/noon-minutes-logo.png" alt="noon minutes">
+      <div class="report-head-copy"><strong>noon minutes</strong><h1>${escapeHtml(heading)}</h1></div>
+      <div class="report-chips">${chips}</div>
+    </header>
+    ${banner}
+    <section class="report-block"><h2>${escapeHtml(t("reportKpiSection"))}</h2><div class="report-stats report-stats-4">${statItems.map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div></section>
+    ${items.length ? `${block(t("icByWarehouse"), groupTable(t("warehouse"), byWarehouse, (group) => group.key))}${block(t("icByType"), groupTable(t("pkTypeCol"), byType, (group) => PICKING_TYPE_SHORT[group.key] || group.key))}${details}` : `<p class="report-footnote">${escapeHtml(t("icNone"))}</p>`}
+    ${hourMode ? "" : `<p class="report-footnote">${escapeHtml(t("icExcelNote"))}</p>`}
+    <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)} · ${escapeHtml(period)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>
+  </div>`;
+}
+
 // The end-of-shift report follows the picker page's hour range, warehouses and shift.
 function buildShiftReportDocument(data) {
   const view = pickerProductivity(data, { allHours: true, from: pickerFilter.from, to: pickerFilter.to });
@@ -1588,6 +1706,47 @@ async function exportPickersExcel() {
   }
 }
 
+// Every incident in the page's filters with all its details, plus the warehouse and hour summaries.
+async function exportIncidentsExcel() {
+  const button = $("#incidentExcelButton");
+  if (!dashboardData || !liveIncidents || button.disabled) return;
+  const label = button.querySelector(".report-button-label");
+  button.disabled = true;
+  button.classList.add("is-loading");
+  label.textContent = t("reportPreparing");
+  try {
+    const XLSX = await ensureXlsxLibrary();
+    const items = incidentsInScope().slice().sort((left, right) => left.hour - right.hour || left.time.localeCompare(right.time));
+    const names = pickerNames(dashboardData);
+    const intro = [[t("icTitle")], [t("reportDateLabel"), dashboardData.date || ""], [t("rptWarehouse"), selectionLabel()], [t("pkTypeCol"), typesLabel()], [t("pkSiteUpdate"), dashboardData.siteUpdatedAt || ""], []];
+    const header = [t("icTime"), t("time"), t("warehouse"), t("icZone"), t("icLocation"), "SKU", t("icBarcode"), "WMS barcode", "Partner", t("icReason"), t("icQty"), t("nameCol"), t("userCol"), t("pkTypeCol"), t("icJob"), t("icReportedBy")];
+    const rows = items.map((item) => [item.time, formatHour(item.hour), item.key, item.zone, item.location, item.sku, item.barcode, item.wmsBarcode, item.partner, reasonLabel(item.reason), item.qty,
+      names.get(item.user.toLowerCase()) || "", item.user.split("@")[0], PICKING_TYPE_SHORT[item.type] || item.type, item.job, item.by]);
+    const listSheet = XLSX.utils.aoa_to_sheet([...intro, header, ...rows]);
+    listSheet["!cols"] = [7, 7, 8, 18, 18, 28, 16, 16, 9, 12, 7, 24, 14, 14, 28, 9].map((wch) => ({ wch }));
+    const summary = (keyOf, labelOf, sortBy) => incidentGroups(items, keyOf).sort(sortBy).map((group) => [labelOf(group), group.reports, group.units, ...INCIDENT_REASONS.map((reason) => group.reasons.get(reason) || 0)]);
+    const summaryHeader = (first) => [first, t("icReports"), t("icUnits"), ...INCIDENT_REASONS.map(reasonLabel)];
+    const summarySheet = XLSX.utils.aoa_to_sheet([
+      [t("icByWarehouse")], summaryHeader(t("warehouse")), ...summary((item) => item.key, (group) => group.key, (left, right) => right.units - left.units), [],
+      [t("icByHour")], summaryHeader(t("time")), ...summary((item) => item.hour, (group) => formatHour(group.key), (left, right) => left.key - right.key), [],
+      [t("icByType")], summaryHeader(t("pkTypeCol")), ...summary((item) => item.type, (group) => PICKING_TYPE_SHORT[group.key] || group.key, (left, right) => right.units - left.units),
+    ]);
+    summarySheet["!cols"] = [16, 10, 10, 12, 12, 12].map((wch) => ({ wch }));
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, listSheet, locale === "ar" ? "البلاغات" : "Incidents");
+    XLSX.utils.book_append_sheet(book, summarySheet, locale === "ar" ? "الملخص" : "Summary");
+    if (locale === "ar") book.Workbook = { Views: [{ RTL: true }] };
+    XLSX.writeFile(book, `noon-incidents-${reportStamp()}.xlsx`);
+  } catch (error) {
+    console.error("Excel export failed:", error);
+    alert(t("pkExcelFailed"));
+  } finally {
+    label.textContent = t("icExcel");
+    button.disabled = false;
+    button.classList.remove("is-loading");
+  }
+}
+
 function getReportContainer() {
   let container = $("#reportDocument");
   if (!container) {
@@ -1710,6 +1869,27 @@ function generatePickerHourReport() {
     labelKey: "pkHourReport",
     buildDocument: buildHourReportDocument,
     filename: `noon-picking-hour-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+  });
+}
+
+function generateIncidentHourReport() {
+  const hour = dashboardData ? reportHourChoice(pickerProductivity(dashboardData, { allHours: true })) : null;
+  return exportReport({
+    buttonSelector: "#incidentHourReportButton",
+    labelKey: "icHourReport",
+    buildDocument: (data) => buildIncidentReportDocument(data, "hour"),
+    filename: `noon-incidents-hour-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+  });
+}
+
+function generateIncidentDayReport() {
+  return exportReport({
+    buttonSelector: "#incidentDayReportButton",
+    labelKey: "icDayReport",
+    buildDocument: (data) => buildIncidentReportDocument(data, "day"),
+    filename: `noon-incidents-day-${reportStamp()}.pdf`,
     pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
   });
 }
@@ -2775,6 +2955,92 @@ function renderPickersPage(data, { animate = true } = {}) {
   $("#pickerTable").innerHTML = `${head}<tbody>${body || `<tr><td colspan="${10 + hours.length}" class="empty-state">${t(inScope.length ? "pkNoMatch" : "pkNoData")}</td></tr>`}</tbody>`;
   $("#pickerCount").textContent = `${list.length} ${t("pkOf")} ${inScope.length} ${t("pkShowing")}`;
   $("#pickersUpdated").textContent = data.siteUpdatedAt || data.date || "—";
+  renderIncidents(data);
+}
+
+const INCIDENT_REASONS = ["missing", "damaged", "expired"];
+const REASON_SHORT = { missing: "Missing", damaged: "Damaged", expired: "Expired" };
+
+function reasonLabel(reason) {
+  const key = { missing: "rsMissing", damaged: "rsDamaged", expired: "rsExpired" }[reason];
+  return key ? t(key) : reason;
+}
+
+// Picker names come from the sheet's attendance match, keyed by the full login.
+function pickerNames(data) {
+  const nameIndex = data.pickers.headers.findIndex((header) => String(header ?? "").trim() === "الاسم");
+  return new Map(data.pickers.records.map((record) => [textAt(record, 1).toLowerCase(), nameIndex >= 0 ? textAt(record, nameIndex).split(/\s+/).slice(0, 2).join(" ") : ""]));
+}
+
+// Today's incidents that match the page's warehouses, picking types and, unless one hour is given, its hour range.
+function incidentsInScope({ hour = null } = {}) {
+  if (!liveIncidents) return [];
+  const keys = selectedKeys();
+  return liveIncidents.rows.filter((item) => (!keys || keys.includes(item.key))
+    && (!pickerFilter.types || pickerFilter.types.includes(item.type))
+    && (hour !== null ? item.hour === hour : (pickerFilter.from === null || item.hour >= pickerFilter.from) && (pickerFilter.to === null || item.hour <= pickerFilter.to)));
+}
+
+// Adds incidents up by any key: report rows, skipped units and units per reason.
+function incidentGroups(items, keyOf) {
+  const groups = new Map();
+  items.forEach((item) => {
+    const key = keyOf(item);
+    if (!groups.has(key)) groups.set(key, { key, reports: 0, units: 0, reasons: new Map(), items: [] });
+    const group = groups.get(key);
+    group.reports += 1;
+    group.units += item.qty;
+    group.reasons.set(item.reason, (group.reasons.get(item.reason) || 0) + item.qty);
+    group.items.push(item);
+  });
+  return [...groups.values()];
+}
+
+function incidentTotals(items) {
+  const total = incidentGroups(items, () => "all")[0] || { reports: 0, units: 0, reasons: new Map(), items: [] };
+  return total;
+}
+
+function topReason(group) {
+  const [reason] = [...group.reasons.entries()].sort((left, right) => right[1] - left[1])[0] || [];
+  return reason ? reasonLabel(reason) : "—";
+}
+
+function renderIncidents(data) {
+  const section = $("#incidents");
+  section.hidden = !liveIncidents;
+  if (!liveIncidents) return;
+  const items = incidentsInScope();
+  const names = pickerNames(data);
+  const total = incidentTotals(items);
+  const picked = pickerScope(pickerProductivity(data, { allHours: true, from: pickerFilter.from, to: pickerFilter.to }), { keys: selectedKeys() }).reduce((sum, picker) => sum + picker.units + picker.openUnits, 0);
+  const share = picked + total.units ? (total.units / (picked + total.units)) * 100 : 0;
+  const kpis = [
+    { label: t("icReports"), value: formatNumber(total.reports), sub: t("icReportsSub"), icon: "⚑", accent: colors.amber },
+    { label: t("icUnits"), value: formatNumber(total.units), sub: `${share.toFixed(1)}% ${t("icOfPicked")}`, icon: "!", accent: colors.red },
+    ...INCIDENT_REASONS.map((reason, index) => ({ label: reasonLabel(reason), value: formatNumber(total.reasons.get(reason) || 0), sub: total.units ? `${Math.round(((total.reasons.get(reason) || 0) / total.units) * 100)}% ${t("icOfUnits")}` : "—", icon: ["?", "✕", "⌛"][index], accent: [colors.violet, colors.red, colors.amber][index] })),
+    { label: t("icPickers"), value: formatNumber(new Set(items.map((item) => item.user)).size), sub: t("icPickersSub"), icon: "♙", accent: colors.blue },
+  ];
+  $("#incidentKpis").innerHTML = kpis.map((metric, index) => `<article class="kpi-card" style="--accent:${metric.accent};--i:${index}"><div class="kpi-top"><span>${escapeHtml(metric.label)}</span><span class="kpi-icon">${metric.icon}</span></div><div class="kpi-value">${escapeHtml(metric.value)}</div><div class="kpi-sub">${escapeHtml(metric.sub)}</div></article>`).join("");
+
+  const reasonCells = (group) => INCIDENT_REASONS.map((reason) => `<td>${formatNumber(group.reasons.get(reason) || 0)}</td>`).join("");
+  const reasonHeads = INCIDENT_REASONS.map((reason) => `<th>${escapeHtml(reasonLabel(reason))}</th>`).join("");
+  const table = (headers, rows, foot = "") => (rows ? `<table class="picker-summary"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody>${foot}</table>` : `<div class="empty-state">${t("icNone")}</div>`);
+  const totalLine = (label) => `<tfoot><tr><td class="warehouse-name">${escapeHtml(label)}</td><td>${formatNumber(total.reports)}</td><td>${formatNumber(total.units)}</td>${reasonCells(total)}</tr></tfoot>`;
+  const byWarehouse = incidentGroups(items, (item) => item.key).sort((left, right) => right.units - left.units);
+  $("#incidentWarehouses").innerHTML = table(`<th>${t("warehouse")}</th><th>${t("icReports")}</th><th>${t("icUnits")}</th>${reasonHeads}`,
+    byWarehouse.map((group) => `<tr><td class="warehouse-name">${escapeHtml(group.key)}</td><td>${formatNumber(group.reports)}</td><td><b>${formatNumber(group.units)}</b></td>${reasonCells(group)}</tr>`).join(""), byWarehouse.length > 1 ? totalLine(t("overallTotal")) : "");
+  const byHour = incidentGroups(items, (item) => item.hour).sort((left, right) => left.key - right.key);
+  $("#incidentHours").innerHTML = table(`<th>${t("time")}</th><th>${t("icReports")}</th><th>${t("icUnits")}</th>${reasonHeads}`,
+    byHour.map((group) => `<tr><td class="warehouse-name">${formatHour(group.key)}</td><td>${formatNumber(group.reports)}</td><td><b>${formatNumber(group.units)}</b></td>${reasonCells(group)}</tr>`).join(""), byHour.length > 1 ? totalLine(t("overallTotal")) : "");
+
+  const top = (keyOf) => incidentGroups(items, keyOf).sort((left, right) => right.units - left.units || right.reports - left.reports).slice(0, 10);
+  $("#incidentLocations").innerHTML = table(`<th>${t("icLocation")}</th><th>${t("warehouseShort")}</th><th>${t("icReports")}</th><th>${t("icUnits")}</th><th>${t("icMainReason")}</th>`,
+    top((item) => `${item.key}|${item.location}`).map((group) => `<tr><td class="warehouse-name">${escapeHtml(group.items[0].location)}<small class="ic-sub">${escapeHtml(group.items[0].zone)}</small></td><td>${escapeHtml(group.items[0].key)}</td><td>${formatNumber(group.reports)}</td><td><b>${formatNumber(group.units)}</b></td><td>${escapeHtml(topReason(group))}</td></tr>`).join(""));
+  $("#incidentSkus").innerHTML = table(`<th>SKU</th><th>${t("icReports")}</th><th>${t("icUnits")}</th><th>${t("icLocations")}</th><th>${t("icMainReason")}</th>`,
+    top((item) => item.sku).map((group) => `<tr><td class="warehouse-name">${escapeHtml(group.key)}<small class="ic-sub">${escapeHtml(group.items[0].barcode)}</small></td><td>${formatNumber(group.reports)}</td><td><b>${formatNumber(group.units)}</b></td><td>${formatNumber(new Set(group.items.map((item) => item.location)).size)}</td><td>${escapeHtml(topReason(group))}</td></tr>`).join(""));
+  $("#incidentPickers").innerHTML = table(`<th>${t("pkPicker")}</th><th>${t("warehouseShort")}</th><th>${t("icReports")}</th><th>${t("icUnits")}</th><th>${t("icMainReason")}</th>`,
+    top((item) => item.user.toLowerCase()).map((group) => `<tr><td>${pickerNameCell({ name: names.get(group.key) || "", user: group.items[0].user.split("@")[0], fullName: names.get(group.key) || "" })}</td><td>${escapeHtml([...new Set(group.items.map((item) => item.key))].join(" / "))}</td><td>${formatNumber(group.reports)}</td><td><b>${formatNumber(group.units)}</b></td><td>${escapeHtml(topReason(group))}</td></tr>`).join(""));
 }
 
 function renderDashboard(data) {
@@ -2792,7 +3058,7 @@ async function loadDashboard() {
   try {
     const request = (url) => fetch(`${url}&_=${Date.now()}`, { cache: "no-store", headers: { Accept: "text/csv" } });
     // The site's own cards live in a separate tab; the page still works from the dashboard tab if they fail to load.
-    const [response, liveResponse, jobsResponse] = await Promise.all([request(SHEET_URL), request(LIVE_URL).catch(() => null), request(LIVE_JOBS_URL).catch(() => null)]);
+    const [response, liveResponse, jobsResponse, incidentsResponse] = await Promise.all([request(SHEET_URL), request(LIVE_URL).catch(() => null), request(LIVE_JOBS_URL).catch(() => null), request(LIVE_INCIDENTS_URL).catch(() => null)]);
     if (!response.ok) throw new Error(`${t("requestFailed")} (${response.status}).`);
     const csv = await response.text();
     if (!csv.trim() || csv.includes("<!DOCTYPE html")) throw new Error(t("invalidCsv"));
@@ -2802,6 +3068,8 @@ async function loadDashboard() {
     liveData = liveCsv && !liveCsv.includes("<!DOCTYPE html") ? parseLive(parseCsv(liveCsv)) : null;
     const jobsCsv = jobsResponse?.ok ? await jobsResponse.text().catch(() => "") : "";
     liveJobs = jobsCsv && !jobsCsv.includes("<!DOCTYPE html") ? parseLiveJobs(parseCsv(jobsCsv)) : null;
+    const incidentsCsv = incidentsResponse?.ok ? await incidentsResponse.text().catch(() => "") : "";
+    liveIncidents = incidentsCsv && !incidentsCsv.includes("<!DOCTYPE html") ? parseIncidents(parseCsv(incidentsCsv), liveJobs?.today || (data.date || "").replace(/-/g, "")) : null;
     lastSyncAt = new Date();
     lastSyncError = "";
     renderDashboard(data);
@@ -2981,6 +3249,9 @@ $("#pickerSummary").addEventListener("click", (event) => {
   });
 });
 $("#pickerExcelButton").addEventListener("click", exportPickersExcel);
+$("#incidentHourReportButton").addEventListener("click", generateIncidentHourReport);
+$("#incidentDayReportButton").addEventListener("click", generateIncidentDayReport);
+$("#incidentExcelButton").addEventListener("click", exportIncidentsExcel);
 $("#pickerHourReportButton").addEventListener("click", generatePickerHourReport);
 $("#pickerShiftReportButton").addEventListener("click", generatePickerShiftReport);
 [["#pickerShift", "shift"], ["#pickerStatus", "status"], ["#pickerSort", "sort"]].forEach(([selector, key]) => {
