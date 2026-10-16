@@ -1790,6 +1790,10 @@ function numberReportPages(pdf) {
   }
 }
 
+// Margins chosen so the printable area is exactly 750 x 1065 CSS px. With the old [6, 6, 9, 6] html2pdf
+// placed page breaks on a rounded page height but sliced the image on an unrounded one, so each page
+// drifted by about a pixel and rows near the page edge were cut, worse on every later page.
+const REPORT_MARGIN_MM = [6, 5.78125, 9.2, 5.78125];
 let reportBusy = false;
 
 async function exportReport({ buttonSelector, labelKey, buildDocument, filename, pagebreak }) {
@@ -1808,7 +1812,7 @@ async function exportReport({ buttonSelector, labelKey, buildDocument, filename,
   try {
     const html2pdf = await ensurePdfLibrary();
     await html2pdf().set({
-      margin: [6, 6, 9, 6],
+      margin: REPORT_MARGIN_MM,
       filename,
       image: { type: "jpeg", quality: .96 },
       html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
@@ -1847,7 +1851,7 @@ function generateHourlyReport() {
     labelKey: "hourlyReportButton",
     buildDocument: buildHourlyReportDocument,
     filename: `noon-hourly-report-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
-    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-footnote", ".report-hour-banner"] },
   });
 }
 
@@ -1858,7 +1862,7 @@ function generateProductivityReport() {
     labelKey: "productivityReportButton",
     buildDocument: buildProductivityReportDocument,
     filename: `noon-productivity-report-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
-    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-warehouse"] },
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-warehouse", ".report-footnote", ".report-hour-banner"] },
   });
 }
 
@@ -1869,7 +1873,7 @@ function generatePickerHourReport() {
     labelKey: "pkHourReport",
     buildDocument: buildHourReportDocument,
     filename: `noon-picking-hour-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
-    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-footnote", ".report-hour-banner"] },
   });
 }
 
@@ -1880,7 +1884,7 @@ function generateIncidentHourReport() {
     labelKey: "icHourReport",
     buildDocument: (data) => buildIncidentReportDocument(data, "hour"),
     filename: `noon-incidents-hour-${reportStamp()}-${hour === null ? "latest" : `${String(hour).padStart(2, "0")}00`}.pdf`,
-    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-footnote", ".report-hour-banner"] },
   });
 }
 
@@ -1890,7 +1894,7 @@ function generateIncidentDayReport() {
     labelKey: "icDayReport",
     buildDocument: (data) => buildIncidentReportDocument(data, "day"),
     filename: `noon-incidents-day-${reportStamp()}.pdf`,
-    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-footnote", ".report-hour-banner"] },
   });
 }
 
@@ -1901,7 +1905,7 @@ function generatePickerShiftReport() {
     labelKey: "pkShiftReport",
     buildDocument: buildShiftReportDocument,
     filename: `noon-shift-report-${reportStamp()}-${pad(pickerFilter.from)}00-${pad(pickerFilter.to)}00.pdf`,
-    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2"] },
+    pagebreak: { mode: ["css", "legacy"], avoid: ["tr", ".report-stats", ".report-block h2", ".report-footnote", ".report-hour-banner"] },
   });
 }
 
