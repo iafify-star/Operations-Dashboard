@@ -786,7 +786,6 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 .report-hour-banner small { font-size: 10px; font-weight: 700; opacity: .75; }
 .report-hour-banner strong { font-size: 24px; font-weight: 900; line-height: 1.1; direction: ltr; unicode-bidi: isolate; }
 .report-hour-banner span { font-size: 11px; font-weight: 700; }
-.report-good-note { margin: 4px 0 0; padding: 9px 12px; border-radius: 9px; background: #e2f6e9; color: #1c7a3e; font-size: 10.5px; font-weight: 700; }
 
 /* Day mode: chosen with the sun/moon button and kept per browser. The dark look above stays the default. */
 .theme-button { font-size: 15px; }

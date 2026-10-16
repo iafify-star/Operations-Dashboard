@@ -41,8 +41,8 @@ const messages = {
     rptHourBanner: "بيانات الساعة", rptHourClosed: "الساعة دي خلصت", rptHourRunning: "الساعة دي لسه شغالة", rptHourDone: "منجز الساعة", rptHourTarget: "مستهدف الساعة",
     rptHourGap: "الفرق عن المستهدف", rptHourWorkers: "شغالين الساعة دي", rptHourPerPicker: "قطع لكل بيكر", rptVsPrevious: "عن الساعة اللي قبلها",
     rptHourWarehouses: "كل مخزن في الساعة دي", rptRemainingNow: "الفاضل لحد دلوقتي", rptRequiredEach: "المطلوب من كل بيكر", rptHourPickers: "البيكرز اللي اشتغلوا الساعة دي",
-    rptFocus: "محتاجين نركز عليهم", rptShort: "الناقص", rptPicked: "اتلقط", rptStopped: "اشتغلوا الساعة اللي قبلها ومظهروش الساعة دي",
-    rptNoFocus: "كل اللي اشتغلوا الساعة دي حققوا المطلوب منهم.", rptFocusRunning: "الساعة دي لسه شغالة، فلسه ما اتحكمش مين حقق ومين لأ.", rptRunningNote: "الساعة الجارية لسه شغالة، اتعمل فيها لحد دلوقتي من",
+    rptPicked: "اتلقط", rptStopped: "اشتغلوا الساعة اللي قبلها ومظهروش الساعة دي",
+    rptRunningNote: "الساعة الجارية لسه شغالة، اتعمل فيها لحد دلوقتي من",
     pkExcel: "تنزيل Excel", pkExcelTitle: "تنزيل جدول البيكرز زي ما هو ظاهر بالفلاتر في ملف Excel", pkExcelFailed: "تعذر تجهيز ملف Excel، جرّب تاني.",
     pkRemainingTitle: "الفاضل في كل مخزن", pkRemainingSub: "المتبقي من المطلوب ومين شغال دلوقتي، دوس على المخزن عشان تفلتر عليه",
     pkOfRequired: "من", pkPerActive: "على كل بيكر شغال", pkNoneActive: "مفيش حد شغال الساعة دي", pkFrom: "من الساعة", pkTo: "إلى الساعة",
@@ -260,8 +260,8 @@ const messages = {
     rptHourBanner: "Figures for", rptHourClosed: "This hour is closed", rptHourRunning: "This hour is still running", rptHourDone: "Picked this hour", rptHourTarget: "Target this hour",
     rptHourGap: "Gap to target", rptHourWorkers: "Pickers this hour", rptHourPerPicker: "Units per picker", rptVsPrevious: "Versus the hour before",
     rptHourWarehouses: "Each warehouse this hour", rptRemainingNow: "Remaining now", rptRequiredEach: "Required per picker", rptHourPickers: "Pickers who worked this hour",
-    rptFocus: "Pickers to focus on", rptShort: "Short by", rptPicked: "Picked", rptStopped: "Worked the hour before but not this hour",
-    rptNoFocus: "Everyone who worked this hour met what was required of them.", rptFocusRunning: "This hour is still running, so nobody is scored yet.", rptRunningNote: "The hour in progress is still running; picked so far from",
+    rptPicked: "Picked", rptStopped: "Worked the hour before but not this hour",
+    rptRunningNote: "The hour in progress is still running; picked so far from",
     pkExcel: "Download Excel", pkExcelTitle: "Download the picker table as shown, with its filters, as an Excel file", pkExcelFailed: "The Excel file could not be prepared. Please try again.",
     pkRemainingTitle: "Remaining by warehouse", pkRemainingSub: "What is left of the plan and who is working now; click a warehouse to filter",
     pkOfRequired: "of", pkPerActive: "per active picker", pkNoneActive: "nobody working this hour", pkFrom: "From", pkTo: "To",
@@ -1298,9 +1298,9 @@ function buildHourReportDocument(data) {
   const running = view.isOpen(hour);
   const pickers = pickerScope(view, { keys });
   const cellAt = (picker) => (index >= 0 ? picker.cells[index] : null);
-  const worked = pickers.filter((picker) => cellAt(picker)?.picked > 0).sort((left, right) => cellAt(right).picked - cellAt(left).picked);
-  const rateOf = (cell) => (cell.required ? cell.picked / cell.required : 0);
-  const focus = worked.filter((picker) => !cellAt(picker).open && cellAt(picker).required > 0 && !cellAt(picker).met).sort((left, right) => rateOf(cellAt(left)) - rateOf(cellAt(right)));
+  // Lowest achievement first, so the pickers who need a word come at the top; unscored ones go last.
+  const rateOf = (cell) => (cell.required ? cell.picked / cell.required : Infinity);
+  const worked = pickers.filter((picker) => cellAt(picker)?.picked > 0).sort((left, right) => rateOf(cellAt(left)) - rateOf(cellAt(right)) || cellAt(left).picked - cellAt(right).picked);
   const stopped = previous ? pickers.filter((picker) => picker.cells[index - 1]?.picked > 0 && !(cellAt(picker)?.picked > 0)) : [];
   const workers = worked.length;
 
@@ -1356,15 +1356,6 @@ function buildHourReportDocument(data) {
     headers: ["#", t("nameCol"), t("warehouseShort"), t("shiftCol"), t("pkTypeCol"), t("rptPicked"), t("pkRequired"), t("pkRate"), t("statusCol")],
     rows: worked.map(pickerLine),
   });
-  const focusTable = focus.length
-    ? reportDataTable({
-      headers: ["#", t("nameCol"), t("warehouseShort"), t("pkTypeCol"), t("rptPicked"), t("pkRequired"), t("rptShort"), t("pkRate")],
-      rows: focus.map((picker, position) => {
-        const cell = cellAt(picker);
-        return [String(position + 1), person(picker), picker.warehouse, typeLabel(cell.types), formatNumber(cell.picked), formatNumber(cell.required), { html: `<span class="report-delta is-down">−${formatNumber(cell.required - cell.picked)}</span>` }, percent(cell.picked, cell.required)];
-      }),
-    })
-    : `<p class="report-good-note">${escapeHtml(t(running ? "rptFocusRunning" : "rptNoFocus"))}</p>`;
   const stoppedBlock = stopped.length
     ? `<section class="report-block"><h2>${escapeHtml(t("rptStopped"))}</h2>${reportDataTable({
       headers: ["#", t("nameCol"), t("userCol"), t("warehouseShort"), `${t("rptPicked")} ${formatHour(previous.hour)}`],
@@ -1388,7 +1379,6 @@ function buildHourReportDocument(data) {
     <section class="report-block"><h2>${escapeHtml(t("reportKpiSection"))}</h2><div class="report-stats report-stats-4">${statItems.map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div></section>
     <section class="report-block"><h2>${escapeHtml(t("rptHourWarehouses"))}</h2>${warehouseTable}</section>
     ${typeTable ? `<section class="report-block"><h2>${escapeHtml(t("rptByType"))}</h2>${typeTable}</section>` : ""}
-    <section class="report-block"><h2>${escapeHtml(t("rptFocus"))}</h2>${focusTable}</section>
     ${stoppedBlock}
     <section class="report-block"><h2>${escapeHtml(`${t("rptHourPickers")} (${workers})`)}</h2>${workedTable}</section>
     ${runningNote}
