@@ -490,6 +490,7 @@ function parseLive(rows) {
   if (header[1] !== "ALL" || !metrics.has("total_qty")) return null;
   const columns = new Map(header.map((code, index) => [code, index]));
   return {
+    updated: textAt(metrics.get("updated_at") || [], 1),
     codes: header.slice(2).filter(Boolean),
     value: (metric, code) => {
       const row = metrics.get(metric);
@@ -3070,6 +3071,8 @@ async function loadDashboard() {
     const data = parseDashboard(rows);
     const liveCsv = liveResponse?.ok ? await liveResponse.text().catch(() => "") : "";
     liveData = liveCsv && !liveCsv.includes("<!DOCTYPE html") ? parseLive(parseCsv(liveCsv)) : null;
+    // The Live tab keeps its last numbers; on a day nothing has synced yet they belong to an earlier day, so they are not shown.
+    if (liveData && data.date && !liveData.updated.startsWith(data.date)) liveData = null;
     const jobsCsv = jobsResponse?.ok ? await jobsResponse.text().catch(() => "") : "";
     liveJobs = jobsCsv && !jobsCsv.includes("<!DOCTYPE html") ? parseLiveJobs(parseCsv(jobsCsv)) : null;
     const incidentsCsv = incidentsResponse?.ok ? await incidentsResponse.text().catch(() => "") : "";
