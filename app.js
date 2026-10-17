@@ -8,6 +8,8 @@ const LIVE_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?form
 const LIVE_JOBS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=220728301`;
 // "LiveIncidents" mirrors the Incident Reported tab: one row per skipped location.
 const LIVE_INCIDENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=737990709`;
+// "LiveHistory" keeps an OOS and pending snapshot per warehouse from every sync.
+const LIVE_HISTORY_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1843204247`;
 
 const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const colors = {
@@ -37,6 +39,8 @@ const messages = {
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     pkNoLive: "أرقام الموقع مش متاحة دلوقتي، هتظهر مع التحديث الجاي.",
     pkTimeFilter: "فلتر الوقت",
+    rptPendingByType: "الفاضل في كل نوع بيك (Pending)", rptOfPending: "من الـ Pending", rptOosByHour: "OOS كل ساعة", rptSnapshotAt: "وقت التحديث",
+    rptOosChange: "الزيادة عن اللي قبلها", rptOosEmpty: "OOS بالساعة بيتسجل مع كل تحديث للأرقام، ولسه مفيش تحديثات النهارده.",
     icTitle: "مشاكل التجهيز (Incident Reported)", icSubtitle: "البلاغات اللي البيكرز عملوها في Minutes Central، بنفس فلاتر المخازن ونوع البيك والوقت اللي فوق",
     icHourReport: "مشاكل الساعة", icHourReportTitle: "تنزيل تقرير مشاكل آخر ساعة خلصت بكل بلاغاتها", icDayReport: "مشاكل اليوم", icDayReportTitle: "تنزيل تقرير إجمالي مشاكل اليوم",
     icExcel: "البلاغات Excel", icExcelTitle: "تنزيل كل البلاغات بكل تفاصيلها في ملف Excel", icByWarehouse: "المشاكل في كل مخزن", icByWarehouseSub: "عدد البلاغات والقطع وكل سبب",
@@ -266,6 +270,8 @@ const messages = {
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     pkNoLive: "Site figures are not available right now; they will appear with the next update.",
     pkTimeFilter: "Time filter",
+    rptPendingByType: "Pending by picking type", rptOfPending: "Share of pending", rptOosByHour: "OOS through the day", rptSnapshotAt: "Updated at",
+    rptOosChange: "Change since previous", rptOosEmpty: "OOS by hour is recorded with every sync; there are none yet today.",
     icTitle: "Picking incidents (Incident Reported)", icSubtitle: "Reports pickers raised in Minutes Central, with the warehouse, picking type and time filters above",
     icHourReport: "Hour incidents", icHourReportTitle: "Download every incident in the last finished hour", icDayReport: "Day incidents", icDayReportTitle: "Download the incident summary for the day",
     icExcel: "Incidents Excel", icExcelTitle: "Download every incident with all its details as an Excel file", icByWarehouse: "Incidents by warehouse", icByWarehouseSub: "Reports, units and each reason",
@@ -452,6 +458,7 @@ let dashboardData;
 let liveData = null;
 let liveJobs = null;
 let liveIncidents = null;
+let liveHistory = [];
 
 // Reads today's LiveJobs rows (the sheet's own date sits next to "today_key" in the header row).
 function parseLiveJobs(rows) {
@@ -466,6 +473,17 @@ function parseLiveJobs(rows) {
     .map((row) => ({ hour: parseNumber(textAt(row, hour)), user: textAt(row, picker), warehouse: textAt(row, warehouse), type: textAt(row, type), picked: parseNumber(textAt(row, picked)) }))
     .filter((row) => row.picked > 0);
   return list.length ? { rows: list, today } : null;
+}
+
+// Today's snapshots from the LiveHistory tab, oldest first.
+function parseHistory(rows, dayKey) {
+  const header = (rows[0] || []).map((cell) => String(cell ?? "").trim());
+  const at = (name) => header.indexOf(name);
+  if (at("oos") < 0 || at("warehouse") < 0) return [];
+  return rows.slice(1).filter((row) => textAt(row, at("date_key")) === dayKey).map((row) => ({
+    time: textAt(row, at("time")).replace(/^'/, ""), hour: parseNumber(textAt(row, at("hour"))), minute: parseNumber(textAt(row, at("minute"))), code: textAt(row, at("warehouse")),
+    oos: parseNumber(textAt(row, at("oos"))), pending: parseNumber(textAt(row, at("pending"))),
+  })).sort((left, right) => left.minute - right.minute);
 }
 
 // Reads the LiveIncidents tab for one day. An empty tab (nothing synced yet) gives null so the section stays hidden.
@@ -1385,6 +1403,43 @@ function buildHourReportDocument(data) {
     : "";
 
   const person = (picker) => ({ html: `<span class="report-person"><b>${escapeHtml(picker.name || picker.user)}</b><small>${escapeHtml(picker.user)}</small></span>` });
+  // What is still waiting in each picking type, from the site's Pending card for the chosen warehouses.
+  const chosenCodes = keys ? (liveData?.codes || []).filter((code) => keys.includes(warehouseKey(code))) : null;
+  const siteValue = (metric) => (chosenCodes ? chosenCodes.reduce((total, code) => total + liveData.value(metric, code), 0) : liveData.value(metric, "ALL"));
+  const pendingAll = liveData ? siteValue("pending_qty") : 0;
+  const pendingTable = liveData
+    ? reportDataTable({
+      headers: [t("pkTypeCol"), "Pending", t("rptOfPending")],
+      rows: PICKING_TYPES.map(([type]) => {
+        const pending = siteValue(`pending_${PICKING_TYPE_METRIC[type]}`);
+        return [PICKING_TYPE_SHORT[type], { html: `<b>${formatNumber(pending)}</b>` }, percent(pending, pendingAll)];
+      }),
+      foot: [t("overallTotal"), formatNumber(pendingAll), pendingAll ? "100%" : "—"],
+    })
+    : "";
+
+  // OOS through the day from the sync snapshots: the last one taken in each hour, set against the one before.
+  // The snapshot just after the hour ends is the one that describes it, so that row is highlighted.
+  const snapshotTimes = new Map();
+  liveHistory.filter((item) => (chosenCodes ? chosenCodes.includes(item.code) : item.code === "ALL")).forEach((item) => {
+    if (!snapshotTimes.has(item.minute)) snapshotTimes.set(item.minute, { time: item.time, hour: item.hour, oos: 0, pending: 0 });
+    const entry = snapshotTimes.get(item.minute);
+    entry.oos += item.oos;
+    entry.pending += item.pending;
+  });
+  const lastPerHour = new Map();
+  [...snapshotTimes.entries()].sort((left, right) => left[0] - right[0]).forEach(([, entry]) => lastPerHour.set(entry.hour, entry));
+  const oosRows = [...lastPerHour.values()];
+  const oosChange = (value) => ({ html: `<span class="report-delta is-${value > 0 ? "down" : "up"}">${signed(value)}</span>` });
+  const oosCurrent = oosRows.findIndex((entry) => entry.hour === nextHour);
+  const oosTable = oosRows.length
+    ? reportDataTable({
+      headers: [t("rptSnapshotAt"), "OOS", t("rptOosChange"), "Pending"],
+      rows: oosRows.map((entry, position) => [entry.time, { html: `<b>${formatNumber(entry.oos)}</b>` }, position ? oosChange(entry.oos - oosRows[position - 1].oos) : "—", formatNumber(entry.pending)]),
+      current: oosCurrent >= 0 ? oosCurrent : oosRows.findIndex((entry) => entry.hour === hour),
+    })
+    : `<p class="report-footnote">${escapeHtml(t("rptOosEmpty"))}</p>`;
+
   const pickerLine = (picker, position) => {
     const cell = cellAt(picker);
     return [String(position + 1), person(picker), picker.warehouse, picker.shift, typeLabel(cell.types), { html: `<b>${formatNumber(cell.picked)}</b>` },
@@ -1418,6 +1473,8 @@ function buildHourReportDocument(data) {
     <section class="report-block"><h2>${escapeHtml(t("reportKpiSection"))}</h2><div class="report-stats report-stats-4">${statItems.map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div></section>
     <section class="report-block"><h2>${escapeHtml(t("rptHourWarehouses"))}</h2>${warehouseTable}</section>
     ${typeTable ? `<section class="report-block"><h2>${escapeHtml(t("rptByType"))}</h2>${typeTable}</section>` : ""}
+    ${pendingTable ? `<section class="report-block"><h2>${escapeHtml(t("rptPendingByType"))}</h2>${pendingTable}</section>` : ""}
+    <section class="report-block"><h2>${escapeHtml(t("rptOosByHour"))}</h2>${oosTable}</section>
     ${stoppedBlock}
     <section class="report-block"><h2>${escapeHtml(`${t("rptHourPickers")} (${workers})`)}</h2>${workedTable}</section>
     ${runningNote}
@@ -3063,7 +3120,7 @@ async function loadDashboard() {
   try {
     const request = (url) => fetch(`${url}&_=${Date.now()}`, { cache: "no-store", headers: { Accept: "text/csv" } });
     // The site's own cards live in a separate tab; the page still works from the dashboard tab if they fail to load.
-    const [response, liveResponse, jobsResponse, incidentsResponse] = await Promise.all([request(SHEET_URL), request(LIVE_URL).catch(() => null), request(LIVE_JOBS_URL).catch(() => null), request(LIVE_INCIDENTS_URL).catch(() => null)]);
+    const [response, liveResponse, jobsResponse, incidentsResponse, historyResponse] = await Promise.all([request(SHEET_URL), request(LIVE_URL).catch(() => null), request(LIVE_JOBS_URL).catch(() => null), request(LIVE_INCIDENTS_URL).catch(() => null), request(LIVE_HISTORY_URL).catch(() => null)]);
     if (!response.ok) throw new Error(`${t("requestFailed")} (${response.status}).`);
     const csv = await response.text();
     if (!csv.trim() || csv.includes("<!DOCTYPE html")) throw new Error(t("invalidCsv"));
@@ -3077,6 +3134,8 @@ async function loadDashboard() {
     liveJobs = jobsCsv && !jobsCsv.includes("<!DOCTYPE html") ? parseLiveJobs(parseCsv(jobsCsv)) : null;
     const incidentsCsv = incidentsResponse?.ok ? await incidentsResponse.text().catch(() => "") : "";
     liveIncidents = incidentsCsv && !incidentsCsv.includes("<!DOCTYPE html") ? parseIncidents(parseCsv(incidentsCsv), liveJobs?.today || (data.date || "").replace(/-/g, "")) : null;
+    const historyCsv = historyResponse?.ok ? await historyResponse.text().catch(() => "") : "";
+    liveHistory = historyCsv && !historyCsv.includes("<!DOCTYPE html") ? parseHistory(parseCsv(historyCsv), liveJobs?.today || (data.date || "").replace(/-/g, "")) : [];
     lastSyncAt = new Date();
     lastSyncError = "";
     renderDashboard(data);
