@@ -86,7 +86,7 @@ const messages = {
     rptPickHourHeading: "تقرير التجهيز الساعي", rptShiftHeading: "تقرير آخر الشيفت", rptPeriod: "الفترة", rptShift: "الشيفت", rptWarehouse: "المخزن",
     rptHoursSection: "عملنا كام كل ساعة", rptRemainingSection: "الفاضل في كل مخزن", rptTopSection: "الأعلى إنتاجية", rptBottomSection: "محتاجين متابعة",
     rptPickersSection: "إنتاجية كل بيكر في الفترة", rptLastHourDone: "منجز الساعة", rptCumulative: "المنجز في الفترة", rptHoursMet: "ساعات محققة",
-    rptNote: "الأرقام من Minutes Central. مستهدف الساعة = مستهدف المخزن + اللي ما اتحققش من الساعة اللي قبلها، بحد أقصى المتاح (Pending من غير OOS). المطلوب من كل بيكر = مستهدف الساعة ÷ البيكرز اللي اشتغلوا فيها. الساعة الجارية مش داخلة في الحكم.",
+    rptPickerTargetNote: "جدول البيكرز: المطلوب من كل بيكر ثابت {target} قطعة في الساعة، ومترتب بالشيفت ثم نوع البيك ثم الأقل في القطع.", rptNote: "الأرقام من Minutes Central. مستهدف الساعة = مستهدف المخزن + اللي ما اتحققش من الساعة اللي قبلها، بحد أقصى المتاح (Pending من غير OOS). المطلوب من كل بيكر = مستهدف الساعة ÷ البيكرز اللي اشتغلوا فيها. الساعة الجارية مش داخلة في الحكم.",
     brandLogo: "شعار نون مينتس", navLabel: "التنقل الرئيسي", homeLabel: "العودة للرئيسية",
     brandCaption: "مركز العمليات", navSection: "لوحة المتابعة", navOverview: "نظرة عامة",
     navWarehouses: "أداء المستودعات", navProductivity: "الإنتاجية الساعية",
@@ -329,7 +329,7 @@ const messages = {
     rptPickHourHeading: "Hourly Picking Report", rptShiftHeading: "End of Shift Report", rptPeriod: "Period", rptShift: "Shift", rptWarehouse: "Warehouse",
     rptHoursSection: "Units picked each hour", rptRemainingSection: "Remaining by warehouse", rptTopSection: "Top performers", rptBottomSection: "Needs follow-up",
     rptPickersSection: "Each picker in the period", rptLastHourDone: "Picked at", rptCumulative: "Picked in period", rptHoursMet: "Hours on target",
-    rptNote: "Figures come from Minutes Central. An hour's target = the warehouse's hourly target plus what the hour before fell short by, capped at what could be picked (pending without OOS). Required per picker = that target ÷ the pickers who worked the hour. The hour in progress is not scored.",
+    rptPickerTargetNote: "Pickers table: every picker is held to a fixed {target} units an hour, listed by shift, then picking type, then fewest units first.", rptNote: "Figures come from Minutes Central. An hour's target = the warehouse's hourly target plus what the hour before fell short by, capped at what could be picked (pending without OOS). Required per picker = that target ÷ the pickers who worked the hour. The hour in progress is not scored.",
     searchWarehouse: "Search warehouses…", warehouse: "Warehouse",
     totalRequired: "Total required", actualCompleted: "Completed",
     remaining: "Remaining", shortages: "OOS", hourlyTarget: "Target / hr",
@@ -1156,6 +1156,8 @@ function shiftLabel(value) {
 
 // Each warehouse is scored on its own hourly target, shared across the pickers active in it
 // that hour. The latest hour is usually still running, so it is listed but kept out of the scoring.
+// The hourly report's target for each picker: units in one hour.
+const PICKER_HOUR_TARGET = 200;
 const PICKING_TYPES = [["batch_dynamic", "Batch Dynamic"], ["batch_static", "Batch Static"], ["multi_store_picking", "Multi Store Picking"]];
 const PICKING_TYPE_SHORT = { batch_dynamic: "Batch Dynamic", batch_static: "Batch Static", multi_store_picking: "Multi Store" };
 // The short codes Minutes Central puts at the end of job numbers, for narrow report columns.
@@ -1527,8 +1529,9 @@ function buildHourReportDocument(data) {
   const pickers = pickerScope(view, { keys });
   const cellAt = (picker) => (index >= 0 ? picker.cells[index] : null);
   // Grouped by shift (morning first) and then by the picking type the picker spent the hour on; inside
-  // each group the lowest achievement comes first, so the pickers who need a word are at the top.
-  const rateOf = (cell) => (cell.required ? cell.picked / cell.required : Infinity);
+  // each group the fewest units come first, so the pickers who need a word are at the top.
+  // Every picker in this report is held to the same fixed hourly target.
+  const metHour = (cell) => cell.picked >= PICKER_HOUR_TARGET;
   const shiftOrder = (picker) => ({ morning: 0, between: 1, night: 2 }[picker.shiftKey] ?? (picker.shiftKey ? 3 : 4));
   const typeOrder = (picker) => {
     const main = [...(cellAt(picker).types || new Map()).entries()].sort((left, right) => right[1] - left[1])[0]?.[0];
@@ -1537,7 +1540,7 @@ function buildHourReportDocument(data) {
   };
   const worked = pickers.filter((picker) => cellAt(picker)?.picked > 0).sort((left, right) => shiftOrder(left) - shiftOrder(right)
     || typeOrder(left) - typeOrder(right)
-    || rateOf(cellAt(left)) - rateOf(cellAt(right)) || cellAt(left).picked - cellAt(right).picked);
+    || cellAt(left).picked - cellAt(right).picked);
   const stopped = previous ? pickers.filter((picker) => picker.cells[index - 1]?.picked > 0 && !(cellAt(picker)?.picked > 0)) : [];
   const workers = worked.length;
 
@@ -1548,7 +1551,7 @@ function buildHourReportDocument(data) {
     [t("pkRate"), line.target ? percent(line.done, line.target) : "—", line.done >= line.target ? colors.teal : colors.red],
     [t("rptHourWorkers"), formatNumber(workers), colors.violet],
     [t("rptHourPerPicker"), workers ? formatNumber(line.done / workers) : "—", colors.amber],
-    [t("rptHourMet"), running ? "—" : `${worked.filter((picker) => cellAt(picker).met).length} / ${worked.filter((picker) => cellAt(picker).required > 0).length}`, colors.green],
+    [t("rptHourMet"), running ? "—" : `${worked.filter((picker) => metHour(cellAt(picker))).length} / ${worked.length}`, colors.green],
     [t("rptVsPrevious"), previous ? `${signed(line.done - previous.done)}` : "—", previous && line.done < previous.done ? colors.red : colors.green],
   ];
 
@@ -1632,8 +1635,8 @@ function buildHourReportDocument(data) {
     const tenure = pickerTenure(picker, data.date);
     return [String(position + 1), person(picker), tenure ? { html: `<bdi dir="ltr">${escapeHtml(tenure.date)}</bdi>` } : "—", tenure ? formatNumber(tenure.days) : "—",
       placeAt(picker, hour), picker.shift, typeLabel(cell.types), { html: `<b>${formatNumber(cell.picked)}</b>` },
-      cell.required ? formatNumber(cell.required) : "—", cell.required ? percent(cell.picked, cell.required) : "—",
-      cell.open ? reportPill(t("hourOpen"), "muted") : cell.required ? status(cell.met) : "—"];
+      formatNumber(PICKER_HOUR_TARGET), percent(cell.picked, PICKER_HOUR_TARGET),
+      cell.open ? reportPill(t("hourOpen"), "muted") : status(metHour(cell))];
   };
   const workedTable = reportDataTable({
     headers: ["#", t("nameCol"), t("rptHiredCol"), t("rptTenureCol"), t("rptWarehouseZone"), t("shiftCol"), t("pkTypeCol"), t("rptPicked"), t("pkRequired"), t("pkRate"), t("statusCol")],
@@ -1669,6 +1672,7 @@ function buildHourReportDocument(data) {
     <section class="report-block"><h2>${escapeHtml(`${t("rptHourPickers")} (${workers})`)}</h2>${workedTable}</section>
     ${runningNote}
     ${footnoteLines(t("rptNote"))}
+    ${footnoteLines(t("rptPickerTargetNote").replace("{target}", formatNumber(PICKER_HOUR_TARGET)))}
     <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)} · ${escapeHtml(hourText)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>
   </div>`;
 }
