@@ -3264,8 +3264,9 @@ function renderPlanPage(data) {
   $("#planZonesUpdated").textContent = planZones[0]?.updated ? `${t("pkSiteUpdate")} ${planZones[0].updated}` : "";
 }
 
-async function exportPlanExcel() {
-  const button = $("#planExcelButton");
+// Both plan buttons (in the heading and on the table) download the same file.
+async function exportPlanExcel(event) {
+  const button = event?.currentTarget || $("#planExcelButton");
   if (!dashboardData || button.disabled) return;
   const label = button.querySelector(".report-button-label");
   button.disabled = true;
@@ -3552,6 +3553,7 @@ $("#planWarehouses").addEventListener("click", (event) => {
   renderPlanPage(dashboardData);
 });
 $("#planExcelButton").addEventListener("click", exportPlanExcel);
+$("#planTableExcelButton").addEventListener("click", exportPlanExcel);
 window.addEventListener("hashchange", () => {
   applyView();
   window.scrollTo({ top: 0 });

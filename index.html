@@ -9,7 +9,7 @@
     <title>نون مينتس | لوحة العمليات</title>
     <script>try { if (localStorage.getItem("dashboardTheme") === "light") document.documentElement.dataset.theme = "light"; } catch (error) {}</script>
     <link rel="stylesheet" href="styles.css?v=57">
-    <script src="app.js?v=67" defer></script>
+    <script src="app.js?v=68" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -315,7 +315,10 @@
             <article class="panel picker-table-panel plan-panel">
               <div class="panel-heading">
                 <div><span class="panel-icon red">⌖</span><div><h3 data-i18n="plTableTitle">أعلى اللوكيشنات في الكمية اللي لسه ما اتلقطتش</h3><p data-i18n="plTableSubtitle">مترتبة من الأكبر للأصغر، ابدأ من فوق</p></div></div>
-                <span class="warehouse-count" id="planCount"></span>
+                <div class="picker-table-tools">
+                  <span class="warehouse-count" id="planCount"></span>
+                  <button class="report-button picker-excel-button" id="planTableExcelButton" type="button" title="تنزيل الخطة في ملف Excel" data-i18n-title="plExcelTitle"><span class="report-icon">▦</span><span class="report-button-label" data-i18n="plExcel">الخطة Excel</span></button>
+                </div>
               </div>
               <div class="table-scroll picker-table-scroll"><table class="picker-table plan-table" id="planTable"></table></div>
               <p class="picker-note" data-i18n="plNote">الكمية الفاضلة = القطع اللي لسه Pending (مستنية تتخصص أو مستنية تتلقط) في اللوكيشن، من ملف التصدير اللي بيدخل الشيت كل ساعة. القطع الـ OOS مش محسوبة.</p>
