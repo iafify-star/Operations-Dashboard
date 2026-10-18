@@ -13,6 +13,10 @@ const LIVE_HISTORY_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/exp
 // The picking plan: pending units per location from the hourly export, and the live Zone Level View.
 const PLAN_LOCATIONS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=793953273`;
 const LIVE_PLAN_ZONES_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1541166215`;
+// Units per picker, hour and zone, so the hourly report can say where each picker worked.
+const LIVE_PICKER_ZONES_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1482975610`;
+// The attendance list (Staff tab), for each picker's hiring date.
+const STAFF_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=210810005`;
 
 const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const colors = {
@@ -71,7 +75,7 @@ const messages = {
     rptHourMet: "محققين من الشغالين",
     rptHourBanner: "بيانات الساعة", rptHourClosed: "الساعة دي خلصت", rptHourRunning: "الساعة دي لسه شغالة", rptHourDone: "منجز الساعة", rptHourTarget: "مستهدف الساعة",
     rptHourGap: "الفرق عن المستهدف", rptHourWorkers: "شغالين الساعة دي", rptHourPerPicker: "قطع لكل بيكر", rptVsPrevious: "عن الساعة اللي قبلها",
-    rptHourWarehouses: "كل مخزن في الساعة دي", rptRemainingNow: "الفاضل لحد دلوقتي", rptRequiredEach: "المطلوب من كل بيكر", rptHourPickers: "البيكرز اللي اشتغلوا الساعة دي",
+    rptHourWarehouses: "كل مخزن في الساعة دي", rptRemainingNow: "الفاضل لحد دلوقتي", rptRequiredEach: "المطلوب من كل بيكر", rptHourPickers: "البيكرز اللي اشتغلوا الساعة دي", rptWarehouseZone: "المخزن / الزون", rptHiredCol: "تاريخ التعيين", rptTenureCol: "بقاله (يوم)",
     rptPicked: "اتلقط", rptStopped: "اشتغلوا الساعة اللي قبلها ومظهروش الساعة دي",
     rptRunningNote: "الساعة الجارية لسه شغالة، اتعمل فيها لحد دلوقتي من",
     pkExcel: "تنزيل Excel", pkExcelTitle: "تنزيل جدول البيكرز زي ما هو ظاهر بالفلاتر في ملف Excel", pkExcelFailed: "تعذر تجهيز ملف Excel، جرّب تاني.",
@@ -314,7 +318,7 @@ const messages = {
     rptHourMet: "Pickers on target",
     rptHourBanner: "Figures for", rptHourClosed: "This hour is closed", rptHourRunning: "This hour is still running", rptHourDone: "Picked this hour", rptHourTarget: "Target this hour",
     rptHourGap: "Gap to target", rptHourWorkers: "Pickers this hour", rptHourPerPicker: "Units per picker", rptVsPrevious: "Versus the hour before",
-    rptHourWarehouses: "Each warehouse this hour", rptRemainingNow: "Remaining now", rptRequiredEach: "Required per picker", rptHourPickers: "Pickers who worked this hour",
+    rptHourWarehouses: "Each warehouse this hour", rptRemainingNow: "Remaining now", rptRequiredEach: "Required per picker", rptHourPickers: "Pickers who worked this hour", rptWarehouseZone: "WH / Zone", rptHiredCol: "Hiring date", rptTenureCol: "Days here",
     rptPicked: "Picked", rptStopped: "Worked the hour before but not this hour",
     rptRunningNote: "The hour in progress is still running; picked so far from",
     pkExcel: "Download Excel", pkExcelTitle: "Download the picker table as shown, with its filters, as an Excel file", pkExcelFailed: "The Excel file could not be prepared. Please try again.",
@@ -488,6 +492,75 @@ let liveIncidents = null;
 let liveHistory = [];
 let planLocations = null;
 let planZones = [];
+let pickerZones = new Map();
+let staffHired = new Map();
+
+// The key the sheet matches users with: "mak00213aba@…" and the attendance ID "Mak00213A" both become "mak213".
+function staffKey(user) {
+  const text = String(user ?? "").trim().toLowerCase();
+  const letters = text.match(/^[a-z]+/);
+  const digits = text.match(/\d+/);
+  return letters && digits ? `${letters[0]}${Number(digits[0])}` : "";
+}
+
+// Hiring date (yyyy-mm-dd) by match key, from the Staff tab; the first row wins, as in the sheet's MATCH.
+function parseStaff(rows) {
+  const header = (rows[0] || []).map((cell) => String(cell ?? "").trim());
+  const keyAt = header.indexOf("match_key");
+  const dateAt = header.indexOf("hiring_date");
+  const hired = new Map();
+  if (keyAt < 0 || dateAt < 0) return hired;
+  rows.slice(1).forEach((row) => {
+    const key = textAt(row, keyAt);
+    const text = textAt(row, dateAt);
+    const dayFirst = text.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    const iso = /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : dayFirst ? `${dayFirst[3]}-${dayFirst[2].padStart(2, "0")}-${dayFirst[1].padStart(2, "0")}` : "";
+    if (key && iso && !hired.has(key)) hired.set(key, iso);
+  });
+  return hired;
+}
+
+// A picker's hiring date and how many days ago it was, counted to the report's day.
+function pickerTenure(picker, dayIso) {
+  const hired = staffHired.get(staffKey(picker.user));
+  if (!hired) return null;
+  const [year, month, day] = hired.split("-").map(Number);
+  const [toYear, toMonth, toDay] = (dayIso || new Date().toISOString().slice(0, 10)).split("-").map(Number);
+  const days = Math.round((Date.UTC(toYear, toMonth - 1, toDay) - Date.UTC(year, month - 1, day)) / 86400000);
+  return { date: `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`, days };
+}
+
+// Today's LivePickerZones rows, grouped by "hour|user" (the user without its @domain, as the page shows it).
+function parsePickerZones(rows, dayKey) {
+  const header = (rows[0] || []).map((cell) => String(cell ?? "").trim());
+  const at = (name) => header.indexOf(name);
+  const zones = new Map();
+  if (at("zone") < 0 || at("picked_qty") < 0) return zones;
+  rows.slice(1).forEach((row) => {
+    const user = textAt(row, at("picker")).toLowerCase().split("@")[0];
+    const zone = textAt(row, at("zone"));
+    if (textAt(row, at("date_key")) !== dayKey || !user || !zone) return;
+    const key = `${parseNumber(textAt(row, at("hour")))}|${user}`;
+    zones.set(key, [...(zones.get(key) || []), { zone, key: warehouseKey(textAt(row, at("warehouse"))), type: textAt(row, at("picking_type")), picked: parseNumber(textAt(row, at("picked_qty"))) }]);
+  });
+  return zones;
+}
+
+// The zones a picker worked in one hour, most units first, inside the chosen warehouses and picking types.
+// "STOCK-S-ID01-B1" shows as "B1" when the picker has one warehouse, and as "ID01-B1" otherwise.
+function pickerZonesAt(picker, hour, keys) {
+  const types = pickerFilter.types;
+  const single = !picker.warehouses || picker.warehouses.length < 2;
+  const totals = new Map();
+  (pickerZones.get(`${hour}|${picker.user.toLowerCase().split("@")[0]}`) || [])
+    .filter((item) => (!keys || keys.includes(item.key)) && (!types || types.includes(item.type)))
+    .forEach((item) => {
+      const short = item.zone.replace(/^STOCK-S-/i, "");
+      const label = single && short.startsWith(`${item.key}-`) ? short.slice(item.key.length + 1) : short;
+      totals.set(label, (totals.get(label) || 0) + item.picked);
+    });
+  return [...totals.entries()].filter(([, units]) => units > 0).sort((left, right) => right[1] - left[1]).map(([label]) => label);
+}
 
 // Pending units per location from the PlanLocations tab, which pivots the export; the tab also says when that export came in.
 function parsePlanLocations(rows) {
@@ -1501,6 +1574,13 @@ function buildHourReportDocument(data) {
     : "";
 
   const person = (picker) => ({ html: `<span class="report-person"><b>${escapeHtml(picker.name || picker.user)}</b><small>${escapeHtml(picker.user)}</small></span>` });
+  // The warehouse with the zones under it; three at most, so a picker who moved a lot keeps the row short.
+  const placeAt = (picker, at) => {
+    const zones = pickerZonesAt(picker, at, keys);
+    if (!zones.length) return picker.warehouse;
+    const shown = `${zones.slice(0, 3).join(" · ")}${zones.length > 3 ? ` +${zones.length - 3}` : ""}`;
+    return { html: `<span class="report-person"><b>${escapeHtml(picker.warehouse)}</b><small dir="ltr">${escapeHtml(shown)}</small></span>` };
+  };
   // What is still waiting in each picking type, from the site's Pending card for the chosen warehouses.
   const chosenCodes = keys ? (liveData?.codes || []).filter((code) => keys.includes(warehouseKey(code))) : null;
   const siteValue = (metric) => (chosenCodes ? chosenCodes.reduce((total, code) => total + liveData.value(metric, code), 0) : liveData.value(metric, "ALL"));
@@ -1540,18 +1620,21 @@ function buildHourReportDocument(data) {
 
   const pickerLine = (picker, position) => {
     const cell = cellAt(picker);
-    return [String(position + 1), person(picker), picker.warehouse, picker.shift, typeLabel(cell.types), { html: `<b>${formatNumber(cell.picked)}</b>` },
+    const tenure = pickerTenure(picker, data.date);
+    return [String(position + 1), person(picker), tenure ? { html: `<bdi dir="ltr">${escapeHtml(tenure.date)}</bdi>` } : "—", tenure ? formatNumber(tenure.days) : "—",
+      placeAt(picker, hour), picker.shift, typeLabel(cell.types), { html: `<b>${formatNumber(cell.picked)}</b>` },
       cell.required ? formatNumber(cell.required) : "—", cell.required ? percent(cell.picked, cell.required) : "—",
       cell.open ? reportPill(t("hourOpen"), "muted") : cell.required ? status(cell.met) : "—"];
   };
   const workedTable = reportDataTable({
-    headers: ["#", t("nameCol"), t("warehouseShort"), t("shiftCol"), t("pkTypeCol"), t("rptPicked"), t("pkRequired"), t("pkRate"), t("statusCol")],
+    headers: ["#", t("nameCol"), t("rptHiredCol"), t("rptTenureCol"), t("rptWarehouseZone"), t("shiftCol"), t("pkTypeCol"), t("rptPicked"), t("pkRequired"), t("pkRate"), t("statusCol")],
     rows: worked.map(pickerLine),
+    className: "report-workers",
   });
   const stoppedBlock = stopped.length
     ? `<section class="report-block"><h2>${escapeHtml(t("rptStopped"))}</h2>${reportDataTable({
-      headers: ["#", t("nameCol"), t("userCol"), t("warehouseShort"), `${t("rptPicked")} ${formatHour(previous.hour)}`],
-      rows: stopped.map((picker, position) => [String(position + 1), picker.name || picker.user, picker.user, picker.warehouse, formatNumber(picker.cells[index - 1].picked)]),
+      headers: ["#", t("nameCol"), t("userCol"), t("rptWarehouseZone"), `${t("rptPicked")} ${formatHour(previous.hour)}`],
+      rows: stopped.map((picker, position) => [String(position + 1), picker.name || picker.user, picker.user, placeAt(picker, previous.hour), formatNumber(picker.cells[index - 1].picked)]),
     })}</section>`
     : "";
 
@@ -3367,7 +3450,7 @@ async function loadDashboard() {
   try {
     const request = (url) => fetch(`${url}&_=${Date.now()}`, { cache: "no-store", headers: { Accept: "text/csv" } });
     // The site's own cards live in a separate tab; the page still works from the dashboard tab if they fail to load.
-    const [response, liveResponse, jobsResponse, incidentsResponse, historyResponse, locationsResponse, zonesResponse] = await Promise.all([request(SHEET_URL), ...[LIVE_URL, LIVE_JOBS_URL, LIVE_INCIDENTS_URL, LIVE_HISTORY_URL, PLAN_LOCATIONS_URL, LIVE_PLAN_ZONES_URL].map((url) => request(url).catch(() => null))]);
+    const [response, liveResponse, jobsResponse, incidentsResponse, historyResponse, locationsResponse, zonesResponse, pickerZonesResponse, staffResponse] = await Promise.all([request(SHEET_URL), ...[LIVE_URL, LIVE_JOBS_URL, LIVE_INCIDENTS_URL, LIVE_HISTORY_URL, PLAN_LOCATIONS_URL, LIVE_PLAN_ZONES_URL, LIVE_PICKER_ZONES_URL, STAFF_URL].map((url) => request(url).catch(() => null))]);
     if (!response.ok) throw new Error(`${t("requestFailed")} (${response.status}).`);
     const csv = await response.text();
     if (!csv.trim() || csv.includes("<!DOCTYPE html")) throw new Error(t("invalidCsv"));
@@ -3388,6 +3471,10 @@ async function loadDashboard() {
     planLocations = locationRows ? parsePlanLocations(locationRows) : null;
     const zoneRows = await csvOf(zonesResponse);
     planZones = zoneRows ? parsePlanZones(zoneRows, liveJobs?.today || (data.date || "").replace(/-/g, "")) : [];
+    const pickerZoneRows = await csvOf(pickerZonesResponse);
+    pickerZones = pickerZoneRows ? parsePickerZones(pickerZoneRows, liveJobs?.today || (data.date || "").replace(/-/g, "")) : new Map();
+    const staffRows = await csvOf(staffResponse);
+    if (staffRows) staffHired = parseStaff(staffRows);
     lastSyncAt = new Date();
     lastSyncError = "";
     renderDashboard(data);

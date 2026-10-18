@@ -921,3 +921,8 @@ body.view-plan .page-wrap > .pickers-page { display: none; }
   .plan-filters select { flex: 1; min-width: 0; }
   .plan-filters .search-box, .plan-filters .search-box input { width: 100%; }
 }
+
+/* Hourly report workers: eleven columns with hiring date, days and zones, kept to the page width. */
+.report-hourly .report-workers th, .report-hourly .report-workers td { padding-inline: 4px; font-size: 8px; }
+.report-hourly .report-workers td:nth-child(3), .report-hourly .report-workers td:nth-child(4) { white-space: nowrap; color: #46536c; }
+.report-hourly .report-workers .report-person small { white-space: nowrap; }
