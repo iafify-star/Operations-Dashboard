@@ -8,8 +8,8 @@
     <link rel="icon" type="image/png" href="assets/noon-minutes-logo.png">
     <title>نون مينتس | لوحة العمليات</title>
     <script>try { if (localStorage.getItem("dashboardTheme") === "light") document.documentElement.dataset.theme = "light"; } catch (error) {}</script>
-    <link rel="stylesheet" href="styles.css?v=54">
-    <script src="app.js?v=64" defer></script>
+    <link rel="stylesheet" href="styles.css?v=57">
+    <script src="app.js?v=67" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -21,6 +21,7 @@
         <div class="nav-label" data-i18n="navSection">لوحة المتابعة</div>
         <nav class="main-nav">
           <a class="nav-link nav-link-pickers active" href="#pickers"><span class="nav-icon">♙</span><span data-i18n="navPickers">إنتاجية البيكرز</span></a>
+          <a class="nav-link nav-link-plan" href="#plan"><span class="nav-icon">⌖</span><span data-i18n="navPlan">خطة البيك</span></a>
         </nav>
         <div class="sidebar-spacer"></div>
         <div class="source-card">
@@ -287,6 +288,45 @@
               <div id="issueHourlyTable"></div>
               <div id="hotspotFullTable"></div>
             </div>
+          </section>
+
+          <section class="plan-page" id="plan" aria-labelledby="planTitle">
+            <div class="page-heading">
+              <div>
+                <div class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="plEyebrow">خطة التجهيز</span></div>
+                <h1 id="planTitle"><span class="heading-main" data-i18n="plHeadingMain">خطة</span> <span data-i18n="plHeadingAccent">البيك</span></h1>
+                <p data-i18n="plIntro">اللوكيشنات اللي فيها أكبر كمية لسه ما اتلقطتش، ابدأ بيها عشان تخلص البيك بدري.</p>
+              </div>
+              <div class="heading-meta picker-heading-meta">
+                <div class="date-box"><span class="calendar-icon">◷</span><span><small data-i18n="plUpdated">آخر تحديث للوكيشنات</small><strong id="planUpdated">—</strong></span></div>
+                <button class="report-button picker-excel-button" id="planExcelButton" type="button" title="تنزيل الخطة في ملف Excel" data-i18n-title="plExcelTitle"><span class="report-icon">▦</span><span class="report-button-label" data-i18n="plExcel">الخطة Excel</span></button>
+              </div>
+            </div>
+            <div class="connection-banner" id="planStale" role="status" hidden></div>
+            <div class="filter-controls plan-filters">
+              <label><span data-i18n="warehouse">المستودع</span><select id="planWarehouse" aria-label="المستودع" data-i18n-aria="warehouse"></select></label>
+              <label><span data-i18n="pkTypeCol">نوع البيك</span><select id="planType" aria-label="نوع البيك" data-i18n-aria="pkTypeCol"></select></label>
+              <label><span data-i18n="plLimit">العدد</span><select id="planLimit" aria-label="العدد" data-i18n-aria="plLimit"></select></label>
+              <label class="search-box"><span>⌕</span><input id="planSearch" type="search" placeholder="ابحث بالزون أو اللوكيشن…" aria-label="ابحث بالزون أو اللوكيشن" data-i18n-placeholder="plSearch" data-i18n-aria="plSearch"></label>
+            </div>
+            <div class="kpi-grid plan-kpis" id="planKpis" aria-live="polite"></div>
+            <div class="picker-section-head"><h2 data-i18n="plByWarehouse">الفاضل في اللوكيشنات حسب المخزن</h2><p data-i18n="plByWarehouseSub">دوس على المخزن عشان تشوف لوكيشناته بس</p></div>
+            <div class="remaining-grid" id="planWarehouses"></div>
+            <article class="panel picker-table-panel plan-panel">
+              <div class="panel-heading">
+                <div><span class="panel-icon red">⌖</span><div><h3 data-i18n="plTableTitle">أعلى اللوكيشنات في الكمية اللي لسه ما اتلقطتش</h3><p data-i18n="plTableSubtitle">مترتبة من الأكبر للأصغر، ابدأ من فوق</p></div></div>
+                <span class="warehouse-count" id="planCount"></span>
+              </div>
+              <div class="table-scroll picker-table-scroll"><table class="picker-table plan-table" id="planTable"></table></div>
+              <p class="picker-note" data-i18n="plNote">الكمية الفاضلة = القطع اللي لسه Pending (مستنية تتخصص أو مستنية تتلقط) في اللوكيشن، من ملف التصدير اللي بيدخل الشيت كل ساعة. القطع الـ OOS مش محسوبة.</p>
+            </article>
+            <article class="panel picker-table-panel plan-panel">
+              <div class="panel-heading">
+                <div><span class="panel-icon blue">▦</span><div><h3 data-i18n="plZonesTitle">الزونات دلوقتي</h3><p data-i18n="plZonesSubtitle">من Zone Level View: الفاضل في كل زون ومين شغال فيه، وبيتحدث مع زرار حدّث الداشبورد</p></div></div>
+                <span class="warehouse-count" id="planZonesUpdated"></span>
+              </div>
+              <div class="table-scroll picker-table-scroll"><table class="picker-table plan-table" id="planZones"></table></div>
+            </article>
           </section>
 
           <footer class="page-footer">

@@ -10,6 +10,9 @@ const LIVE_JOBS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export
 const LIVE_INCIDENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=737990709`;
 // "LiveHistory" keeps an OOS and pending snapshot per warehouse from every sync.
 const LIVE_HISTORY_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1843204247`;
+// The picking plan: pending units per location from the hourly export, and the live Zone Level View.
+const PLAN_LOCATIONS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=793953273`;
+const LIVE_PLAN_ZONES_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1541166215`;
 
 const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const colors = {
@@ -39,6 +42,16 @@ const messages = {
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     pkNoLive: "أرقام الموقع مش متاحة دلوقتي، هتظهر مع التحديث الجاي.",
     pkTimeFilter: "فلتر الوقت",
+    navPlan: "خطة البيك", plEyebrow: "خطة التجهيز", plHeadingMain: "خطة", plHeadingAccent: "البيك", plIntro: "اللوكيشنات اللي فيها أكبر كمية لسه ما اتلقطتش، ابدأ بيها عشان تخلص البيك بدري.",
+    plUpdated: "آخر تحديث للوكيشنات", plExcel: "الخطة Excel", plExcelTitle: "تنزيل الخطة في ملف Excel", plLimit: "العدد", plAll: "الكل", plSearch: "ابحث بالزون أو اللوكيشن…",
+    plByWarehouse: "الفاضل في اللوكيشنات حسب المخزن", plByWarehouseSub: "دوس على المخزن عشان تشوف لوكيشناته بس", plTableTitle: "أعلى اللوكيشنات في الكمية اللي لسه ما اتلقطتش",
+    plTableSubtitle: "مترتبة من الأكبر للأصغر، ابدأ من فوق", plNote: "الكمية الفاضلة = القطع اللي لسه Pending (مستنية تتخصص أو مستنية تتلقط) في اللوكيشن، من ملف التصدير اللي بيدخل الشيت كل ساعة. القطع الـ OOS مش محسوبة.",
+    plZonesTitle: "الزونات دلوقتي", plZonesSubtitle: "من Zone Level View: الفاضل في كل زون ومين شغال فيه، وبيتحدث مع زرار حدّث الداشبورد",
+    plStale: "اللوكيشنات من ملف تصدير قديم ({time})، هتتحدث مع أول تشغيل للمهمة اللي كل ساعة.", plMissing: "بيانات اللوكيشنات مش متاحة دلوقتي.",
+    plKpiPending: "قطع لسه ما اتلقطتش", plKpiTop20: "نصيب أعلى 20 لوكيشن", plKpiBig: "لوكيشنات فيها 30 قطعة أو أكتر", plKpiBigSub: "ابدأ بيها الأول",
+    plKpiZones: "الفاضل في الزونات دلوقتي", plLocationsWord: "لوكيشن", plUnitsWord: "قطعة", plZonesWord: "زون", plWarehouseSub: "قطعة لسه ما اتلقطتش", plBiggest: "أكبر لوكيشن:",
+    plNone: "مفيش لوكيشنات فيها كميات فاضلة.", plNoZones: "مفيش زونات فيها شغل فاضل.", plPendingCol: "الفاضل", plRunningCol: "تراكمي", plCluster: "الكلاستر",
+    plInProgress: "شغالين فيه", plDone: "خلص", plClearIn: "يخلص في", plMinutes: "دقيقة",
     rptPendingByType: "الفاضل في كل نوع بيك (Pending)", rptOfPending: "من الـ Pending", rptOosByHour: "OOS كل ساعة", rptSnapshotAt: "وقت التحديث",
     rptOosChange: "الزيادة عن اللي قبلها", rptOosEmpty: "OOS بالساعة بيتسجل مع كل تحديث للأرقام، ولسه مفيش تحديثات النهارده.",
     icTitle: "مشاكل التجهيز (Incident Reported)", icSubtitle: "البلاغات اللي البيكرز عملوها في Minutes Central، بنفس فلاتر المخازن ونوع البيك والوقت اللي فوق",
@@ -270,6 +283,16 @@ const messages = {
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     pkNoLive: "Site figures are not available right now; they will appear with the next update.",
     pkTimeFilter: "Time filter",
+    navPlan: "Picking plan", plEyebrow: "Picking plan", plHeadingMain: "Picking", plHeadingAccent: "plan", plIntro: "The locations holding the most units still to pick; start with them to finish picking early.",
+    plUpdated: "Locations updated", plExcel: "Plan Excel", plExcelTitle: "Download the plan as an Excel file", plLimit: "Show", plAll: "All", plSearch: "Search zone or location…",
+    plByWarehouse: "Units left in locations by warehouse", plByWarehouseSub: "Click a warehouse to see only its locations", plTableTitle: "Locations with the most units still to pick",
+    plTableSubtitle: "Largest first; start from the top", plNote: "Units left = units still pending (waiting for reservation or picking) in the location, from the export the sheet takes in every hour. OOS units are not counted.",
+    plZonesTitle: "Zones now", plZonesSubtitle: "From Zone Level View: what each zone has left and who is on it, refreshed with the dashboard button",
+    plStale: "Locations come from an older export ({time}); they refresh with the next hourly run.", plMissing: "Location figures are not available right now.",
+    plKpiPending: "Units still to pick", plKpiTop20: "Share of the top 20 locations", plKpiBig: "Locations with 30+ units", plKpiBigSub: "start with these",
+    plKpiZones: "Left in zones now", plLocationsWord: "locations", plUnitsWord: "units", plZonesWord: "zones", plWarehouseSub: "units still to pick", plBiggest: "Largest:",
+    plNone: "No locations have units left.", plNoZones: "No zone has work left.", plPendingCol: "Left", plRunningCol: "Running", plCluster: "Cluster",
+    plInProgress: "In progress", plDone: "Done", plClearIn: "Clears in", plMinutes: "min",
     rptPendingByType: "Pending by picking type", rptOfPending: "Share of pending", rptOosByHour: "OOS through the day", rptSnapshotAt: "Updated at",
     rptOosChange: "Change since previous", rptOosEmpty: "OOS by hour is recorded with every sync; there are none yet today.",
     icTitle: "Picking incidents (Incident Reported)", icSubtitle: "Reports pickers raised in Minutes Central, with the warehouse, picking type and time filters above",
@@ -459,6 +482,35 @@ let liveData = null;
 let liveJobs = null;
 let liveIncidents = null;
 let liveHistory = [];
+let planLocations = null;
+let planZones = [];
+
+// Pending units per location from the PlanLocations tab, which pivots the export; the tab also says when that export came in.
+function parsePlanLocations(rows) {
+  const header = (rows[0] || []).map((cell) => String(cell ?? "").trim());
+  const at = (name) => header.indexOf(name);
+  if (at("location") < 0 || at("pending") < 0) return null;
+  const importedAt = at("imported_at") >= 0 ? textAt(rows[0], at("imported_at") + 1) : "";
+  const list = rows.slice(1).filter((row) => textAt(row, at("location"))).map((row) => ({
+    code: textAt(row, at("warehouse")), key: warehouseKey(textAt(row, at("warehouse"))), zone: textAt(row, at("zone")),
+    location: textAt(row, at("location")), type: textAt(row, at("picking_type")), pending: parseNumber(textAt(row, at("pending"))),
+  }));
+  return { importedAt, rows: list };
+}
+
+// Today's Zone Level View rows from the LivePlanZones tab.
+function parsePlanZones(rows, dayKey) {
+  const header = (rows[0] || []).map((cell) => String(cell ?? "").trim());
+  const at = (name) => header.indexOf(name);
+  if (at("zone") < 0 || at("pending") < 0) return [];
+  const text = (row, name) => textAt(row, at(name)).replace(/^'/, "");
+  return rows.slice(1).filter((row) => text(row, "date_key") === dayKey && text(row, "zone")).map((row) => ({
+    zone: text(row, "zone"), code: text(row, "warehouse"), key: warehouseKey(text(row, "warehouse")), type: text(row, "picking_type"),
+    cluster: text(row, "cluster_rank"), cutoff: text(row, "cutoff"), planned: parseNumber(text(row, "planned")), completed: parseNumber(text(row, "completed")),
+    inProgress: parseNumber(text(row, "in_progress")), pending: parseNumber(text(row, "pending")), pickers: parseNumber(text(row, "active_pickers")),
+    ipp: parseNumber(text(row, "ipp")), updated: text(row, "updated_at"),
+  }));
+}
 
 // Reads today's LiveJobs rows (the sheet's own date sits next to "today_key" in the header row).
 function parseLiveJobs(rows) {
@@ -3147,11 +3199,116 @@ function renderIncidents(data) {
     top((item) => item.user.toLowerCase()).map((group) => `<tr><td>${pickerNameCell({ name: names.get(group.key) || "", user: group.items[0].user.split("@")[0], fullName: names.get(group.key) || "" })}</td><td>${escapeHtml([...new Set(group.items.map((item) => item.key))].join(" / "))}</td><td>${formatNumber(group.reports)}</td><td><b>${formatNumber(group.units)}</b></td><td>${escapeHtml(topReason(group))}</td></tr>`).join(""));
 }
 
+const planFilter = { warehouse: "all", type: "all", limit: 50, search: "" };
+
+function planInScope(item) {
+  const search = planFilter.search.trim().toLowerCase();
+  return (planFilter.warehouse === "all" || item.key === planFilter.warehouse)
+    && (planFilter.type === "all" || item.type === planFilter.type)
+    && (!search || item.zone.toLowerCase().includes(search) || (item.location || "").toLowerCase().includes(search));
+}
+
+// The plan lists the locations holding the most units still to pick, so the floor can clear the big ones first.
+function renderPlanPage(data) {
+  const locations = planLocations ? planLocations.rows.filter(planInScope) : [];
+  const zones = planZones.filter(planInScope).sort((left, right) => right.pending - left.pending);
+  const allKeys = [...new Set([...(planLocations?.rows || []), ...planZones].map((item) => item.key))].filter(Boolean).sort();
+  fillSelect($("#planWarehouse"), [["all", t("pkAllWarehouses")], ...allKeys.map((key) => [key, key])], planFilter.warehouse);
+  fillSelect($("#planType"), [["all", t("pkAllTypes")], ...PICKING_TYPES.map(([type, label]) => [type, label])], planFilter.type);
+  fillSelect($("#planLimit"), [["20", "20"], ["50", "50"], ["100", "100"], ["10000", t("plAll")]], String(planFilter.limit));
+
+  const today = data.date || "";
+  const imported = planLocations?.importedAt || "";
+  $("#planUpdated").textContent = imported || "—";
+  const stale = planLocations && imported && today && !imported.startsWith(today);
+  $("#planStale").hidden = !stale && !!planLocations;
+  $("#planStale").textContent = planLocations ? t("plStale").replace("{time}", imported) : t("plMissing");
+
+  const total = locations.reduce((sum, item) => sum + item.pending, 0);
+  const shown = locations.slice(0, planFilter.limit);
+  const top20 = locations.slice(0, 20).reduce((sum, item) => sum + item.pending, 0);
+  const zonePending = zones.reduce((sum, item) => sum + item.pending, 0);
+  const kpis = [
+    { label: t("plKpiPending"), value: formatNumber(total), sub: `${formatNumber(locations.length)} ${t("plLocationsWord")}`, icon: "⌖", accent: colors.red },
+    { label: t("plKpiTop20"), value: total ? `${Math.round((top20 / total) * 100)}%` : "—", sub: `${formatNumber(top20)} ${t("plUnitsWord")}`, icon: "▲", accent: colors.amber },
+    { label: t("plKpiBig"), value: formatNumber(locations.filter((item) => item.pending >= 30).length), sub: t("plKpiBigSub"), icon: "!", accent: colors.violet },
+    { label: t("plKpiZones"), value: formatNumber(zonePending), sub: `${formatNumber(zones.filter((item) => item.pending > 0).length)} ${t("plZonesWord")} · ${formatNumber(zones.reduce((sum, item) => sum + item.pickers, 0))} ${t("pkStatusActive")}`, icon: "▦", accent: colors.blue },
+  ];
+  $("#planKpis").innerHTML = kpis.map((metric, index) => `<article class="kpi-card" style="--accent:${metric.accent};--i:${index}"><div class="kpi-top"><span>${escapeHtml(metric.label)}</span><span class="kpi-icon">${metric.icon}</span></div><div class="kpi-value">${escapeHtml(metric.value)}</div><div class="kpi-sub">${escapeHtml(metric.sub)}</div></article>`).join("");
+
+  // One card per warehouse: pending units in its locations, and how many locations hold them.
+  const byWarehouse = allKeys.map((key) => {
+    const rows = (planLocations?.rows || []).filter((item) => item.key === key && (planFilter.type === "all" || item.type === planFilter.type));
+    return { key, pending: rows.reduce((sum, item) => sum + item.pending, 0), count: rows.length, top: rows[0] };
+  }).filter((item) => item.count).sort((left, right) => right.pending - left.pending);
+  $("#planWarehouses").innerHTML = byWarehouse.length ? byWarehouse.map((item) => `<button class="remaining-card${planFilter.warehouse === item.key ? " active" : ""}" type="button" data-plan-warehouse="${escapeHtml(item.key)}">
+      <span class="remaining-top"><strong>${escapeHtml(item.key)}</strong><span>${formatNumber(item.count)} ${escapeHtml(t("plLocationsWord"))}</span></span>
+      <span class="remaining-value">${formatNumber(item.pending)}</span>
+      <span class="remaining-sub">${escapeHtml(t("plWarehouseSub"))}</span>
+      <span class="remaining-foot">${escapeHtml(t("plBiggest"))} <b>${escapeHtml(item.top?.location || "—")}</b> (${formatNumber(item.top?.pending || 0)})</span>
+    </button>`).join("") : `<div class="empty-state">${t("plNone")}</div>`;
+
+  const max = Math.max(1, ...shown.map((item) => item.pending));
+  let running = 0;
+  const locationRows = shown.map((item, index) => {
+    running += item.pending;
+    return `<tr><td>${index + 1}</td><td><span class="plan-location">${escapeHtml(item.location)}</span></td><td>${escapeHtml(item.zone)}</td><td class="warehouse-name">${escapeHtml(item.key)}</td><td>${escapeHtml(PICKING_TYPE_SHORT[item.type] || item.type)}</td><td class="plan-qty"><span class="plan-bar"><b>${formatNumber(item.pending)}</b><i style="width:${Math.max(4, Math.round((item.pending / max) * 90))}px"></i></span></td><td>${total ? `${Math.round((running / total) * 100)}%` : "—"}</td></tr>`;
+  }).join("");
+  $("#planTable").innerHTML = `<thead><tr><th>#</th><th>${t("icLocation")}</th><th>${t("icZone")}</th><th>${t("warehouseShort")}</th><th>${t("pkTypeCol")}</th><th>${t("plPendingCol")}</th><th>${t("plRunningCol")}</th></tr></thead><tbody>${locationRows || `<tr><td colspan="7" class="empty-state">${t(planLocations ? "plNone" : "plMissing")}</td></tr>`}</tbody>`;
+  $("#planCount").textContent = `${formatNumber(shown.length)} ${t("pkOf")} ${formatNumber(locations.length)} ${t("plLocationsWord")}`;
+
+  // Minutes to clear a zone at its current pace: what is left over the units its active pickers manage per hour.
+  const clearIn = (zone) => (zone.pickers && zone.ipp ? `${formatNumber((zone.pending / (zone.ipp * zone.pickers)) * 60)} ${t("plMinutes")}` : "—");
+  const zoneRows = zones.filter((zone) => zone.pending > 0 || zone.inProgress > 0).map((zone, index) => `<tr><td>${index + 1}</td><td><span class="plan-location">${escapeHtml(zone.zone)}</span></td><td class="warehouse-name">${escapeHtml(zone.key)}</td><td>${escapeHtml(PICKING_TYPE_SHORT[zone.type] || zone.type)}</td><td>${escapeHtml(zone.cluster)}</td><td><b>${formatNumber(zone.pending)}</b></td><td>${formatNumber(zone.inProgress)}</td><td>${zone.planned ? `${Math.round((zone.completed / zone.planned) * 100)}%` : "—"}</td><td>${formatNumber(zone.pickers)}</td><td>${zone.ipp ? formatNumber(zone.ipp) : "—"}</td><td>${clearIn(zone)}</td></tr>`).join("");
+  $("#planZones").innerHTML = `<thead><tr><th>#</th><th>${t("icZone")}</th><th>${t("warehouseShort")}</th><th>${t("pkTypeCol")}</th><th>${t("plCluster")}</th><th>${t("plPendingCol")}</th><th>${t("plInProgress")}</th><th>${t("plDone")}</th><th>${t("pkStatusActive")}</th><th>IPP</th><th>${t("plClearIn")}</th></tr></thead><tbody>${zoneRows || `<tr><td colspan="11" class="empty-state">${t("plNoZones")}</td></tr>`}</tbody>`;
+  $("#planZonesUpdated").textContent = planZones[0]?.updated ? `${t("pkSiteUpdate")} ${planZones[0].updated}` : "";
+}
+
+async function exportPlanExcel() {
+  const button = $("#planExcelButton");
+  if (!dashboardData || button.disabled) return;
+  const label = button.querySelector(".report-button-label");
+  button.disabled = true;
+  label.textContent = t("reportPreparing");
+  try {
+    const XLSX = await ensureXlsxLibrary();
+    const locations = (planLocations?.rows || []).filter(planInScope);
+    const zones = planZones.filter(planInScope).sort((left, right) => right.pending - left.pending);
+    const locationSheet = XLSX.utils.aoa_to_sheet([[t("plTableTitle")], [t("plUpdated"), planLocations?.importedAt || ""], [],
+      ["#", t("icLocation"), t("icZone"), t("warehouse"), t("pkTypeCol"), t("plPendingCol")],
+      ...locations.map((item, index) => [index + 1, item.location, item.zone, item.key, PICKING_TYPE_SHORT[item.type] || item.type, item.pending])]);
+    locationSheet["!cols"] = [5, 20, 22, 10, 14, 12].map((wch) => ({ wch }));
+    const zoneSheet = XLSX.utils.aoa_to_sheet([[t("plZonesTitle")], [],
+      [t("icZone"), t("warehouse"), t("pkTypeCol"), t("plCluster"), t("plPendingCol"), t("plInProgress"), "Planned", "Completed", t("pkStatusActive"), "IPP"],
+      ...zones.map((zone) => [zone.zone, zone.key, PICKING_TYPE_SHORT[zone.type] || zone.type, zone.cluster, zone.pending, zone.inProgress, zone.planned, zone.completed, zone.pickers, zone.ipp])]);
+    zoneSheet["!cols"] = [22, 10, 14, 22, 10, 10, 10, 10, 10, 8].map((wch) => ({ wch }));
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, locationSheet, locale === "ar" ? "اللوكيشنات" : "Locations");
+    XLSX.utils.book_append_sheet(book, zoneSheet, locale === "ar" ? "الزونات" : "Zones");
+    if (locale === "ar") book.Workbook = { Views: [{ RTL: true }] };
+    XLSX.writeFile(book, `noon-picking-plan-${reportStamp()}.xlsx`);
+  } catch (error) {
+    console.error("Excel export failed:", error);
+    alert(t("pkExcelFailed"));
+  } finally {
+    label.textContent = t("plExcel");
+    button.disabled = false;
+  }
+}
+
+// #plan shows the picking plan; anything else shows the picker page.
+function applyView() {
+  const plan = location.hash === "#plan";
+  document.body.classList.toggle("view-plan", plan);
+  document.querySelectorAll(".main-nav .nav-link").forEach((link) => link.classList.toggle("active", link.getAttribute("href") === (plan ? "#plan" : "#pickers")));
+}
+
 function renderDashboard(data) {
   dashboardData = data;
-  // The site shows only the picker page; the older dashboard sections are hidden and no longer drawn.
+  // The site shows the picker page and the picking plan; the older dashboard sections are hidden and no longer drawn.
   syncHourOptions();
   renderPickersPage(data);
+  renderPlanPage(data);
   $("#connectionBanner").hidden = !lastSyncError;
 }
 
@@ -3162,7 +3319,7 @@ async function loadDashboard() {
   try {
     const request = (url) => fetch(`${url}&_=${Date.now()}`, { cache: "no-store", headers: { Accept: "text/csv" } });
     // The site's own cards live in a separate tab; the page still works from the dashboard tab if they fail to load.
-    const [response, liveResponse, jobsResponse, incidentsResponse, historyResponse] = await Promise.all([request(SHEET_URL), request(LIVE_URL).catch(() => null), request(LIVE_JOBS_URL).catch(() => null), request(LIVE_INCIDENTS_URL).catch(() => null), request(LIVE_HISTORY_URL).catch(() => null)]);
+    const [response, liveResponse, jobsResponse, incidentsResponse, historyResponse, locationsResponse, zonesResponse] = await Promise.all([request(SHEET_URL), ...[LIVE_URL, LIVE_JOBS_URL, LIVE_INCIDENTS_URL, LIVE_HISTORY_URL, PLAN_LOCATIONS_URL, LIVE_PLAN_ZONES_URL].map((url) => request(url).catch(() => null))]);
     if (!response.ok) throw new Error(`${t("requestFailed")} (${response.status}).`);
     const csv = await response.text();
     if (!csv.trim() || csv.includes("<!DOCTYPE html")) throw new Error(t("invalidCsv"));
@@ -3178,6 +3335,11 @@ async function loadDashboard() {
     liveIncidents = incidentsCsv && !incidentsCsv.includes("<!DOCTYPE html") ? parseIncidents(parseCsv(incidentsCsv), liveJobs?.today || (data.date || "").replace(/-/g, "")) : null;
     const historyCsv = historyResponse?.ok ? await historyResponse.text().catch(() => "") : "";
     liveHistory = historyCsv && !historyCsv.includes("<!DOCTYPE html") ? parseHistory(parseCsv(historyCsv), liveJobs?.today || (data.date || "").replace(/-/g, "")) : [];
+    const csvOf = async (reply) => { const text = reply?.ok ? await reply.text().catch(() => "") : ""; return text && !text.includes("<!DOCTYPE html") ? parseCsv(text) : null; };
+    const locationRows = await csvOf(locationsResponse);
+    planLocations = locationRows ? parsePlanLocations(locationRows) : null;
+    const zoneRows = await csvOf(zonesResponse);
+    planZones = zoneRows ? parsePlanZones(zoneRows, liveJobs?.today || (data.date || "").replace(/-/g, "")) : [];
     lastSyncAt = new Date();
     lastSyncError = "";
     renderDashboard(data);
@@ -3372,6 +3534,29 @@ $("#pickerSearch").addEventListener("input", (event) => {
   pickerFilter.search = event.target.value;
   if (dashboardData) renderPickersPage(dashboardData, { animate: false });
 });
+[["#planWarehouse", "warehouse"], ["#planType", "type"], ["#planLimit", "limit"]].forEach(([selector, key]) => {
+  $(selector).addEventListener("change", (event) => {
+    planFilter[key] = key === "limit" ? Number(event.target.value) : event.target.value;
+    if (dashboardData) renderPlanPage(dashboardData);
+  });
+});
+$("#planSearch").addEventListener("input", (event) => {
+  planFilter.search = event.target.value;
+  if (dashboardData) renderPlanPage(dashboardData);
+});
+// A warehouse card narrows the plan to that warehouse; clicking it again shows every warehouse.
+$("#planWarehouses").addEventListener("click", (event) => {
+  const card = event.target.closest("[data-plan-warehouse]");
+  if (!card || !dashboardData) return;
+  planFilter.warehouse = planFilter.warehouse === card.dataset.planWarehouse ? "all" : card.dataset.planWarehouse;
+  renderPlanPage(dashboardData);
+});
+$("#planExcelButton").addEventListener("click", exportPlanExcel);
+window.addEventListener("hashchange", () => {
+  applyView();
+  window.scrollTo({ top: 0 });
+});
+applyView();
 setAutoRefresh(true);
 syncHourOptions();
 applyLocale();

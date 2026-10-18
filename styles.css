@@ -629,7 +629,7 @@ table tfoot td { padding: 10px 13px; border-top: 1px solid #ffe90033; background
 }
 
 /* The site now shows only the picker productivity page; the older dashboard sections stay in the markup, hidden. */
-.page-wrap > :not(.pickers-page):not(.connection-banner):not(.page-footer) { display: none; }
+.page-wrap > :not(.pickers-page):not(.plan-page):not(.connection-banner):not(.page-footer) { display: none; }
 .pickers-page .page-heading { margin-bottom: 22px; }
 .picker-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 20px 0 14px; }
 .picker-filters select { min-width: 120px; }
@@ -896,3 +896,28 @@ html[data-theme="light"] .live-pill { background: #e2f6e9; color: #1c7a3e; }
 .report-break { overflow-wrap: anywhere; word-break: break-all; }
 /* A wide hour table (many warehouses side by side) gets a smaller type so it stays on the page. */
 .report-compact th, .report-compact td { padding: 4px 3px; font-size: 7.5px; }
+
+/* Picking plan page, shown from the #plan link; the picker page stays the default. */
+.page-wrap > .plan-page { display: none; }
+body.view-plan .page-wrap > .plan-page { display: block; }
+body.view-plan .page-wrap > .pickers-page { display: none; }
+.plan-filters { margin: 4px 0 16px; }
+.plan-filters .search-box input { width: 190px; }
+.plan-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 8px; }
+.plan-panel { margin-top: 14px; }
+.plan-table td.plan-qty { min-width: 140px; }
+.plan-bar { display: inline-flex; align-items: center; gap: 8px; }
+.plan-bar i { display: block; height: 6px; border-radius: 4px; background: var(--red); }
+.plan-bar b { min-width: 34px; font: 800 11px "Segoe UI", sans-serif; }
+.plan-location { font: 700 10.5px "Segoe UI", sans-serif; direction: ltr; unicode-bidi: isolate; }
+@media (max-width: 1180px) {
+  .plan-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.plan-filters select { min-width: 120px; }
+@media (max-width: 620px) {
+  .plan-page .report-button-label { display: inline; }
+  .plan-page .picker-heading-meta .report-button { flex: 1; justify-content: center; }
+  .plan-filters label { flex: 1 1 45%; }
+  .plan-filters select { flex: 1; min-width: 0; }
+  .plan-filters .search-box, .plan-filters .search-box input { width: 100%; }
+}
