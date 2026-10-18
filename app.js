@@ -42,6 +42,8 @@ const messages = {
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
     pkNoLive: "أرقام الموقع مش متاحة دلوقتي، هتظهر مع التحديث الجاي.",
     pkTimeFilter: "فلتر الوقت",
+    plZoneTotalsTitle: "الزونات: كام لوكيشن وكام قطعة فاضلة", plZoneTotalsSubtitle: "كل زون فيه كام لوكيشن لسه فيه كمية، ومجموع الفاضل، مترتب من الأكبر",
+    plZoneLocations: "لوكيشنات فيها كمية", plLiveLeft: "الفاضل دلوقتي (لايف)", plBiggestCol: "أكبر لوكيشن", plBiggestQty: "فاضل في أكبر لوكيشن",
     navPlan: "خطة البيك", plEyebrow: "خطة التجهيز", plHeadingMain: "خطة", plHeadingAccent: "البيك", plIntro: "اللوكيشنات اللي فيها أكبر كمية لسه ما اتلقطتش، ابدأ بيها عشان تخلص البيك بدري.",
     plUpdated: "آخر تحديث للوكيشنات", plExcel: "الخطة Excel", plExcelTitle: "تنزيل الخطة في ملف Excel", plLimit: "العدد", plAll: "الكل", plSearch: "ابحث بالزون أو اللوكيشن…",
     plByWarehouse: "الفاضل في اللوكيشنات حسب المخزن", plByWarehouseSub: "دوس على المخزن عشان تشوف لوكيشناته بس", plTableTitle: "أعلى اللوكيشنات في الكمية اللي لسه ما اتلقطتش",
@@ -283,6 +285,8 @@ const messages = {
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
     pkNoLive: "Site figures are not available right now; they will appear with the next update.",
     pkTimeFilter: "Time filter",
+    plZoneTotalsTitle: "Zones: locations and units left", plZoneTotalsSubtitle: "How many locations in each zone still hold units, and how many units, largest first",
+    plZoneLocations: "Locations with units", plLiveLeft: "Left now (live)", plBiggestCol: "Biggest location", plBiggestQty: "Left in biggest location",
     navPlan: "Picking plan", plEyebrow: "Picking plan", plHeadingMain: "Picking", plHeadingAccent: "plan", plIntro: "The locations holding the most units still to pick; start with them to finish picking early.",
     plUpdated: "Locations updated", plExcel: "Plan Excel", plExcelTitle: "Download the plan as an Excel file", plLimit: "Show", plAll: "All", plSearch: "Search zone or location…",
     plByWarehouse: "Units left in locations by warehouse", plByWarehouseSub: "Click a warehouse to see only its locations", plTableTitle: "Locations with the most units still to pick",
@@ -3199,13 +3203,45 @@ function renderIncidents(data) {
     top((item) => item.user.toLowerCase()).map((group) => `<tr><td>${pickerNameCell({ name: names.get(group.key) || "", user: group.items[0].user.split("@")[0], fullName: names.get(group.key) || "" })}</td><td>${escapeHtml([...new Set(group.items.map((item) => item.key))].join(" / "))}</td><td>${formatNumber(group.reports)}</td><td><b>${formatNumber(group.units)}</b></td><td>${escapeHtml(topReason(group))}</td></tr>`).join(""));
 }
 
-const planFilter = { warehouse: "all", type: "all", limit: 50, search: "" };
+// warehouses is null for every warehouse, or the keys picked in the plan's warehouse menu.
+const planFilter = { warehouses: null, type: "all", limit: 50, search: "" };
+
+function planWarehouseLabel() {
+  return planFilter.warehouses ? planFilter.warehouses.join(", ") : t("pkAllWarehouses");
+}
+
+function renderPlanWarehousePicker(keys) {
+  if (planFilter.warehouses) planFilter.warehouses = planFilter.warehouses.filter((key) => keys.includes(key));
+  if (planFilter.warehouses && (!planFilter.warehouses.length || planFilter.warehouses.length === keys.length)) planFilter.warehouses = null;
+  $("#planWarehouseLabel").textContent = planWarehouseLabel();
+  const chosen = planFilter.warehouses || keys;
+  $("#planWarehouseMenu").innerHTML = `<label class="wh-option wh-option-all"><input type="checkbox" data-plan-key="all"${planFilter.warehouses ? "" : " checked"}><span>${escapeHtml(t("pkAllWarehouses"))}</span></label>${keys.map((key) => `<label class="wh-option"><input type="checkbox" data-plan-key="${escapeHtml(key)}"${chosen.includes(key) ? " checked" : ""}><span>${escapeHtml(key)}</span></label>`).join("")}`;
+}
 
 function planInScope(item) {
   const search = planFilter.search.trim().toLowerCase();
-  return (planFilter.warehouse === "all" || item.key === planFilter.warehouse)
+  return (!planFilter.warehouses || planFilter.warehouses.includes(item.key))
     && (planFilter.type === "all" || item.type === planFilter.type)
     && (!search || item.zone.toLowerCase().includes(search) || (item.location || "").toLowerCase().includes(search));
+}
+
+// What each zone still has to pick: locations holding units, the units in them (from the export),
+// what Zone Level View shows left right now, and the zone's biggest location. Largest first.
+function planZoneTotals(locations, zones) {
+  const liveLeft = new Map();
+  zones.forEach((zone) => liveLeft.set(`${zone.key}|${zone.zone}`, (liveLeft.get(`${zone.key}|${zone.zone}`) || 0) + zone.pending));
+  const totals = new Map();
+  locations.forEach((item) => {
+    const id = `${item.key}|${item.zone}`;
+    if (!totals.has(id)) totals.set(id, { key: item.key, zone: item.zone, count: 0, pending: 0, types: new Map(), top: item });
+    const total = totals.get(id);
+    total.count += 1;
+    total.pending += item.pending;
+    total.types.set(item.type, (total.types.get(item.type) || 0) + item.pending);
+    if (item.pending > total.top.pending) total.top = item;
+  });
+  return [...totals.entries()].map(([id, total]) => ({ ...total, live: liveLeft.has(id) ? liveLeft.get(id) : null }))
+    .sort((left, right) => right.pending - left.pending);
 }
 
 // The plan lists the locations holding the most units still to pick, so the floor can clear the big ones first.
@@ -3213,7 +3249,7 @@ function renderPlanPage(data) {
   const locations = planLocations ? planLocations.rows.filter(planInScope) : [];
   const zones = planZones.filter(planInScope).sort((left, right) => right.pending - left.pending);
   const allKeys = [...new Set([...(planLocations?.rows || []), ...planZones].map((item) => item.key))].filter(Boolean).sort();
-  fillSelect($("#planWarehouse"), [["all", t("pkAllWarehouses")], ...allKeys.map((key) => [key, key])], planFilter.warehouse);
+  renderPlanWarehousePicker(allKeys);
   fillSelect($("#planType"), [["all", t("pkAllTypes")], ...PICKING_TYPES.map(([type, label]) => [type, label])], planFilter.type);
   fillSelect($("#planLimit"), [["20", "20"], ["50", "50"], ["100", "100"], ["10000", t("plAll")]], String(planFilter.limit));
 
@@ -3241,7 +3277,7 @@ function renderPlanPage(data) {
     const rows = (planLocations?.rows || []).filter((item) => item.key === key && (planFilter.type === "all" || item.type === planFilter.type));
     return { key, pending: rows.reduce((sum, item) => sum + item.pending, 0), count: rows.length, top: rows[0] };
   }).filter((item) => item.count).sort((left, right) => right.pending - left.pending);
-  $("#planWarehouses").innerHTML = byWarehouse.length ? byWarehouse.map((item) => `<button class="remaining-card${planFilter.warehouse === item.key ? " active" : ""}" type="button" data-plan-warehouse="${escapeHtml(item.key)}">
+  $("#planWarehouses").innerHTML = byWarehouse.length ? byWarehouse.map((item) => `<button class="remaining-card${planFilter.warehouses?.length === 1 && planFilter.warehouses[0] === item.key ? " active" : ""}" type="button" data-plan-warehouse="${escapeHtml(item.key)}">
       <span class="remaining-top"><strong>${escapeHtml(item.key)}</strong><span>${formatNumber(item.count)} ${escapeHtml(t("plLocationsWord"))}</span></span>
       <span class="remaining-value">${formatNumber(item.pending)}</span>
       <span class="remaining-sub">${escapeHtml(t("plWarehouseSub"))}</span>
@@ -3256,6 +3292,12 @@ function renderPlanPage(data) {
   }).join("");
   $("#planTable").innerHTML = `<thead><tr><th>#</th><th>${t("icLocation")}</th><th>${t("icZone")}</th><th>${t("warehouseShort")}</th><th>${t("pkTypeCol")}</th><th>${t("plPendingCol")}</th><th>${t("plRunningCol")}</th></tr></thead><tbody>${locationRows || `<tr><td colspan="7" class="empty-state">${t(planLocations ? "plNone" : "plMissing")}</td></tr>`}</tbody>`;
   $("#planCount").textContent = `${formatNumber(shown.length)} ${t("pkOf")} ${formatNumber(locations.length)} ${t("plLocationsWord")}`;
+
+  const zoneTotals = planZoneTotals(locations, zones);
+  const zoneMax = Math.max(1, ...zoneTotals.map((item) => item.pending));
+  const zoneTotalRows = zoneTotals.map((item, index) => `<tr><td>${index + 1}</td><td><span class="plan-location">${escapeHtml(item.zone)}</span></td><td class="warehouse-name">${escapeHtml(item.key)}</td><td>${escapeHtml(typeLabel(item.types))}</td><td>${formatNumber(item.count)}</td><td class="plan-qty"><span class="plan-bar"><b>${formatNumber(item.pending)}</b><i style="width:${Math.max(4, Math.round((item.pending / zoneMax) * 90))}px"></i></span></td><td>${item.live === null ? "—" : formatNumber(item.live)}</td><td><span class="plan-location">${escapeHtml(item.top.location)}</span> (${formatNumber(item.top.pending)})</td></tr>`).join("");
+  $("#planZoneTotals").innerHTML = `<thead><tr><th>#</th><th>${t("icZone")}</th><th>${t("warehouseShort")}</th><th>${t("pkTypeCol")}</th><th>${t("plZoneLocations")}</th><th>${t("plPendingCol")}</th><th>${t("plLiveLeft")}</th><th>${t("plBiggestCol")}</th></tr></thead><tbody>${zoneTotalRows || `<tr><td colspan="8" class="empty-state">${t(planLocations ? "plNone" : "plMissing")}</td></tr>`}</tbody>`;
+  $("#planZoneTotalsCount").textContent = `${formatNumber(zoneTotals.length)} ${t("plZonesWord")}`;
 
   // Minutes to clear a zone at its current pace: what is left over the units its active pickers manage per hour.
   const clearIn = (zone) => (zone.pickers && zone.ipp ? `${formatNumber((zone.pending / (zone.ipp * zone.pickers)) * 60)} ${t("plMinutes")}` : "—");
@@ -3283,9 +3325,14 @@ async function exportPlanExcel(event) {
       [t("icZone"), t("warehouse"), t("pkTypeCol"), t("plCluster"), t("plPendingCol"), t("plInProgress"), "Planned", "Completed", t("pkStatusActive"), "IPP"],
       ...zones.map((zone) => [zone.zone, zone.key, PICKING_TYPE_SHORT[zone.type] || zone.type, zone.cluster, zone.pending, zone.inProgress, zone.planned, zone.completed, zone.pickers, zone.ipp])]);
     zoneSheet["!cols"] = [22, 10, 14, 22, 10, 10, 10, 10, 10, 8].map((wch) => ({ wch }));
+    const totalsSheet = XLSX.utils.aoa_to_sheet([[t("plZoneTotalsTitle")], [t("plUpdated"), planLocations?.importedAt || ""], [],
+      ["#", t("icZone"), t("warehouse"), t("pkTypeCol"), t("plZoneLocations"), t("plPendingCol"), t("plLiveLeft"), t("plBiggestCol"), t("plBiggestQty")],
+      ...planZoneTotals(locations, zones).map((item, index) => [index + 1, item.zone, item.key, typeLabel(item.types), item.count, item.pending, item.live ?? "", item.top.location, item.top.pending])]);
+    totalsSheet["!cols"] = [5, 22, 10, 26, 12, 10, 12, 20, 10].map((wch) => ({ wch }));
     const book = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(book, locationSheet, locale === "ar" ? "اللوكيشنات" : "Locations");
-    XLSX.utils.book_append_sheet(book, zoneSheet, locale === "ar" ? "الزونات" : "Zones");
+    XLSX.utils.book_append_sheet(book, totalsSheet, locale === "ar" ? "الزونات (الفاضل)" : "Zones (left)");
+    XLSX.utils.book_append_sheet(book, zoneSheet, locale === "ar" ? "الزونات دلوقتي" : "Zones now");
     if (locale === "ar") book.Workbook = { Views: [{ RTL: true }] };
     XLSX.writeFile(book, `noon-picking-plan-${reportStamp()}.xlsx`);
   } catch (error) {
@@ -3458,11 +3505,13 @@ $("#typeButton").addEventListener("click", () => setTypeMenu($("#typeMenu").hidd
 document.addEventListener("click", (event) => {
   if (!event.target.closest("#warehousePicker")) setWarehouseMenu(false);
   if (!event.target.closest("#typePicker")) setTypeMenu(false);
+  if (!event.target.closest("#planWarehousePicker")) setPlanWarehouseMenu(false);
 });
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   setWarehouseMenu(false);
   setTypeMenu(false);
+  setPlanWarehouseMenu(false);
 });
 // Ticking every type, or "All", clears the filter; the last ticked type cannot be unticked.
 $("#typeMenu").addEventListener("change", (event) => {
@@ -3535,7 +3584,7 @@ $("#pickerSearch").addEventListener("input", (event) => {
   pickerFilter.search = event.target.value;
   if (dashboardData) renderPickersPage(dashboardData, { animate: false });
 });
-[["#planWarehouse", "warehouse"], ["#planType", "type"], ["#planLimit", "limit"]].forEach(([selector, key]) => {
+[["#planType", "type"], ["#planLimit", "limit"]].forEach(([selector, key]) => {
   $(selector).addEventListener("change", (event) => {
     planFilter[key] = key === "limit" ? Number(event.target.value) : event.target.value;
     if (dashboardData) renderPlanPage(dashboardData);
@@ -3549,11 +3598,30 @@ $("#planSearch").addEventListener("input", (event) => {
 $("#planWarehouses").addEventListener("click", (event) => {
   const card = event.target.closest("[data-plan-warehouse]");
   if (!card || !dashboardData) return;
-  planFilter.warehouse = planFilter.warehouse === card.dataset.planWarehouse ? "all" : card.dataset.planWarehouse;
+  const key = card.dataset.planWarehouse;
+  planFilter.warehouses = planFilter.warehouses?.length === 1 && planFilter.warehouses[0] === key ? null : [key];
   renderPlanPage(dashboardData);
 });
 $("#planExcelButton").addEventListener("click", exportPlanExcel);
 $("#planTableExcelButton").addEventListener("click", exportPlanExcel);
+$("#planZoneExcelButton").addEventListener("click", exportPlanExcel);
+function setPlanWarehouseMenu(open) {
+  $("#planWarehouseMenu").hidden = !open;
+  $("#planWarehouseButton").setAttribute("aria-expanded", String(open));
+}
+$("#planWarehouseButton").addEventListener("click", () => setPlanWarehouseMenu($("#planWarehouseMenu").hidden));
+// Ticking every warehouse, or "All", clears the filter; the last ticked warehouse cannot be unticked.
+$("#planWarehouseMenu").addEventListener("change", (event) => {
+  const box = event.target.closest("[data-plan-key]");
+  if (!box || !dashboardData) return;
+  const keys = [...$("#planWarehouseMenu").querySelectorAll("[data-plan-key]")].map((input) => input.dataset.planKey).filter((key) => key !== "all");
+  const chosen = new Set(planFilter.warehouses || keys);
+  if (box.dataset.planKey === "all") chosen.clear();
+  else if (box.checked) chosen.add(box.dataset.planKey);
+  else if (chosen.size > 1) chosen.delete(box.dataset.planKey);
+  planFilter.warehouses = chosen.size && chosen.size < keys.length ? keys.filter((key) => chosen.has(key)) : null;
+  renderPlanPage(dashboardData);
+});
 window.addEventListener("hashchange", () => {
   applyView();
   window.scrollTo({ top: 0 });

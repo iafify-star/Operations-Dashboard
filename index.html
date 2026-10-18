@@ -9,7 +9,7 @@
     <title>نون مينتس | لوحة العمليات</title>
     <script>try { if (localStorage.getItem("dashboardTheme") === "light") document.documentElement.dataset.theme = "light"; } catch (error) {}</script>
     <link rel="stylesheet" href="styles.css?v=57">
-    <script src="app.js?v=68" defer></script>
+    <script src="app.js?v=70" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -304,7 +304,10 @@
             </div>
             <div class="connection-banner" id="planStale" role="status" hidden></div>
             <div class="filter-controls plan-filters">
-              <label><span data-i18n="warehouse">المستودع</span><select id="planWarehouse" aria-label="المستودع" data-i18n-aria="warehouse"></select></label>
+              <div class="wh-picker plan-wh-picker" id="planWarehousePicker">
+                <button class="wh-button type-button" id="planWarehouseButton" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="planWarehouseMenu"><span class="type-button-title" data-i18n="warehouse">المستودع</span><span class="wh-divider" aria-hidden="true">|</span><span class="wh-list" id="planWarehouseLabel"></span><span class="summary-chevron" aria-hidden="true">⌄</span></button>
+                <div class="wh-menu" id="planWarehouseMenu" hidden></div>
+              </div>
               <label><span data-i18n="pkTypeCol">نوع البيك</span><select id="planType" aria-label="نوع البيك" data-i18n-aria="pkTypeCol"></select></label>
               <label><span data-i18n="plLimit">العدد</span><select id="planLimit" aria-label="العدد" data-i18n-aria="plLimit"></select></label>
               <label class="search-box"><span>⌕</span><input id="planSearch" type="search" placeholder="ابحث بالزون أو اللوكيشن…" aria-label="ابحث بالزون أو اللوكيشن" data-i18n-placeholder="plSearch" data-i18n-aria="plSearch"></label>
@@ -322,6 +325,16 @@
               </div>
               <div class="table-scroll picker-table-scroll"><table class="picker-table plan-table" id="planTable"></table></div>
               <p class="picker-note" data-i18n="plNote">الكمية الفاضلة = القطع اللي لسه Pending (مستنية تتخصص أو مستنية تتلقط) في اللوكيشن، من ملف التصدير اللي بيدخل الشيت كل ساعة. القطع الـ OOS مش محسوبة.</p>
+            </article>
+            <article class="panel picker-table-panel plan-panel">
+              <div class="panel-heading">
+                <div><span class="panel-icon amber">▤</span><div><h3 data-i18n="plZoneTotalsTitle">الزونات: كام لوكيشن وكام قطعة فاضلة</h3><p data-i18n="plZoneTotalsSubtitle">كل زون فيه كام لوكيشن لسه فيه كمية، ومجموع الفاضل، مترتب من الأكبر</p></div></div>
+                <div class="picker-table-tools">
+                  <span class="warehouse-count" id="planZoneTotalsCount"></span>
+                  <button class="report-button picker-excel-button" id="planZoneExcelButton" type="button" title="تنزيل الخطة في ملف Excel" data-i18n-title="plExcelTitle"><span class="report-icon">▦</span><span class="report-button-label" data-i18n="plExcel">الخطة Excel</span></button>
+                </div>
+              </div>
+              <div class="table-scroll picker-table-scroll"><table class="picker-table plan-table" id="planZoneTotals"></table></div>
             </article>
             <article class="panel picker-table-panel plan-panel">
               <div class="panel-heading">
