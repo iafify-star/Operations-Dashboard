@@ -1526,9 +1526,18 @@ function buildHourReportDocument(data) {
   const running = view.isOpen(hour);
   const pickers = pickerScope(view, { keys });
   const cellAt = (picker) => (index >= 0 ? picker.cells[index] : null);
-  // Lowest achievement first, so the pickers who need a word come at the top; unscored ones go last.
+  // Grouped by shift (morning first) and then by the picking type the picker spent the hour on; inside
+  // each group the lowest achievement comes first, so the pickers who need a word are at the top.
   const rateOf = (cell) => (cell.required ? cell.picked / cell.required : Infinity);
-  const worked = pickers.filter((picker) => cellAt(picker)?.picked > 0).sort((left, right) => rateOf(cellAt(left)) - rateOf(cellAt(right)) || cellAt(left).picked - cellAt(right).picked);
+  const shiftOrder = (picker) => ({ morning: 0, between: 1, night: 2 }[picker.shiftKey] ?? (picker.shiftKey ? 3 : 4));
+  const typeOrder = (picker) => {
+    const main = [...(cellAt(picker).types || new Map()).entries()].sort((left, right) => right[1] - left[1])[0]?.[0];
+    const position = ["multi_store_picking", "batch_dynamic", "batch_static"].indexOf(main);
+    return position < 0 ? 3 : position;
+  };
+  const worked = pickers.filter((picker) => cellAt(picker)?.picked > 0).sort((left, right) => shiftOrder(left) - shiftOrder(right)
+    || typeOrder(left) - typeOrder(right)
+    || rateOf(cellAt(left)) - rateOf(cellAt(right)) || cellAt(left).picked - cellAt(right).picked);
   const stopped = previous ? pickers.filter((picker) => picker.cells[index - 1]?.picked > 0 && !(cellAt(picker)?.picked > 0)) : [];
   const workers = worked.length;
 
