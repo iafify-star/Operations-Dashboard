@@ -33,7 +33,7 @@ const messages = {
     pkSearch: "ابحث بالاسم أو اليوزر…", pkTopTitle: "الأعلى إنتاجية", pkTopSubtitle: "أعلى 5 في القطع في الساعة",
     pkBottomTitle: "محتاجين متابعة", pkBottomSubtitle: "أقل 5 في نسبة التحقيق", pkWarehouseTitle: "ملخص المخازن", pkWarehouseSubtitle: "البيكرز والإنتاجية في كل مخزن",
     pkTableTitle: "إنتاجية كل بيكر بالساعة", pkTableSubtitle: "في كل خانة: الرقم الكبير اللي لقطه، والصغير المطلوب منه في الساعة دي",
-    pkNote: "المطلوب من كل بيكر = مستهدف المخزن في الساعة ÷ عدد البيكرز اللي اشتغلوا فيه الساعة دي. الساعة الحالية لسه شغالة فمش داخلة في الحكم.",
+    pkNote: "مستهدف الساعة = مستهدف المخزن + اللي ما اتحققش من الساعة اللي قبلها، بحد أقصى اللي كان متاح يتلقط (Pending من غير OOS). المطلوب من كل بيكر = مستهدف الساعة ÷ عدد البيكرز اللي اشتغلوا فيها. الساعة الحالية لسه شغالة فمش داخلة في الحكم.",
     pkPicker: "البيكر", pkHours: "ساعات", pkDone: "المنجز", pkRequired: "المطلوب", pkRate: "التحقيق", pkPerHour: "قطعة/ساعة",
     pkPickersCol: "البيكرز", pkMetCol: "محققين", pkMissedCol: "عجز", pkNoData: "مفيش بيانات بيكرز لسه.", pkNoMatch: "مفيش بيكر مطابق للفلتر.",
     pkShowing: "بيكر", pkOf: "من", pkNowOnly: "شغال في الساعة الجارية بس",
@@ -67,7 +67,7 @@ const messages = {
     rptPickHourHeading: "تقرير التجهيز الساعي", rptShiftHeading: "تقرير آخر الشيفت", rptPeriod: "الفترة", rptShift: "الشيفت", rptWarehouse: "المخزن",
     rptHoursSection: "عملنا كام كل ساعة", rptRemainingSection: "الفاضل في كل مخزن", rptTopSection: "الأعلى إنتاجية", rptBottomSection: "محتاجين متابعة",
     rptPickersSection: "إنتاجية كل بيكر في الفترة", rptLastHourDone: "منجز الساعة", rptCumulative: "المنجز في الفترة", rptHoursMet: "ساعات محققة",
-    rptNote: "الأرقام من Minutes Central. المطلوب من كل بيكر = مستهدف المخزن في الساعة ÷ عدد البيكرز اللي اشتغلوا فيه الساعة دي. الساعة الجارية مش داخلة في الحكم.",
+    rptNote: "الأرقام من Minutes Central. مستهدف الساعة = مستهدف المخزن + اللي ما اتحققش من الساعة اللي قبلها، بحد أقصى المتاح (Pending من غير OOS). المطلوب من كل بيكر = مستهدف الساعة ÷ البيكرز اللي اشتغلوا فيها. الساعة الجارية مش داخلة في الحكم.",
     brandLogo: "شعار نون مينتس", navLabel: "التنقل الرئيسي", homeLabel: "العودة للرئيسية",
     brandCaption: "مركز العمليات", navSection: "لوحة المتابعة", navOverview: "نظرة عامة",
     navWarehouses: "أداء المستودعات", navProductivity: "الإنتاجية الساعية",
@@ -264,7 +264,7 @@ const messages = {
     pkSearch: "Search name or user…", pkTopTitle: "Top performers", pkTopSubtitle: "Top 5 by units per hour",
     pkBottomTitle: "Needs follow-up", pkBottomSubtitle: "Lowest 5 by achievement", pkWarehouseTitle: "Warehouse summary", pkWarehouseSubtitle: "Pickers and output in each warehouse",
     pkTableTitle: "Hourly output by picker", pkTableSubtitle: "In each cell the large figure is units picked and the small one is what was required that hour",
-    pkNote: "Required per picker = the warehouse's hourly target ÷ the pickers who worked in it that hour. The hour in progress is not scored yet.",
+    pkNote: "An hour's target = the warehouse's hourly target plus what the hour before fell short by, capped at what could be picked (pending without OOS). Required per picker = the hour's target ÷ the pickers who worked it. The hour in progress is not scored yet.",
     pkPicker: "Picker", pkHours: "Hours", pkDone: "Picked", pkRequired: "Required", pkRate: "Achieved", pkPerHour: "units/h",
     pkPickersCol: "Pickers", pkMetCol: "On target", pkMissedCol: "Below", pkNoData: "No picker data yet.", pkNoMatch: "No picker matches the filters.",
     pkShowing: "pickers", pkOf: "of", pkNowOnly: "only worked in the hour in progress",
@@ -298,7 +298,7 @@ const messages = {
     rptPickHourHeading: "Hourly Picking Report", rptShiftHeading: "End of Shift Report", rptPeriod: "Period", rptShift: "Shift", rptWarehouse: "Warehouse",
     rptHoursSection: "Units picked each hour", rptRemainingSection: "Remaining by warehouse", rptTopSection: "Top performers", rptBottomSection: "Needs follow-up",
     rptPickersSection: "Each picker in the period", rptLastHourDone: "Picked at", rptCumulative: "Picked in period", rptHoursMet: "Hours on target",
-    rptNote: "Figures come from Minutes Central. Required per picker = the warehouse's hourly target ÷ the pickers who worked in it that hour. The hour in progress is not scored.",
+    rptNote: "Figures come from Minutes Central. An hour's target = the warehouse's hourly target plus what the hour before fell short by, capped at what could be picked (pending without OOS). Required per picker = that target ÷ the pickers who worked the hour. The hour in progress is not scored.",
     searchWarehouse: "Search warehouses…", warehouse: "Warehouse",
     totalRequired: "Total required", actualCompleted: "Completed",
     remaining: "Remaining", shortages: "OOS", hourlyTarget: "Target / hr",
@@ -730,6 +730,11 @@ function stagingValue(data, phrase) {
   return index >= 0 ? textAt(section.values, index) : "—";
 }
 
+// Arabic reports keep their spaces unbreakable, so a long note would run off the page; each sentence gets its own line.
+function footnoteLines(text) {
+  return String(text).split(/(?<=\.)\s+/).map((sentence) => `<p class="report-footnote">${escapeHtml(sentence)}</p>`).join("");
+}
+
 function reportStat(label, value, accent = "") {
   return `<div class="report-stat"${accent ? ` style="--accent:${accent}"` : ""}><small>${escapeHtml(label)}</small><strong>${escapeHtml(value || "—")}</strong></div>`;
 }
@@ -1024,13 +1029,16 @@ function shiftLabel(value) {
 // that hour. The latest hour is usually still running, so it is listed but kept out of the scoring.
 const PICKING_TYPES = [["batch_dynamic", "Batch Dynamic"], ["batch_static", "Batch Static"], ["multi_store_picking", "Multi Store Picking"]];
 const PICKING_TYPE_SHORT = { batch_dynamic: "Batch Dynamic", batch_static: "Batch Static", multi_store_picking: "Multi Store" };
+// The short codes Minutes Central puts at the end of job numbers, for narrow report columns.
+const PICKING_TYPE_CODE = { batch_dynamic: "BD", batch_static: "BS", multi_store_picking: "MSP" };
 // The site's card breakdowns use their own names for each picking type.
 const PICKING_TYPE_METRIC = { batch_dynamic: "batch_dynamic", batch_static: "batch_static", multi_store_picking: "multi_store" };
 
 // Picking types a set of units came from, largest first, such as "Batch Dynamic + Multi Store".
-function typeLabel(types) {
+function typeLabel(types, short = false) {
   if (!types || !types.size) return "—";
-  return [...types.entries()].sort((left, right) => right[1] - left[1]).map(([type]) => PICKING_TYPE_SHORT[type] || type).join(" + ");
+  const names = short ? PICKING_TYPE_CODE : PICKING_TYPE_SHORT;
+  return [...types.entries()].sort((left, right) => right[1] - left[1]).map(([type]) => names[type] || type).join(short ? "+" : " + ");
 }
 
 function addTypes(target, source) {
@@ -1101,19 +1109,53 @@ function pickerProductivity(data, { allHours = false, from = null, to = null } =
     const row = section.records.find((record) => warehouseKey(textAt(record, 1)) === key);
     return new Map(section.hours.map(({ hour, index }) => [hour, row ? parseNumber(textAt(row, index)) : 0]));
   };
+  // Targets roll forward: an hour's target is the warehouse's base hourly target plus whatever the hour
+  // before fell short by, capped at what could still be picked when the hour began (pending without OOS
+  // now, plus what has been picked since). The carry runs over the whole day, whatever range is shown.
+  const dayHours = (data.pickingHourly?.records || []).map((row) => hourValue(textAt(row, 1))).filter((hour) => hour !== null && reportHour !== null && hour <= reportHour);
+  const dayOpen = (hour) => dayHours.length > 1 && hour === reportHour;
+  const pickableNow = (code) => {
+    if (!liveData) return null;
+    if (pickerFilter.types) return pickerFilter.types.reduce((total, type) => total + liveData.value(`pending_${PICKING_TYPE_METRIC[type]}`, code), 0);
+    return Math.max(0, liveData.value("pending_qty", code) - liveData.value("oos", code));
+  };
+  // When a sync ran early in the hour, its snapshot says what was pickable then; otherwise it is
+  // estimated as what is pickable now plus everything picked since the hour began.
+  const pickableAt = (code, hour) => {
+    if (pickerFilter.types) return null;
+    const snapshot = liveHistory.filter((item) => item.code === code && item.hour === hour && item.minute <= hour * 60 + 20).sort((left, right) => left.minute - right.minute)[0];
+    return snapshot ? Math.max(0, snapshot.pending - snapshot.oos) : null;
+  };
+  const rollTargets = (code, base, units) => {
+    const targets = new Map();
+    if (!base) return targets;
+    const pickable = pickableNow(code);
+    let carry = 0;
+    dayHours.forEach((hour) => {
+      const pickedSince = dayHours.filter((later) => later >= hour).reduce((total, later) => total + (units.get(later) || 0), 0);
+      const estimate = pickable === null ? Infinity : pickable + pickedSince;
+      const hourTarget = Math.min(base + carry, pickableAt(code, hour) ?? estimate);
+      targets.set(hour, hourTarget);
+      if (!dayOpen(hour)) carry = Math.max(0, hourTarget - (units.get(hour) || 0));
+    });
+    return targets;
+  };
   // Warehouses without a plan in the sheet (such as cross-dock ones) still show their output, with no target.
   const planned = new Set(data.warehouses.map((warehouse) => warehouseKey(textAt(warehouse, 1))));
   const unplanned = source.warehouseHourly.records.map((record) => textAt(record, 1)).filter((code) => code && !planned.has(warehouseKey(code)));
   const warehouses = [...data.warehouses, ...unplanned.map((code) => [null, code])].map((warehouse) => {
     const key = warehouseKey(textAt(warehouse, 1));
-    const target = planned.has(key) ? parseNumber(textAt(warehouse, 6)) * typeShare(textAt(warehouse, 1)) : 0;
+    // The sheet names warehouses "ID01" while the site's figures use "CAIID01".
+    const siteCode = liveData?.codes.find((code) => warehouseKey(code) === key) || textAt(warehouse, 1);
+    const target = planned.has(key) ? parseNumber(textAt(warehouse, 6)) * typeShare(siteCode) : 0;
     const units = pivotValues(source.warehouseHourly, key);
     const staff = pivotValues(source.warehouseStaff, key);
+    const targets = rollTargets(siteCode, target, units);
     const shares = new Map();
     hours.forEach((hour) => {
-      if (!isOpen(hour) && staff.get(hour) && target) shares.set(hour, target / staff.get(hour));
+      if (!isOpen(hour) && staff.get(hour) && targets.get(hour)) shares.set(hour, targets.get(hour) / staff.get(hour));
     });
-    return { row: planned.has(key) ? warehouse : null, code: textAt(warehouse, 1), key, target, units, staff, shares };
+    return { row: planned.has(key) ? warehouse : null, code: textAt(warehouse, 1), key, target, targets, units, staff, shares };
   });
   const sharesOf = new Map(warehouses.map((warehouse) => [warehouse.key, warehouse.shares]));
   const headerIndex = (label) => source.pickers.headers.findIndex((header) => String(header ?? "").trim() === label);
@@ -1278,7 +1320,7 @@ function hourLines(view, keys = null) {
   const scope = view.warehouses.filter((item) => !keys || keys.includes(item.key));
   return view.hours.map((hour) => {
     const byWarehouse = new Map(view.warehouses.map((item) => [item.key, item.units.get(hour) || 0]));
-    const target = scope.reduce((total, item) => total + item.target, 0);
+    const target = scope.reduce((total, item) => total + (item.targets?.get(hour) ?? item.target), 0);
     const done = scope.reduce((total, item) => total + (item.units.get(hour) || 0), 0);
     const staff = scope.reduce((total, item) => total + (item.staff.get(hour) || 0), 0);
     return { hour, open: view.isOpen(hour), target, done, staff, ipp: staff ? done / staff : 0, byWarehouse, met: target > 0 && done >= target };
@@ -1379,7 +1421,7 @@ function buildHourReportDocument(data) {
     figure(staff), staff ? formatNumber(done / staff) : "—", staff && target ? formatNumber(target / staff) : "—",
     running ? reportPill(t("hourOpen"), "muted") : target ? status(done >= target) : "—", remaining === null ? "—" : formatNumber(remaining),
   ];
-  const warehouseRows = warehouses.map((item) => warehouseLine(item.key, item.units.get(hour) || 0, item.target, item.staff.get(hour) || 0, remainingOf.get(item.key)?.remaining ?? null));
+  const warehouseRows = warehouses.map((item) => warehouseLine(item.key, item.units.get(hour) || 0, item.targets?.get(hour) ?? item.target, item.staff.get(hour) || 0, remainingOf.get(item.key)?.remaining ?? null));
   const warehouseTable = reportDataTable({
     headers: [t("warehouse"), t("rptPicked"), t("targetLabel"), t("gapCol"), t("rptHourWorkers"), t("rptHourPerPicker"), t("rptRequiredEach"), t("statusCol"), t("rptRemainingNow")],
     rows: warehouseRows,
@@ -1478,7 +1520,7 @@ function buildHourReportDocument(data) {
     ${stoppedBlock}
     <section class="report-block"><h2>${escapeHtml(`${t("rptHourPickers")} (${workers})`)}</h2>${workedTable}</section>
     ${runningNote}
-    <p class="report-footnote">${escapeHtml(t("rptNote"))}</p>
+    ${footnoteLines(t("rptNote"))}
     <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)} · ${escapeHtml(hourText)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>
   </div>`;
 }
@@ -1633,11 +1675,11 @@ function buildShiftReportDocument(data) {
   };
   const hourLabel = (hour) => (hours.length > 12 ? String(hour).padStart(2, "0") : formatHour(hour));
   const pickerMatrix = reportDataTable({
-    headers: [t("warehouseShort"), t("userCol"), t("nameCol"), t("shiftCol"), t("pkTypeCol"), ...hours.map(hourLabel), t("totalShort"), t("statusCol")],
+    headers: [t("warehouseShort"), t("nameCol"), t("shiftCol"), t("pkTypeCol"), ...hours.map(hourLabel), t("totalShort"), t("statusCol")],
     rows: pickers.slice().sort((left, right) => left.warehouse.localeCompare(right.warehouse) || right.units + right.openUnits - left.units - left.openUnits).map((picker) => [
-      picker.warehouse, picker.user, picker.name || "—", picker.shift, typeLabel(picker.types), ...picker.cells.map(hitCell),
+      picker.warehouse, { html: `<span class="report-person"><b>${escapeHtml(picker.name || picker.user)}</b><small>${escapeHtml(picker.user)}</small></span>` }, picker.shift, typeLabel(picker.types, true), ...picker.cells.map(hitCell),
       { html: `<span class="report-hit is-${picker.met ? "good" : "bad"}"><b>${formatNumber(picker.units + picker.openUnits)}</b><small>${picker.share > 0 ? formatNumber(picker.share) : "—"}</small></span>` },
-      picker.share > 0 ? status(picker.met) : picker.openUnits ? reportPill(t("hourOpen"), "muted") : "—",
+      picker.share > 0 ? status(picker.met) : picker.openUnits ? reportPill(t("hourOpenShort"), "muted") : "—",
     ]),
   });
 
@@ -1651,10 +1693,10 @@ function buildShiftReportDocument(data) {
       <div class="report-chips">${chips}</div>
     </header>
     <section class="report-block"><h2>${escapeHtml(t("reportKpiSection"))}</h2><div class="report-stats">${statItems.map(([label, value, accent]) => reportStat(label, value, accent)).join("")}</div></section>
-    <section class="report-block"><h2>${escapeHtml(t("rptHoursSection"))}</h2>${reportDataTable({ headers: hourHeaders, rows: hourRows, foot: hourFoot, current: lines.findIndex((line) => line.open) })}</section>
+    <section class="report-block"><h2>${escapeHtml(t("rptHoursSection"))}</h2>${reportDataTable({ headers: hourHeaders, rows: hourRows, foot: hourFoot, current: lines.findIndex((line) => line.open), className: keys.length > 3 ? "report-compact" : "" })}</section>
     <section class="report-block"><h2>${escapeHtml(t("rptRemainingSection"))}</h2>${remainingTable}</section>
     <section class="report-block report-pickers"><h2>${escapeHtml(t("rptPickersSection"))}</h2><div class="report-branches report-matrix">${pickerMatrix}</div></section>
-    <p class="report-footnote">${escapeHtml(t("rptNote"))}</p>
+    ${footnoteLines(t("rptNote"))}
     <footer class="report-foot"><span>noon minutes · ${escapeHtml(heading)}</span><span>${escapeHtml(t("designCredit"))}</span></footer>
   </div>`;
 }
