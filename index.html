@@ -9,7 +9,7 @@
     <title>نون مينتس | لوحة العمليات</title>
     <script>try { if (localStorage.getItem("dashboardTheme") === "light") document.documentElement.dataset.theme = "light"; } catch (error) {}</script>
     <link rel="stylesheet" href="styles.css?v=58">
-    <script src="app.js?v=73" defer></script>
+    <script src="app.js?v=74" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -339,7 +339,10 @@
             <article class="panel picker-table-panel plan-panel">
               <div class="panel-heading">
                 <div><span class="panel-icon blue">▦</span><div><h3 data-i18n="plZonesTitle">الزونات دلوقتي</h3><p data-i18n="plZonesSubtitle">من Zone Level View: الفاضل في كل زون ومين شغال فيه، وبيتحدث مع زرار حدّث الداشبورد</p></div></div>
-                <span class="warehouse-count" id="planZonesUpdated"></span>
+                <div class="picker-table-tools">
+                  <span class="warehouse-count" id="planZonesUpdated"></span>
+                  <button class="report-button picker-excel-button" id="planZonesNowExcelButton" type="button" title="تنزيل جدول الزونات دلوقتي في ملف Excel" data-i18n-title="plZonesExcelTitle"><span class="report-icon">▦</span><span class="report-button-label" data-i18n="plZonesExcel">الزونات Excel</span></button>
+                </div>
               </div>
               <div class="table-scroll picker-table-scroll"><table class="picker-table plan-table" id="planZones"></table></div>
             </article>

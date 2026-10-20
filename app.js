@@ -57,7 +57,7 @@ const messages = {
     plKpiPending: "قطع لسه ما اتلقطتش", plKpiTop20: "نصيب أعلى 20 لوكيشن", plKpiBig: "لوكيشنات فيها 30 قطعة أو أكتر", plKpiBigSub: "ابدأ بيها الأول",
     plKpiZones: "الفاضل في الزونات دلوقتي", plLocationsWord: "لوكيشن", plUnitsWord: "قطعة", plZonesWord: "زون", plWarehouseSub: "قطعة لسه ما اتلقطتش", plBiggest: "أكبر لوكيشن:",
     plNone: "مفيش لوكيشنات فيها كميات فاضلة.", plNoZones: "مفيش زونات فيها شغل فاضل.", plPendingCol: "الفاضل", plRunningCol: "تراكمي", plCluster: "الكلاستر",
-    plInProgress: "شغالين فيه", plDone: "خلص", plClearIn: "يخلص في", plMinutes: "دقيقة",
+    plInProgress: "جاري تلقيطه", plShareLeft: "% من فاضل المخزن", plPickedCol: "اتلقط", plShareWorkers: "% من الشغالين", plZonesExcel: "الزونات Excel", plZonesExcelTitle: "تنزيل جدول الزونات دلوقتي في ملف Excel", plDone: "الإنجاز", plClearIn: "يخلص في", plMinutes: "دقيقة",
     rptPendingByType: "الفاضل في كل نوع بيك (Pending)", rptOfPending: "من الـ Pending", rptOosByHour: "OOS كل ساعة", rptSnapshotAt: "وقت التحديث",
     rptOosChange: "الزيادة عن اللي قبلها", rptOosEmpty: "OOS بالساعة بيتسجل مع كل تحديث للأرقام، ولسه مفيش تحديثات النهارده.",
     icTitle: "مشاكل التجهيز (Incident Reported)", icSubtitle: "البلاغات اللي البيكرز عملوها في Minutes Central، بنفس فلاتر المخازن ونوع البيك والوقت اللي فوق",
@@ -300,7 +300,7 @@ const messages = {
     plKpiPending: "Units still to pick", plKpiTop20: "Share of the top 20 locations", plKpiBig: "Locations with 30+ units", plKpiBigSub: "start with these",
     plKpiZones: "Left in zones now", plLocationsWord: "locations", plUnitsWord: "units", plZonesWord: "zones", plWarehouseSub: "units still to pick", plBiggest: "Largest:",
     plNone: "No locations have units left.", plNoZones: "No zone has work left.", plPendingCol: "Left", plRunningCol: "Running", plCluster: "Cluster",
-    plInProgress: "In progress", plDone: "Done", plClearIn: "Clears in", plMinutes: "min",
+    plInProgress: "In progress", plShareLeft: "% of WH left", plPickedCol: "Picked", plShareWorkers: "% of pickers", plZonesExcel: "Zones Excel", plZonesExcelTitle: "Download the zones-now table as Excel", plDone: "Done %", plClearIn: "Clears in", plMinutes: "min",
     rptPendingByType: "Pending by picking type", rptOfPending: "Share of pending", rptOosByHour: "OOS through the day", rptSnapshotAt: "Updated at",
     rptOosChange: "Change since previous", rptOosEmpty: "OOS by hour is recorded with every sync; there are none yet today.",
     icTitle: "Picking incidents (Incident Reported)", icSubtitle: "Reports pickers raised in Minutes Central, with the warehouse, picking type and time filters above",
@@ -3340,6 +3340,23 @@ function planZoneTotals(locations, zones) {
     .sort((left, right) => right.pending - left.pending);
 }
 
+// Zone Level View for the plan's filters, biggest left first. Each zone's left and pickers are also given as a share
+// of everything left and everyone working in the chosen warehouses, whatever the type or search filter.
+function planZonesNow() {
+  const inWarehouses = planZones.filter((zone) => !planFilter.warehouses || planFilter.warehouses.includes(zone.key));
+  const allLeft = inWarehouses.reduce((sum, zone) => sum + zone.pending, 0);
+  const allPickers = inWarehouses.reduce((sum, zone) => sum + zone.pickers, 0);
+  const zones = planZones.filter(planInScope).filter((zone) => zone.pending > 0 || zone.inProgress > 0).sort((left, right) => right.pending - left.pending);
+  return zones.map((zone) => ({
+    ...zone,
+    leftShare: allLeft ? zone.pending / allLeft : null,
+    doneShare: zone.planned ? zone.completed / zone.planned : null,
+    pickerShare: allPickers ? zone.pickers / allPickers : null,
+    // Minutes to clear the zone at its current pace: what is left over the units its active pickers manage per hour.
+    clearMinutes: zone.pickers && zone.ipp ? (zone.pending / (zone.ipp * zone.pickers)) * 60 : null,
+  }));
+}
+
 // The plan lists the locations holding the most units still to pick, so the floor can clear the big ones first.
 function renderPlanPage(data) {
   const locations = planLocations ? planLocations.rows.filter(planInScope) : [];
@@ -3395,11 +3412,49 @@ function renderPlanPage(data) {
   $("#planZoneTotals").innerHTML = `<thead><tr><th>#</th><th>${t("icZone")}</th><th>${t("warehouseShort")}</th><th>${t("pkTypeCol")}</th><th>${t("plZoneLocations")}</th><th>${t("plPendingCol")}</th><th>${t("plLiveLeft")}</th><th>${t("plBiggestCol")}</th></tr></thead><tbody>${zoneTotalRows || `<tr><td colspan="8" class="empty-state">${t(planLocations ? "plNone" : "plMissing")}</td></tr>`}</tbody>`;
   $("#planZoneTotalsCount").textContent = `${formatNumber(zoneTotals.length)} ${t("plZonesWord")}`;
 
-  // Minutes to clear a zone at its current pace: what is left over the units its active pickers manage per hour.
-  const clearIn = (zone) => (zone.pickers && zone.ipp ? `${formatNumber((zone.pending / (zone.ipp * zone.pickers)) * 60)} ${t("plMinutes")}` : "—");
-  const zoneRows = zones.filter((zone) => zone.pending > 0 || zone.inProgress > 0).map((zone, index) => `<tr><td>${index + 1}</td><td><span class="plan-location">${escapeHtml(zone.zone)}</span></td><td class="warehouse-name">${escapeHtml(zone.key)}</td><td>${escapeHtml(PICKING_TYPE_SHORT[zone.type] || zone.type)}</td><td>${escapeHtml(zone.cluster)}</td><td><b>${formatNumber(zone.pending)}</b></td><td>${formatNumber(zone.inProgress)}</td><td>${zone.planned ? `${Math.round((zone.completed / zone.planned) * 100)}%` : "—"}</td><td>${formatNumber(zone.pickers)}</td><td>${zone.ipp ? formatNumber(zone.ipp) : "—"}</td><td>${clearIn(zone)}</td></tr>`).join("");
-  $("#planZones").innerHTML = `<thead><tr><th>#</th><th>${t("icZone")}</th><th>${t("warehouseShort")}</th><th>${t("pkTypeCol")}</th><th>${t("plCluster")}</th><th>${t("plPendingCol")}</th><th>${t("plInProgress")}</th><th>${t("plDone")}</th><th>${t("pkStatusActive")}</th><th>IPP</th><th>${t("plClearIn")}</th></tr></thead><tbody>${zoneRows || `<tr><td colspan="11" class="empty-state">${t("plNoZones")}</td></tr>`}</tbody>`;
+  const share = (value) => (value === null ? "—" : `${Math.round(value * 100)}%`);
+  const zoneRows = planZonesNow().map((zone, index) => `<tr><td>${index + 1}</td><td><span class="plan-location">${escapeHtml(zone.zone)}</span></td><td class="warehouse-name">${escapeHtml(zone.key)}</td><td>${escapeHtml(PICKING_TYPE_SHORT[zone.type] || zone.type)}</td><td>${escapeHtml(zone.cluster)}</td><td><b>${formatNumber(zone.pending)}</b></td><td>${share(zone.leftShare)}</td><td>${formatNumber(zone.completed)}</td><td>${share(zone.doneShare)}</td><td><b>${formatNumber(zone.pickers)}</b></td><td>${share(zone.pickerShare)}</td><td>${formatNumber(zone.inProgress)}</td><td>${zone.ipp ? formatNumber(zone.ipp) : "—"}</td><td>${zone.clearMinutes === null ? "—" : `${formatNumber(zone.clearMinutes)} ${t("plMinutes")}`}</td></tr>`).join("");
+  $("#planZones").innerHTML = `<thead><tr><th>#</th><th>${t("icZone")}</th><th>${t("warehouseShort")}</th><th>${t("pkTypeCol")}</th><th>${t("plCluster")}</th><th>${t("plPendingCol")}</th><th>${t("plShareLeft")}</th><th>${t("plPickedCol")}</th><th>${t("plDone")}</th><th>${t("pkStatusActive")}</th><th>${t("plShareWorkers")}</th><th>${t("plInProgress")}</th><th>IPP</th><th>${t("plClearIn")}</th></tr></thead><tbody>${zoneRows || `<tr><td colspan="14" class="empty-state">${t("plNoZones")}</td></tr>`}</tbody>`;
   $("#planZonesUpdated").textContent = planZones[0]?.updated ? `${t("pkSiteUpdate")} ${planZones[0].updated}` : "";
+}
+
+// The zones-now table as a sheet, shares as real percentages so Excel can sort and sum them.
+function planZonesNowSheet(XLSX) {
+  const share = (value) => (value === null ? "" : Math.round(value * 1000) / 1000);
+  const zones = planZonesNow();
+  const sheet = XLSX.utils.aoa_to_sheet([[t("plZonesTitle")], [t("pkSiteUpdate"), planZones[0]?.updated || ""], [],
+    ["#", t("icZone"), t("warehouse"), t("pkTypeCol"), t("plCluster"), t("plPendingCol"), t("plShareLeft"), t("plPickedCol"), "Planned", t("plDone"), t("pkStatusActive"), t("plShareWorkers"), t("plInProgress"), "IPP", t("plClearIn")],
+    ...zones.map((zone, index) => [index + 1, zone.zone, zone.key, PICKING_TYPE_SHORT[zone.type] || zone.type, zone.cluster, zone.pending, share(zone.leftShare), zone.completed, zone.planned, share(zone.doneShare),
+      zone.pickers, share(zone.pickerShare), zone.inProgress, zone.ipp || "", zone.clearMinutes === null ? "" : Math.round(zone.clearMinutes)])]);
+  // The share columns (G, J, L) show as percentages.
+  zones.forEach((_, index) => ["G", "J", "L"].forEach((column) => {
+    const cell = sheet[`${column}${index + 5}`];
+    if (cell && cell.t === "n") cell.z = "0%";
+  }));
+  sheet["!cols"] = [5, 24, 10, 14, 22, 10, 12, 10, 10, 10, 12, 12, 12, 8, 10].map((wch) => ({ wch }));
+  return sheet;
+}
+
+// Just the zones-now table, for the button on that table.
+async function exportZonesNowExcel(event) {
+  const button = event?.currentTarget || $("#planZonesNowExcelButton");
+  if (!dashboardData || button.disabled) return;
+  const label = button.querySelector(".report-button-label");
+  button.disabled = true;
+  label.textContent = t("reportPreparing");
+  try {
+    const XLSX = await ensureXlsxLibrary();
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, planZonesNowSheet(XLSX), locale === "ar" ? "الزونات دلوقتي" : "Zones now");
+    if (locale === "ar") book.Workbook = { Views: [{ RTL: true }] };
+    XLSX.writeFile(book, `noon-zones-now-${reportStamp()}.xlsx`);
+  } catch (error) {
+    console.error("Excel export failed:", error);
+    alert(t("pkExcelFailed"));
+  } finally {
+    label.textContent = t("plZonesExcel");
+    button.disabled = false;
+  }
 }
 
 // Both plan buttons (in the heading and on the table) download the same file.
@@ -3417,10 +3472,7 @@ async function exportPlanExcel(event) {
       ["#", t("icLocation"), t("icZone"), t("warehouse"), t("pkTypeCol"), t("plPendingCol")],
       ...locations.map((item, index) => [index + 1, item.location, item.zone, item.key, PICKING_TYPE_SHORT[item.type] || item.type, item.pending])]);
     locationSheet["!cols"] = [5, 20, 22, 10, 14, 12].map((wch) => ({ wch }));
-    const zoneSheet = XLSX.utils.aoa_to_sheet([[t("plZonesTitle")], [],
-      [t("icZone"), t("warehouse"), t("pkTypeCol"), t("plCluster"), t("plPendingCol"), t("plInProgress"), "Planned", "Completed", t("pkStatusActive"), "IPP"],
-      ...zones.map((zone) => [zone.zone, zone.key, PICKING_TYPE_SHORT[zone.type] || zone.type, zone.cluster, zone.pending, zone.inProgress, zone.planned, zone.completed, zone.pickers, zone.ipp])]);
-    zoneSheet["!cols"] = [22, 10, 14, 22, 10, 10, 10, 10, 10, 8].map((wch) => ({ wch }));
+    const zoneSheet = planZonesNowSheet(XLSX);
     const totalsSheet = XLSX.utils.aoa_to_sheet([[t("plZoneTotalsTitle")], [t("plUpdated"), planLocations?.importedAt || ""], [],
       ["#", t("icZone"), t("warehouse"), t("pkTypeCol"), t("plZoneLocations"), t("plPendingCol"), t("plLiveLeft"), t("plBiggestCol"), t("plBiggestQty")],
       ...planZoneTotals(locations, zones).map((item, index) => [index + 1, item.zone, item.key, typeLabel(item.types), item.count, item.pending, item.live ?? "", item.top.location, item.top.pending])]);
@@ -3705,6 +3757,7 @@ $("#planWarehouses").addEventListener("click", (event) => {
 $("#planExcelButton").addEventListener("click", exportPlanExcel);
 $("#planTableExcelButton").addEventListener("click", exportPlanExcel);
 $("#planZoneExcelButton").addEventListener("click", exportPlanExcel);
+$("#planZonesNowExcelButton").addEventListener("click", exportZonesNowExcel);
 function setPlanWarehouseMenu(open) {
   $("#planWarehouseMenu").hidden = !open;
   $("#planWarehouseButton").setAttribute("aria-expanded", String(open));
