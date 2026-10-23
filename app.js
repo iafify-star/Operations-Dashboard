@@ -2981,6 +2981,10 @@ function pickerNameCell(picker, rank) {
 
 const WAREHOUSE_STORAGE_KEY = "pickerWarehouses";
 let selectedCodes = null;
+// "All" clicked while every warehouse was ticked: the menu shows nothing ticked and waits for a pick;
+// the page keeps every warehouse until then, and closing the menu with nothing picked changes nothing.
+let warehouseMenuCleared = false;
+let planMenuCleared = false;
 let pickerExport = null;
 let offeredCodes = [];
 const openSummaries = new Set();
@@ -3095,8 +3099,9 @@ function renderTypePicker() {
 function renderWarehousePicker() {
   const all = offeredCodes.every((code) => selectedCodes.has(code));
   $("#warehouseButtonLabel").textContent = all ? offeredCodes.join(", ") : [...selectedCodes].join(", ");
+  const ticked = (code) => !warehouseMenuCleared && selectedCodes.has(code);
   const qty = (code) => (liveData ? formatNumber(liveData.value("total_qty", code)) : "");
-  $("#warehouseMenu").innerHTML = `<label class="wh-option wh-option-all"><input type="checkbox" data-code="all"${all ? " checked" : ""}><span>${escapeHtml(t("pkAllWarehouses"))}</span></label>${offeredCodes.map((code) => `<label class="wh-option"><input type="checkbox" data-code="${escapeHtml(code)}"${selectedCodes.has(code) ? " checked" : ""}><span>${escapeHtml(code)}</span><small>${qty(code)}</small></label>`).join("")}`;
+  $("#warehouseMenu").innerHTML = `<label class="wh-option wh-option-all"><input type="checkbox" data-code="all"${all && !warehouseMenuCleared ? " checked" : ""}><span>${escapeHtml(t("pkAllWarehouses"))}</span></label>${offeredCodes.map((code) => `<label class="wh-option"><input type="checkbox" data-code="${escapeHtml(code)}"${ticked(code) ? " checked" : ""}><span>${escapeHtml(code)}</span><small>${qty(code)}</small></label>`).join("")}`;
 }
 
 // Every part of the page follows the warehouse choice; the hour range applies to picker output only.
@@ -3310,8 +3315,8 @@ function renderPlanWarehousePicker(keys) {
   if (planFilter.warehouses) planFilter.warehouses = planFilter.warehouses.filter((key) => keys.includes(key));
   if (planFilter.warehouses && (!planFilter.warehouses.length || planFilter.warehouses.length === keys.length)) planFilter.warehouses = null;
   $("#planWarehouseLabel").textContent = planWarehouseLabel();
-  const chosen = planFilter.warehouses || keys;
-  $("#planWarehouseMenu").innerHTML = `<label class="wh-option wh-option-all"><input type="checkbox" data-plan-key="all"${planFilter.warehouses ? "" : " checked"}><span>${escapeHtml(t("pkAllWarehouses"))}</span></label>${keys.map((key) => `<label class="wh-option"><input type="checkbox" data-plan-key="${escapeHtml(key)}"${chosen.includes(key) ? " checked" : ""}><span>${escapeHtml(key)}</span></label>`).join("")}`;
+  const chosen = planMenuCleared ? [] : planFilter.warehouses || keys;
+  $("#planWarehouseMenu").innerHTML = `<label class="wh-option wh-option-all"><input type="checkbox" data-plan-key="all"${planFilter.warehouses || planMenuCleared ? "" : " checked"}><span>${escapeHtml(t("pkAllWarehouses"))}</span></label>${keys.map((key) => `<label class="wh-option"><input type="checkbox" data-plan-key="${escapeHtml(key)}"${chosen.includes(key) ? " checked" : ""}><span>${escapeHtml(key)}</span></label>`).join("")}`;
 }
 
 function planInScope(item) {
@@ -3645,6 +3650,10 @@ document.querySelectorAll(".heatmap-tab").forEach((tab) => {
 });
 
 function setWarehouseMenu(open) {
+  if (!open && warehouseMenuCleared) {
+    warehouseMenuCleared = false;
+    if (selectedCodes) renderWarehousePicker();
+  }
   $("#warehouseMenu").hidden = !open;
   $("#warehouseButton").setAttribute("aria-expanded", String(open));
 }
@@ -3684,7 +3693,18 @@ $("#typeMenu").addEventListener("change", (event) => {
 $("#warehouseMenu").addEventListener("change", (event) => {
   const box = event.target.closest("[data-code]");
   if (!box || !dashboardData || !selectedCodes) return;
-  if (box.dataset.code === "all") {
+  const everyOne = offeredCodes.every((code) => selectedCodes.has(code));
+  if (box.dataset.code === "all" && everyOne && !warehouseMenuCleared) {
+    // Every warehouse was ticked: clear the boxes so the next tick starts a fresh choice.
+    warehouseMenuCleared = true;
+    renderWarehousePicker();
+    return;
+  }
+  if (warehouseMenuCleared && box.dataset.code !== "all") {
+    warehouseMenuCleared = false;
+    selectedCodes = new Set([box.dataset.code]);
+  } else if (box.dataset.code === "all") {
+    warehouseMenuCleared = false;
     offeredCodes.forEach((code) => selectedCodes.add(code));
   } else if (box.checked) {
     selectedCodes.add(box.dataset.code);
@@ -3759,16 +3779,28 @@ $("#planTableExcelButton").addEventListener("click", exportPlanExcel);
 $("#planZoneExcelButton").addEventListener("click", exportPlanExcel);
 $("#planZonesNowExcelButton").addEventListener("click", exportZonesNowExcel);
 function setPlanWarehouseMenu(open) {
+  if (!open && planMenuCleared) {
+    planMenuCleared = false;
+    if (dashboardData) renderPlanPage(dashboardData);
+  }
   $("#planWarehouseMenu").hidden = !open;
   $("#planWarehouseButton").setAttribute("aria-expanded", String(open));
 }
 $("#planWarehouseButton").addEventListener("click", () => setPlanWarehouseMenu($("#planWarehouseMenu").hidden));
 // Ticking every warehouse, or "All", clears the filter; the last ticked warehouse cannot be unticked.
+// "All" with every warehouse ticked empties the boxes, and the next tick starts the choice.
 $("#planWarehouseMenu").addEventListener("change", (event) => {
   const box = event.target.closest("[data-plan-key]");
   if (!box || !dashboardData) return;
   const keys = [...$("#planWarehouseMenu").querySelectorAll("[data-plan-key]")].map((input) => input.dataset.planKey).filter((key) => key !== "all");
-  const chosen = new Set(planFilter.warehouses || keys);
+  if (box.dataset.planKey === "all" && !planFilter.warehouses && !planMenuCleared) {
+    // Every warehouse was ticked: clear the boxes so the next tick starts a fresh choice.
+    planMenuCleared = true;
+    renderPlanWarehousePicker(keys);
+    return;
+  }
+  const chosen = new Set(planMenuCleared ? [] : planFilter.warehouses || keys);
+  planMenuCleared = false;
   if (box.dataset.planKey === "all") chosen.clear();
   else if (box.checked) chosen.add(box.dataset.planKey);
   else if (chosen.size > 1) chosen.delete(box.dataset.planKey);
