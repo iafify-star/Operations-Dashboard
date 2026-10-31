@@ -51,7 +51,7 @@ function onOpen() {
     .addItem('🔄 حدّث الكابستي دلوقتي', 'refreshCapacity')
     .addItem('🔖 هات البوكمارك (Created / Pending)', 'showBookmarkletDialog')
     .addSeparator()
-    .addItem('⏰ شغّل تحديث الكابستي كل ساعة', 'installHourlyTrigger')
+    .addItem('⏰ شغّل التحديث التلقائي (كل ساعة + لما التاريخ يتغير)', 'installHourlyTrigger')
     .addItem('➕ ضيف شيت خطة لشهر جديد', 'addPlanSpreadsheet')
     .addToUi();
 }
@@ -63,30 +63,47 @@ function refreshCapacity() {
   lock.waitLock(30000);
   try {
     var ss = SpreadsheetApp.getActive();
-    var date = reportDateKey_(ss);
     var plan = loadPlan_();
-    var day = null;
-    var mtd = {};
-    plan.forEach(function (item) {
-      if (item.key === date) day = item.row;
-      if (item.key.slice(0, 7) === date.slice(0, 7) && item.key <= date) {
-        Object.keys(item.row).forEach(function (h) { mtd[h] = (mtd[h] || 0) + item.row[h]; });
-      }
+    var result = { date: '', found: false };
+    [[CONFIG.OB_SHEET, CONFIG.OB_CAPACITY], [CONFIG.IB_SHEET, CONFIG.IB_CAPACITY]].forEach(function (pair, i) {
+      var sheet = ss.getSheetByName(pair[0]);
+      if (!sheet) return;
+      // Each tab is worked out on the date in its own A2 (today if A2 is empty).
+      var date = reportDateKey_(ss, sheet);
+      var day = planDay_(plan, date);
+      writeCapacityBlocks_(sheet, pair[1], day.day, day.mtd);
+      if (i === 0) result = { date: date, found: !!day.day };
     });
-    var hasMtd = Object.keys(mtd).length > 0;
-
-    var ob = ss.getSheetByName(CONFIG.OB_SHEET);
-    if (ob) writeCapacityBlocks_(ob, CONFIG.OB_CAPACITY, day, hasMtd ? mtd : null);
-    var ib = ss.getSheetByName(CONFIG.IB_SHEET);
-    if (ib) writeCapacityBlocks_(ib, CONFIG.IB_CAPACITY, day, hasMtd ? mtd : null);
-
-    var note = day ? 'OK ' + date : 'مفيش خطة لـ ' + date + ' في شيت الخطة';
+    var note = result.found ? 'OK ' + result.date : 'مفيش خطة لـ ' + result.date + ' في شيت الخطة';
     setStatus_(ss, 0, 'Capacity', now_(ss) + ' — ' + note);
-    if (!day) SpreadsheetApp.getActive().toast('مفيش يوم ' + date + ' في شيتات الخطة. ضيف شيت الشهر من القائمة.', 'Ops View', 8);
-    return { date: date, found: !!day };
+    if (!result.found) ss.toast('مفيش يوم ' + result.date + ' في شيتات الخطة. ضيف شيت الشهر من القائمة.', 'Ops View', 8);
+    return result;
   } finally {
     lock.releaseLock();
   }
+}
+
+function planDay_(plan, date) {
+  var day = null;
+  var mtd = {};
+  plan.forEach(function (item) {
+    if (item.key === date) day = item.row;
+    if (item.key.slice(0, 7) === date.slice(0, 7) && item.key <= date) {
+      Object.keys(item.row).forEach(function (h) { mtd[h] = (mtd[h] || 0) + item.row[h]; });
+    }
+  });
+  return { day: day, mtd: Object.keys(mtd).length ? mtd : null };
+}
+
+// Installable on-edit trigger: changing the date in OB!A2 or IB!A2 refreshes the capacity.
+function onDateEdit(e) {
+  if (!e || !e.range) return;
+  var name = e.range.getSheet().getName();
+  if (name !== CONFIG.OB_SHEET && name !== CONFIG.IB_SHEET) return;
+  if (e.range.getRow() > 2 || e.range.getColumn() > 1 || e.range.getLastRow() < 2) return;
+  var date = reportDateKey_(e.source, e.range.getSheet());
+  var result = refreshCapacity();
+  if (result.found || name === CONFIG.IB_SHEET) e.source.toast('الكابستي اتحدث على تاريخ ' + date, 'Ops View', 5);
 }
 
 // Finds every header row that starts a "WH | Capacity ..." block and fills Capacity.
@@ -168,13 +185,17 @@ function addPlanSpreadsheet() {
   ui.alert(result.found ? 'تمام، الكابستي اتحدث.' : 'اتضاف، بس لسه مفيش يوم ' + result.date + ' في الخطة.');
 }
 
+// Hourly refresh plus refresh whenever the date in A2 changes.
 function installHourlyTrigger() {
+  var ss = SpreadsheetApp.getActive();
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (t.getHandlerFunction() === 'refreshCapacity') ScriptApp.deleteTrigger(t);
+    var fn = t.getHandlerFunction();
+    if (fn === 'refreshCapacity' || fn === 'onDateEdit') ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('refreshCapacity').timeBased().everyHours(1).create();
+  ScriptApp.newTrigger('onDateEdit').forSpreadsheet(ss).onEdit().create();
   refreshCapacity();
-  SpreadsheetApp.getUi().alert('الكابستي هيتحدث لوحده كل ساعة.');
+  SpreadsheetApp.getUi().alert('تمام: الكابستي هيتحدث كل ساعة، وكمان أول ما تغيّر التاريخ في A2 (OB أو IB).');
 }
 
 /* ───────────────────────── Created / Pending (web app) ───────────────────────── */
@@ -375,10 +396,10 @@ function token_() {
   return t;
 }
 
-// The day the OB tab reports on: OB!A2 if it holds a date, otherwise today.
-function reportDateKey_(ss) {
+// The day a tab reports on: its A2 if it holds a date, otherwise today.
+function reportDateKey_(ss, sheet) {
   var tz = ss.getSpreadsheetTimeZone();
-  var sheet = ss.getSheetByName(CONFIG.OB_SHEET);
+  sheet = sheet || ss.getSheetByName(CONFIG.OB_SHEET);
   var v = sheet ? sheet.getRange('A2').getValue() : '';
   return dateKey_(v, tz) || Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
 }
