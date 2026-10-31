@@ -240,12 +240,23 @@ function installPage_() {
   return page_('بوكمارك Ops View', body);
 }
 
+// Shows the bookmarklet inside the sheet, so it works whichever Google account the browser opens links with.
 function showBookmarkletDialog() {
   var url = ScriptApp.getService().getUrl();
-  var html = url
-    ? '<p style="font-family:Arial">افتح اللينك ده واسحب الزرار لشريط البوكماركس:</p><p><a href="' + url + '" target="_blank">' + url + '</a></p>'
-    : '<p style="font-family:Arial">لازم تعمل Deploy للسكربت كـ Web app الأول (Deploy › New deployment › Web app). شوف README.</p>';
-  SpreadsheetApp.getUi().showModalDialog(HtmlService.createHtmlOutput(html).setWidth(520).setHeight(160), 'بوكمارك Ops View');
+  var html;
+  if (!url) {
+    html = '<p style="font-family:Arial" dir="rtl">لازم تعمل Deploy للسكربت كـ Web app الأول (Deploy › New deployment › Web app). شوف README.</p>';
+  } else {
+    var code = bookmarkletCode_(url);
+    html = '<div dir="rtl" style="font:14px/1.6 Arial">' +
+      '<p>اسحب الزرار الأصفر ده وحطه في شريط البوكماركس (Ctrl+Shift+B لو الشريط مش ظاهر):</p>' +
+      '<p style="text-align:center"><a href="' + code.replace(/"/g, '&quot;') + '" onclick="return false" ' +
+      'style="display:inline-block;background:#ffe900;color:#111;font-weight:bold;padding:10px 18px;border-radius:8px;text-decoration:none">🔄 Ops View Sync</a></p>' +
+      '<p>السحب مش شغال؟ اعمل بوكمارك جديد بأي اسم (Ctrl+D ثم More/تعديل) والصق الكود ده في خانة الـ URL:</p>' +
+      '<textarea readonly onclick="this.select()" style="width:100%;height:70px;direction:ltr;font:11px monospace">' +
+      code.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea></div>';
+  }
+  SpreadsheetApp.getUi().showModalDialog(HtmlService.createHtmlOutput(html).setWidth(560).setHeight(330), 'بوكمارك Ops View');
 }
 
 function bookmarkletCode_(url) {
