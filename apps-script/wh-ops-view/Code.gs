@@ -232,6 +232,14 @@ function handlePush_(p) {
       written.push([wh, item.created, item.pending]);
     }
     setStatus_(ss, 1, 'Created/Pending', now_(ss) + ' — Minutes ' + (data.date || ''));
+    // One click keeps the whole sheet on the same day: the Minutes date becomes A2 on OB and IB.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(data.date || '')) {
+      var day = Utilities.parseDate(data.date, ss.getSpreadsheetTimeZone(), 'yyyy-MM-dd');
+      [CONFIG.OB_SHEET, CONFIG.IB_SHEET].forEach(function (name) {
+        var tab = ss.getSheetByName(name);
+        if (tab) tab.getRange('A2').setValue(day).setNumberFormat('mm/dd/yyyy');
+      });
+    }
   } finally {
     lock.releaseLock();
   }
@@ -302,7 +310,10 @@ function OPS_BOOKMARKLET_(APP, TOKEN, WHS) {
   var params = new URLSearchParams(location.search);
   var d = new Date();
   var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  var date = params.get('from') || today;
+  var date = prompt('Ops View Sync — اليوم (yyyy-mm-dd):', params.get('from') || today);
+  if (!date) { window.__opsSyncRunning = false; try { out.close(); } catch (e) {} return; }
+  date = date.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { alert('اكتب التاريخ كده: 2026-11-01'); window.__opsSyncRunning = false; try { out.close(); } catch (e) {} return; }
 
   var panel = document.createElement('div');
   panel.style.cssText = 'position:fixed;top:12px;right:12px;z-index:2147483647;background:#111;color:#fff;font:13px/1.5 Arial;padding:12px 14px;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.4);min-width:260px;direction:rtl';
