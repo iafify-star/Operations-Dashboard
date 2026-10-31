@@ -29,10 +29,10 @@
 2. امسح اللي في `Code.gs` والصق محتوى [`Code.gs`](./Code.gs) ده، واعمل Save.
 3. **Deploy › New deployment** › النوع **Web app**:
    - Execute as: **Me**
-   - Who has access: **Anyone within noon** (أو Anyone with Google account)
+   - Who has access: **Anyone** (الكتابة محمية بتوكن). لو مش متاح اختار **Anyone within noon** واستخدم Chrome Profile فيه حساب noon بس.
    - Deploy، ووافق على الصلاحيات.
 4. ارجع للشيت واعمل Refresh — هتلاقي قائمة **⚙️ Ops View**.
-5. **⚙️ Ops View › 🔖 هات البوكمارك** › افتح اللينك › اسحب الزرار الأصفر **🔄 Ops View Sync** لشريط البوكماركس.
+5. **⚙️ Ops View › 🔖 هات البوكمارك** › اسحب الزرار الأصفر اللي هيظهر جوه الشيت **🔄 Ops View Sync** لشريط البوكماركس.
 6. **⚙️ Ops View › ⏰ شغّل التحديث التلقائي** — الكابستي يتحدث كل ساعة، وأول ما تغيّر التاريخ في `A2` (OB أو IB).
 
 > لو عدّلت الكود بعدين: **Deploy › Manage deployments › Edit › Version: New version** عشان اللينك يفضل هو هو.
