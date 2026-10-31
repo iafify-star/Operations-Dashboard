@@ -36,6 +36,13 @@ var CONFIG = {
     'CAIID07': ['Xdock CAIID07']
   },
 
+  // The dashboard sheet's "Live" tab: Minutes Central's picking cards for today, one column per warehouse,
+  // kept current by the dashboard's own sync. The Refresh All button takes Created/Pending from here.
+  LIVE_SPREADSHEET_ID: '1ZxfAGaLTjWE5CSpdpi2v8UMN4XS_zi6ov9Yr2X7OiCk',
+  LIVE_TAB: 'Live',
+  LIVE_CREATED_METRIC: 'total_qty',
+  LIVE_PENDING_METRIC: 'pending_qty',
+
   // Warehouses the bookmarklet reads from Minutes Central.
   MINUTES_WAREHOUSES: ['CAIID01', 'CAIID02', 'CAIID03', 'CAIID04', 'CAIID05', 'CAIID06', 'CAIID07'],
 
@@ -48,13 +55,76 @@ var CONFIG = {
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('⚙️ Ops View')
-    .addItem('🔄 حدّث الكابستي دلوقتي', 'refreshCapacity')
+    .addItem('🔄 حدّث كل حاجة (Capacity + Created + Pending)', 'refreshAll')
+    .addItem('🔄 حدّث الكابستي بس', 'refreshCapacity')
+    .addItem('🟨 حط زرار Refresh All في تاب OB', 'insertRefreshButton')
+    .addSeparator()
     .addItem('🔖 هات البوكمارك (Created / Pending)', 'showBookmarkletDialog')
     .addSeparator()
     .addItem('⏰ شغّل التحديث التلقائي (كل ساعة + لما التاريخ يتغير)', 'installHourlyTrigger')
     .addItem('➕ ضيف شيت خطة لشهر جديد', 'addPlanSpreadsheet')
     .addToUi();
 }
+
+/* ───────────────────────── Refresh All (the button) ───────────────────────── */
+
+// One button: Created/Pending from the dashboard's Live tab, then the capacity, all for the date in A2.
+// If A2 is empty or holds another day than the Live data, A2 is set to the Live day (today).
+function refreshAll() {
+  var ss = SpreadsheetApp.getActive();
+  var live = readLive_();
+  var message;
+  if (!live) {
+    message = 'مش قادر أقرا تاب Live — الكابستي بس اتحدث.';
+  } else {
+    var tz = ss.getSpreadsheetTimeZone();
+    var day = Utilities.parseDate(live.date, tz, 'yyyy-MM-dd');
+    [CONFIG.OB_SHEET, CONFIG.IB_SHEET].forEach(function (name) {
+      var tab = ss.getSheetByName(name);
+      if (tab) tab.getRange('A2').setValue(day).setNumberFormat('mm/dd/yyyy');
+    });
+    writeMinutes_(ss, { date: live.date, wh: live.wh });
+    message = 'Created/Pending من Minutes (' + live.updated + ')';
+  }
+  var cap = refreshCapacity();
+  message += cap.found ? ' — الكابستي اتحدث.' : ' — مفيش خطة لـ ' + cap.date + '.';
+  ss.toast(message, '✅ Ops View', 8);
+  return message;
+}
+
+function readLive_() {
+  var sheet;
+  try { sheet = SpreadsheetApp.openById(CONFIG.LIVE_SPREADSHEET_ID).getSheetByName(CONFIG.LIVE_TAB); } catch (err) { return null; }
+  if (!sheet) return null;
+  var values = sheet.getDataRange().getValues();
+  var header = values[0].map(function (h) { return String(h).trim(); });
+  var rows = {};
+  values.slice(1).forEach(function (row) { rows[String(row[0]).trim()] = row; });
+  var created = rows[CONFIG.LIVE_CREATED_METRIC];
+  var pending = rows[CONFIG.LIVE_PENDING_METRIC];
+  if (!created || !pending) return null;
+  var updated = rows.updated_at ? rows.updated_at[1] : '';
+  if (updated instanceof Date) updated = Utilities.formatDate(updated, SpreadsheetApp.getActive().getSpreadsheetTimeZone(), 'yyyy-MM-dd HH:mm');
+  updated = String(updated || '');
+  var date = (updated.match(/^\d{4}-\d{2}-\d{2}/) || [Utilities.formatDate(new Date(), SpreadsheetApp.getActive().getSpreadsheetTimeZone(), 'yyyy-MM-dd')])[0];
+  var wh = {};
+  CONFIG.MINUTES_WAREHOUSES.forEach(function (code) {
+    var i = header.indexOf(code);
+    wh[code] = i < 0 ? { created: 0, pending: 0 } : { created: toNumber_(created[i]), pending: toNumber_(pending[i]) };
+  });
+  return { date: date, updated: updated, wh: wh };
+}
+
+// Puts a yellow "Refresh All" button on the OB tab that runs refreshAll when clicked.
+function insertRefreshButton() {
+  var sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.OB_SHEET);
+  sheet.getImages().forEach(function (img) { if (img.getScript && img.getScript() === 'refreshAll') img.remove(); });
+  var blob = Utilities.newBlob(Utilities.base64Decode(REFRESH_BUTTON_PNG_), 'image/png', 'refresh.png');
+  sheet.insertImage(blob, 7, 4).assignScript('refreshAll').setAltTextTitle('Refresh All');
+  SpreadsheetApp.getActive().toast('الزرار اتحط في G4 — تقدر تسحبه لأي مكان.', 'Ops View', 6);
+}
+
+var REFRESH_BUTTON_PNG_ = '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';
 
 /* ───────────────────────── Capacity ───────────────────────── */
 
@@ -190,12 +260,12 @@ function installHourlyTrigger() {
   var ss = SpreadsheetApp.getActive();
   ScriptApp.getProjectTriggers().forEach(function (t) {
     var fn = t.getHandlerFunction();
-    if (fn === 'refreshCapacity' || fn === 'onDateEdit') ScriptApp.deleteTrigger(t);
+    if (fn === 'refreshCapacity' || fn === 'refreshAll' || fn === 'onDateEdit') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('refreshCapacity').timeBased().everyHours(1).create();
+  ScriptApp.newTrigger('refreshAll').timeBased().everyHours(1).create();
   ScriptApp.newTrigger('onDateEdit').forSpreadsheet(ss).onEdit().create();
-  refreshCapacity();
-  SpreadsheetApp.getUi().alert('تمام: الكابستي هيتحدث كل ساعة، وكمان أول ما تغيّر التاريخ في A2 (OB أو IB).');
+  refreshAll();
+  SpreadsheetApp.getUi().alert('تمام: كل حاجة هتتحدث كل ساعة، والكابستي كمان أول ما تغيّر التاريخ في A2 (OB أو IB).');
 }
 
 /* ───────────────────────── Created / Pending (web app) ───────────────────────── */
@@ -216,22 +286,8 @@ function handlePush_(p) {
   var written = [];
   var ss = SpreadsheetApp.getActive();
   try {
-    var sheet = ss.getSheetByName(CONFIG.OB_SHEET);
-    var values = sheet.getDataRange().getValues();
-    var head = findHeader_(values, 'created');
-    if (!head) return page_('❌ مش لاقي عمود Created في تاب OB', '');
-    var createdCol = findInRow_(values[head.row], 'created', head.col);
-    var pendingCol = findInRow_(values[head.row], 'pending', head.col);
-    for (var r = head.row + 1; r < values.length; r++) {
-      var wh = String(values[r][head.col]).trim();
-      if (!wh) break;
-      var item = data.wh && data.wh[wh];
-      if (!item) continue;
-      if (item.created !== null && item.created !== undefined) sheet.getRange(r + 1, createdCol + 1).setValue(item.created).setNumberFormat('#,##0');
-      if (pendingCol >= 0 && item.pending !== null && item.pending !== undefined) sheet.getRange(r + 1, pendingCol + 1).setValue(item.pending).setNumberFormat('#,##0');
-      written.push([wh, item.created, item.pending]);
-    }
-    setStatus_(ss, 1, 'Created/Pending', now_(ss) + ' — Minutes ' + (data.date || ''));
+    written = writeMinutes_(ss, data);
+    if (!written) return page_('❌ مش لاقي عمود Created في تاب OB', '');
     // One click keeps the whole sheet on the same day: the Minutes date becomes A2 on OB and IB.
     if (/^\d{4}-\d{2}-\d{2}$/.test(data.date || '')) {
       var day = Utilities.parseDate(data.date, ss.getSpreadsheetTimeZone(), 'yyyy-MM-dd');
@@ -255,6 +311,28 @@ function handlePush_(p) {
   return page_('✅ اتحدث', '<p>تاريخ Minutes: ' + (data.date || '—') + ' — ' + cap + '</p>' +
     '<table><tr><th>WH</th><th>Created</th><th>Pending</th></tr>' + rows + '</table>' +
     '<p class="muted">تقدر تقفل الصفحة دي.</p>');
+}
+
+// Writes Created/Pending per warehouse into the OB tab. Returns the rows written, or null without a Created column.
+function writeMinutes_(ss, data) {
+  var sheet = ss.getSheetByName(CONFIG.OB_SHEET);
+  var values = sheet.getDataRange().getValues();
+  var head = findHeader_(values, 'created');
+  if (!head) return null;
+  var createdCol = findInRow_(values[head.row], 'created', head.col);
+  var pendingCol = findInRow_(values[head.row], 'pending', head.col);
+  var written = [];
+  for (var r = head.row + 1; r < values.length; r++) {
+    var wh = String(values[r][head.col]).trim();
+    if (!wh) break;
+    var item = data.wh && data.wh[wh];
+    if (!item) continue;
+    if (item.created !== null && item.created !== undefined) sheet.getRange(r + 1, createdCol + 1).setValue(item.created).setNumberFormat('#,##0');
+    if (pendingCol >= 0 && item.pending !== null && item.pending !== undefined) sheet.getRange(r + 1, pendingCol + 1).setValue(item.pending).setNumberFormat('#,##0');
+    written.push([wh, item.created, item.pending]);
+  }
+  setStatus_(ss, 1, 'Created/Pending', now_(ss) + ' — Minutes ' + (data.date || ''));
+  return written;
 }
 
 function installPage_() {
